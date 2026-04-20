@@ -5,8 +5,11 @@ use App\Http\Controllers\Admin\AdminContactController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\TwoFactorController;
 use App\Http\Controllers\AuditController;
+use App\Http\Controllers\AuditCwvController;
 use App\Http\Controllers\AuditPaymentController;
+use App\Http\Controllers\AuditPdfController;
 use App\Http\Controllers\ContactController;
+use App\Http\Controllers\MonitoringController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicController;
 use Illuminate\Support\Facades\Route;
@@ -34,6 +37,24 @@ Route::post('/audit', [AuditController::class, 'store'])
 Route::get('/audit/{audit:uuid}', [AuditController::class, 'show'])->name('audit.show');
 Route::get('/audit/{audit:uuid}/pay', [AuditPaymentController::class, 'create'])->name('audit.pay');
 Route::post('/audit/{audit:uuid}/pay', [AuditPaymentController::class, 'store'])->name('audit.pay.store');
+
+// Add-on PDF
+Route::get('/audit/{audit:uuid}/pdf', [AuditPdfController::class, 'download'])->name('audit.pdf');
+Route::get('/audit/{audit:uuid}/pdf/pay', [AuditPdfController::class, 'pay'])->name('audit.pdf.pay');
+Route::post('/audit/{audit:uuid}/pdf/pay', [AuditPdfController::class, 'confirmPayment'])->name('audit.pdf.pay.store');
+
+// Add-on Core Web Vitals
+Route::get('/audit/{audit:uuid}/performance', [AuditCwvController::class, 'show'])->name('audit.cwv');
+Route::get('/audit/{audit:uuid}/performance/pay', [AuditCwvController::class, 'pay'])->name('audit.cwv.pay');
+Route::post('/audit/{audit:uuid}/performance/pay', [AuditCwvController::class, 'confirmPayment'])->name('audit.cwv.pay.store');
+
+// Abonnement monitoring mensuel
+Route::get('/monitoring', [MonitoringController::class, 'create'])->name('monitoring.create');
+Route::post('/monitoring/subscribe', [MonitoringController::class, 'store'])
+    ->middleware('throttle:contact')
+    ->name('monitoring.store');
+Route::get('/monitoring/{subscription:token}', [MonitoringController::class, 'show'])->name('monitoring.show');
+Route::post('/monitoring/{subscription:token}/cancel', [MonitoringController::class, 'cancel'])->name('monitoring.cancel');
 
 /*
  * Espace utilisateur (Breeze)

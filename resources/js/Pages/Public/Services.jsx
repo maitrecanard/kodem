@@ -33,7 +33,11 @@ export default function Services({ meta, prestations = [] }) {
                         </ul>
                         <div className="mt-6">
                             <Link
-                                href={p.cta_route === 'audit.create' ? '/audit' : '/contact'}
+                                href={
+                                    p.cta_route === 'audit.create' ? '/audit'
+                                    : p.cta_route === 'monitoring' ? '/monitoring'
+                                    : '/contact'
+                                }
                                 className="inline-flex rounded-md bg-indigo-600 text-white px-4 py-2 text-sm font-medium hover:bg-indigo-700"
                             >
                                 {p.cta}

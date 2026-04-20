@@ -142,20 +142,55 @@ export default function AuditResult({ meta, audit, paid, price, paidPrestations 
                 )}
 
                 {paid && audit.status !== 'failed' && (
-                    <div className="mt-8 grid md:grid-cols-2 gap-6">
-                        <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
-                            <h2 className="font-semibold">Contrôles SEO</h2>
-                            <div className="mt-3">
-                                {seo?.checks?.map((c) => <CheckRow key={c.key} check={c} />)}
+                    <>
+                        <div className="mt-8 grid md:grid-cols-2 gap-6">
+                            <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+                                <h2 className="font-semibold">Contrôles SEO</h2>
+                                <div className="mt-3">
+                                    {seo?.checks?.map((c) => <CheckRow key={c.key} check={c} />)}
+                                </div>
+                            </div>
+                            <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+                                <h2 className="font-semibold">Contrôles de sécurité</h2>
+                                <div className="mt-3">
+                                    {sec?.checks?.map((c) => <CheckRow key={c.key} check={c} />)}
+                                </div>
                             </div>
                         </div>
-                        <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
-                            <h2 className="font-semibold">Contrôles de sécurité</h2>
-                            <div className="mt-3">
-                                {sec?.checks?.map((c) => <CheckRow key={c.key} check={c} />)}
+
+                        <div className="mt-8 grid md:grid-cols-2 gap-6">
+                            <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+                                <div className="flex items-start justify-between gap-3">
+                                    <div>
+                                        <h3 className="font-semibold">Rapport PDF</h3>
+                                        <p className="text-sm text-slate-600 mt-1">Version imprimable et archivable du rapport.</p>
+                                    </div>
+                                    <span className="text-lg font-bold whitespace-nowrap">+{audit.pdf_price_label}</span>
+                                </div>
+                                <Link
+                                    href={audit.pdf_paid ? `/audit/${audit.uuid}/pdf` : `/audit/${audit.uuid}/pdf/pay`}
+                                    className="mt-4 inline-flex rounded-md bg-indigo-600 text-white px-4 py-2 text-sm font-medium hover:bg-indigo-700"
+                                >
+                                    {audit.pdf_paid ? 'Télécharger le PDF' : 'Débloquer le PDF'}
+                                </Link>
+                            </div>
+                            <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+                                <div className="flex items-start justify-between gap-3">
+                                    <div>
+                                        <h3 className="font-semibold">Core Web Vitals</h3>
+                                        <p className="text-sm text-slate-600 mt-1">Score de performance Google (LCP, CLS, INP, FCP, TBT).</p>
+                                    </div>
+                                    <span className="text-lg font-bold whitespace-nowrap">+{audit.cwv_price_label}</span>
+                                </div>
+                                <Link
+                                    href={audit.cwv_paid ? `/audit/${audit.uuid}/performance` : `/audit/${audit.uuid}/performance/pay`}
+                                    className="mt-4 inline-flex rounded-md bg-indigo-600 text-white px-4 py-2 text-sm font-medium hover:bg-indigo-700"
+                                >
+                                    {audit.cwv_paid ? 'Voir les Core Web Vitals' : 'Débloquer les Core Web Vitals'}
+                                </Link>
                             </div>
                         </div>
-                    </div>
+                    </>
                 )}
 
                 <section className="mt-12 bg-slate-900 text-white rounded-xl p-8">

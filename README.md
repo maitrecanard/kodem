@@ -16,19 +16,22 @@ Stack monolithique : **Laravel 11** (PHP 8.3) + **Inertia.js** + **React 18** + 
 | Axe | État | Détail |
 |---|---|---|
 | Fonctionnalités du cahier des charges | ✅ **17 / 17 livrées** | Voir § 1 ci-dessous pour la traçabilité point par point |
-| Audit monétisé (freemium) | ✅ Livré | Aperçu gratuit (score global) + rapport complet à **29 €** · checkout stub prêt à brancher sur Stripe |
-| Suite de tests PHPUnit | ✅ **64 tests passés (351 assertions)** en 3,23 s | `php artisan test` — 0 échec, 0 erreur, 0 skipped |
-| Build des assets front (Vite) | ✅ OK | Client : 16,18 s · SSR : 1,54 s |
-| Migrations base de données | ✅ OK | 8 migrations appliquées (SQLite et MySQL) |
-| Routes applicatives | ✅ OK | 41 routes (`php artisan route:list`) |
-| Smoke test HTTP | ✅ OK | `/`, `/audit`, `/cgv` → 200 avec tous les en-têtes de sécurité attendus |
+| Audit monétisé (freemium) | ✅ Livré | Aperçu gratuit (score global) + rapport complet à **29 €** |
+| Add-on PDF téléchargeable | ✅ Livré | **+9 €** après paiement du rapport — PDF généré à la volée via DomPDF |
+| Add-on Core Web Vitals | ✅ Livré | **+19 €** — intègre l'API PageSpeed Insights de Google (LCP, CLS, INP, FCP, TBT) |
+| Abonnement monitoring mensuel | ✅ Livré | **49 €/mois** — audits hebdomadaires automatiques (`monitoring:run` planifié le lundi 03h00), alertes email sur régression, dashboard par lien magique |
+| Suite de tests PHPUnit | ✅ **81 tests passés (465 assertions)** en 3,94 s | `php artisan test` — 0 échec, 0 erreur, 0 skipped |
+| Build des assets front (Vite) | ✅ OK | Client : 13,76 s · SSR : 4,96 s |
+| Migrations base de données | ✅ OK | 10 migrations appliquées (SQLite et MySQL) |
+| Routes applicatives | ✅ OK | 49 routes (`php artisan route:list`) |
+| Smoke test HTTP | ✅ OK | `/`, `/audit`, `/cgv`, `/monitoring` → 200 avec tous les en-têtes de sécurité attendus |
 | Sécurité (en-têtes) | ✅ Cible 100/100 | CSP, HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy, COOP, CORP |
 
 ### Tests exécutés
 
 ```
-Tests:     64 passed (351 assertions)
-Duration:  3,23 s
+Tests:     81 passed (465 assertions)
+Duration:  3,94 s
 ```
 
 | Suite | Tests | Couvre |
@@ -37,6 +40,9 @@ Duration:  3,23 s
 | `tests/Feature/ContactTest.php` | 4 | Insertion valide, validation, honeypot silencieux, rate-limit 5/min |
 | `tests/Feature/AuditTest.php` | 6 | Happy path, URL invalide, aperçu gratuit vs rapport complet, admin sans paiement, score faible |
 | `tests/Feature/AuditPaymentTest.php` | 5 | Checkout rendu, redirection si déjà payé, paiement stub OK, confirmation requise, pas de double-paiement |
+| `tests/Feature/AuditPdfTest.php` | 5 | PDF bloqué sans paiement audit, checkout +9 €, download après paiement, admin bypass, redirection si déjà payé |
+| `tests/Feature/AuditCwvTest.php` | 4 | Checkout +19 €, paiement déclenche appel PSI, résultats stockés, non-accessible si audit non payé |
+| `tests/Feature/MonitoringTest.php` | 7 | Landing, souscription stub, dashboard via token, cancel, runner crée audit et flag alerte, commande `monitoring:run` skip non-actifs |
 | `tests/Feature/SecurityHeadersTest.php` | 1 | Présence CSP, HSTS, X-Frame, Referrer-Policy, Permissions-Policy |
 | `tests/Feature/VisitTrackingTest.php` | 3 | Tracking public, exclusion admin, hash SHA-256 de l'IP |
 | `tests/Feature/AdminAccessTest.php` | 6 | Guest → login, non-admin → 403, admin → setup 2FA, TOTP valide/invalide |
@@ -166,7 +172,36 @@ Contrôles sécurité automatisés (10) : HTTPS, HSTS, Content-Security-Policy, 
 
 Protection : 3 audits/h/IP, blocage des adresses `localhost` / `127.0.0.1` / plages privées (`10.*`, `172.16/12`, `192.168.*`) pour éviter le SSRF.
 
-### 3.3 Catalogue de prestations automatiques
+### 3.3 Add-ons et abonnement monétisés
+
+Trois prestations 100 % automatisées viennent enrichir l'audit :
+
+| Produit | Prix | Route | Comment ça marche |
+|---|---|---|---|
+| **Add-on Rapport PDF** | +9 € | `/audit/{uuid}/pdf` | Après paiement du rapport (29 €), un second checkout débloque un PDF généré à la volée par DomPDF (`resources/views/pdf/audit.blade.php`). Téléchargement immédiat. Les admins accèdent sans payer l'add-on. |
+| **Add-on Core Web Vitals** | +19 € | `/audit/{uuid}/performance` | Au paiement, on interroge l'API **Google PageSpeed Insights** via `PageSpeedClient`. Récupère Performance Score, LCP, CLS, INP, FCP, TBT, stocke en JSON et affiche un dashboard dédié. Clé Google optionnelle via `GOOGLE_PAGESPEED_API_KEY`. |
+| **Abonnement monitoring mensuel** | 49 €/mois | `/monitoring` | Souscription (URL + email + paiement) → `MonitoringSubscription` (statut `active`, `active_until = now + 30 j`). Dashboard accessible par **lien magique** (token UUID) sans compte. Annulable à tout moment. |
+
+**Monitoring — exécution automatique** :
+- Commande artisan : `php artisan monitoring:run` (optionnellement `--token=xxx` pour un seul abonnement).
+- Planification : `Schedule::command('monitoring:run')->weeklyOn(1, '03:00')` dans `routes/console.php` (lundi 03 h 00 UTC).
+- Pour chaque abonnement actif, `MonitoringRunner` lance un audit complet, le marque comme payé (inclus dans l'abonnement), met à jour le dernier score et envoie un email `MonitoringReportMail`.
+- Si la chute de score dépasse le seuil configuré (`MONITORING_ALERT_THRESHOLD`, défaut 10 pts), l'email est typé **⚠️ ALERTE**.
+- Les abonnements dont la période expire passent automatiquement en `expired`.
+
+Paramètres dans `config/audit.php` (tous surchargeables par env) :
+
+```
+AUDIT_PRICE_CENTS=2900            # Rapport complet
+AUDIT_PDF_PRICE_CENTS=900         # Add-on PDF
+AUDIT_CWV_PRICE_CENTS=1900        # Add-on Core Web Vitals
+MONITORING_PRICE_CENTS=4900       # Abonnement mensuel
+MONITORING_PERIOD_DAYS=30
+MONITORING_ALERT_THRESHOLD=10
+GOOGLE_PAGESPEED_API_KEY=         # optionnel
+```
+
+### 3.4 Catalogue de prestations automatiques
 
 `App\Services\PrestationCatalog` fournit 7 prestations :
 
@@ -182,7 +217,7 @@ Protection : 3 audits/h/IP, blocage des adresses `localhost` / `127.0.0.1` / pla
 
 Les prestations payantes sont mises en avant sur le rapport d'audit (cross-sell) et sur la page `/prestations`.
 
-### 3.4 Espace administrateur (`/admin`)
+### 3.5 Espace administrateur (`/admin`)
 
 Protégé par trois couches successives :
 1. `auth` — utilisateur connecté
@@ -193,7 +228,7 @@ Après activation, la clé TOTP est chiffrée en base (`cast: 'encrypted'`), un 
 
 Le dashboard affiche : visites 7j / 30j, visiteurs uniques 30j (clés : hash d'IP distincts), audits totaux / 7j, messages totaux / non lus, top 10 des pages (30j), 5 audits et 5 messages récents.
 
-### 3.5 Analytics (RGPD-friendly)
+### 3.6 Analytics (RGPD-friendly)
 
 `TrackVisit` middleware — une ligne `page_visits` par GET public (hors admin, hors bots). **L'IP n'est jamais stockée en clair** : elle est hachée en SHA-256 avec le `APP_KEY` comme sel. Le hash permet de compter les visiteurs uniques sans identifier une personne.
 

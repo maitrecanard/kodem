@@ -95,6 +95,10 @@ class AuditController extends Controller
                 'score_seo' => $audit->score_seo,
                 'score_security' => $audit->score_security,
                 'results' => $audit->results,
+                'pdf_paid' => $audit->isPdfPaid(),
+                'cwv_paid' => $audit->isCwvPaid(),
+                'pdf_price_label' => number_format($audit->pdf_price_cents / 100, 2, ',', ' ').' €',
+                'cwv_price_label' => number_format($audit->cwv_price_cents / 100, 2, ',', ' ').' €',
             ]);
         }
 

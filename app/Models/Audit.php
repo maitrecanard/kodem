@@ -12,6 +12,8 @@ class Audit extends Model
         'score_seo', 'score_security', 'score_total',
         'results', 'error', 'ip_hash',
         'price_cents', 'paid_at', 'payment_reference',
+        'pdf_price_cents', 'pdf_paid_at',
+        'cwv_price_cents', 'cwv_paid_at', 'cwv_results',
     ];
 
     protected $casts = [
@@ -21,6 +23,11 @@ class Audit extends Model
         'score_total' => 'integer',
         'price_cents' => 'integer',
         'paid_at' => 'datetime',
+        'pdf_price_cents' => 'integer',
+        'pdf_paid_at' => 'datetime',
+        'cwv_price_cents' => 'integer',
+        'cwv_paid_at' => 'datetime',
+        'cwv_results' => 'array',
     ];
 
     protected static function booted(): void
@@ -40,5 +47,15 @@ class Audit extends Model
     public function isPaid(): bool
     {
         return $this->paid_at !== null;
+    }
+
+    public function isPdfPaid(): bool
+    {
+        return $this->pdf_paid_at !== null;
+    }
+
+    public function isCwvPaid(): bool
+    {
+        return $this->cwv_paid_at !== null;
     }
 }
