@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Audit;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\RateLimiter;
@@ -21,9 +22,7 @@ class AuditTest extends TestCase
     public function test_submitting_a_valid_url_creates_and_runs_audit(): void
     {
         Http::fake([
-            'example.com/*' => Http::response('', 200, []),
-            'example.com' => Http::response($this->goodHtml(), 200, $this->strongHeaders()),
-            'https://example.com' => Http::response($this->goodHtml(), 200, $this->strongHeaders()),
+            '*' => Http::response($this->goodHtml(), 200, $this->strongHeaders()),
         ]);
 
         $response = $this->post('/audit', ['url' => 'https://example.com']);
@@ -34,6 +33,8 @@ class AuditTest extends TestCase
         $this->assertSame('completed', $audit->status);
         $this->assertNotNull($audit->score_total);
         $this->assertGreaterThan(50, $audit->score_total);
+        $this->assertNull($audit->paid_at, 'audit should start unpaid');
+        $this->assertSame(2900, $audit->price_cents);
     }
 
     public function test_bad_url_is_rejected_by_validation(): void
@@ -42,11 +43,9 @@ class AuditTest extends TestCase
         $this->assertDatabaseCount('audits', 0);
     }
 
-    public function test_audit_result_page_is_public(): void
+    public function test_unpaid_result_page_shows_teaser_only(): void
     {
-        Http::fake([
-            '*' => Http::response($this->goodHtml(), 200, $this->strongHeaders()),
-        ]);
+        Http::fake(['*' => Http::response($this->goodHtml(), 200, $this->strongHeaders())]);
 
         $this->post('/audit', ['url' => 'https://example.org']);
         $audit = Audit::first();
@@ -55,16 +54,57 @@ class AuditTest extends TestCase
             ->assertOk()
             ->assertInertia(fn ($page) => $page
                 ->component('Public/AuditResult')
+                ->where('paid', false)
                 ->where('audit.uuid', $audit->uuid)
-                ->where('audit.status', 'completed')
+                ->where('audit.score_total', fn ($v) => is_int($v) && $v > 0)
+                ->where('audit.score_seo', null)
+                ->where('audit.score_security', null)
+                ->where('audit.results', null)
+                ->has('audit.teaser')
+                ->has('price.label')
+            );
+    }
+
+    public function test_paid_result_page_shows_full_report(): void
+    {
+        Http::fake(['*' => Http::response($this->goodHtml(), 200, $this->strongHeaders())]);
+
+        $this->post('/audit', ['url' => 'https://example.net']);
+        $audit = Audit::first();
+        $audit->update(['paid_at' => now(), 'payment_reference' => 'TEST-123']);
+
+        $this->get('/audit/'.$audit->uuid)
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->component('Public/AuditResult')
+                ->where('paid', true)
+                ->where('audit.score_seo', fn ($v) => is_int($v))
+                ->where('audit.score_security', fn ($v) => is_int($v))
+                ->has('audit.results.seo.checks')
+                ->has('audit.results.security.checks')
+            );
+    }
+
+    public function test_admin_sees_full_report_without_paying(): void
+    {
+        Http::fake(['*' => Http::response($this->goodHtml(), 200, $this->strongHeaders())]);
+
+        $this->post('/audit', ['url' => 'https://admin.example']);
+        $audit = Audit::first();
+
+        $admin = User::factory()->create(['is_admin' => true]);
+        $this->actingAs($admin)
+            ->get('/audit/'.$audit->uuid)
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->where('paid', true)
+                ->has('audit.results.seo.checks')
             );
     }
 
     public function test_audit_scores_lower_when_security_headers_missing(): void
     {
-        Http::fake([
-            '*' => Http::response($this->minimalHtml(), 200, []),
-        ]);
+        Http::fake(['*' => Http::response($this->minimalHtml(), 200, [])]);
 
         $this->post('/audit', ['url' => 'http://weak.example']);
         $audit = Audit::first();

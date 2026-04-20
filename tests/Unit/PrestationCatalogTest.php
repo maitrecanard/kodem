@@ -30,4 +30,16 @@ class PrestationCatalogTest extends TestCase
             }
         }
     }
+
+    public function test_audit_prestations_are_paid(): void
+    {
+        $byslug = [];
+        foreach (PrestationCatalog::all() as $p) {
+            $byslug[$p['slug']] = $p;
+        }
+
+        $this->assertSame(29, $byslug['audit-seo']['price_from']);
+        $this->assertStringContainsString('29', $byslug['audit-seo']['price_label']);
+        $this->assertSame(29, $byslug['audit-securite']['price_from']);
+    }
 }

@@ -16,10 +16,11 @@ class AuditController extends Controller
     {
         return Inertia::render('Public/Audit', [
             'meta' => [
-                'title' => 'Audit SEO et audit de sécurité en ligne, gratuit — Kodem',
-                'description' => 'Lancez un audit SEO et un audit de sécurité automatisés gratuitement en 30 secondes. Score sur 100, rapport détaillé, recommandations.',
-                'keywords' => 'audit SEO en ligne, audit de sécurité gratuit, analyse SEO automatique',
+                'title' => 'Audit SEO et audit de sécurité en ligne — Kodem',
+                'description' => 'Lancez un audit SEO et un audit de sécurité automatisés en 30 secondes. Aperçu gratuit, rapport détaillé à 29 €.',
+                'keywords' => 'audit SEO en ligne, audit de sécurité payant, rapport audit',
             ],
+            'price' => $this->priceLabel(),
             'paidPrestations' => PrestationCatalog::all(),
         ]);
     }
@@ -37,6 +38,7 @@ class AuditController extends Controller
             'email' => $validated['email'] ?? null,
             'type' => $validated['type'] ?? 'full',
             'status' => 'running',
+            'price_cents' => (int) config('audit.price_cents', 2900),
             'ip_hash' => hash('sha256', (string) $request->ip().config('app.key')),
         ]);
 
@@ -54,26 +56,86 @@ class AuditController extends Controller
         return redirect()->route('audit.show', $audit->uuid);
     }
 
-    public function show(Audit $audit): Response
+    public function show(Request $request, Audit $audit): Response
     {
+        $isAdmin = (bool) optional($request->user())->is_admin;
+        $paid = $audit->isPaid() || $isAdmin;
+
         return Inertia::render('Public/AuditResult', [
             'meta' => [
                 'title' => 'Résultat de l\'audit — Kodem',
-                'description' => 'Rapport d\'audit SEO et de sécurité automatisé par Kodem.',
+                'description' => 'Rapport d\'audit SEO et de sécurité Kodem.',
                 'keywords' => 'audit SEO, audit de sécurité, rapport',
             ],
-            'audit' => [
-                'uuid' => $audit->uuid,
-                'url' => $audit->url,
-                'status' => $audit->status,
-                'score_seo' => $audit->score_seo,
-                'score_security' => $audit->score_security,
-                'score_total' => $audit->score_total,
-                'results' => $audit->results,
-                'error' => $audit->error,
-                'created_at' => $audit->created_at?->toIso8601String(),
-            ],
+            'audit' => $this->serializeAudit($audit, $paid),
+            'paid' => $paid,
+            'price' => $this->priceLabel($audit->price_cents),
             'paidPrestations' => PrestationCatalog::all(),
         ]);
+    }
+
+    /**
+     * @return array<string,mixed>
+     */
+    protected function serializeAudit(Audit $audit, bool $paid): array
+    {
+        $base = [
+            'uuid' => $audit->uuid,
+            'url' => $audit->url,
+            'status' => $audit->status,
+            'score_total' => $audit->score_total,
+            'paid' => $paid,
+            'paid_at' => $audit->paid_at?->toIso8601String(),
+            'error' => $audit->error,
+            'created_at' => $audit->created_at?->toIso8601String(),
+        ];
+
+        if ($paid) {
+            return array_merge($base, [
+                'score_seo' => $audit->score_seo,
+                'score_security' => $audit->score_security,
+                'results' => $audit->results,
+            ]);
+        }
+
+        // Aperçu gratuit : score global uniquement + comptage par catégorie.
+        return array_merge($base, [
+            'score_seo' => null,
+            'score_security' => null,
+            'teaser' => $this->buildTeaser($audit),
+            'results' => null,
+        ]);
+    }
+
+    /**
+     * @return array<string,mixed>
+     */
+    protected function buildTeaser(Audit $audit): array
+    {
+        $results = $audit->results ?? [];
+        $counts = fn (array $checks) => [
+            'pass' => count(array_filter($checks, fn ($c) => ($c['status'] ?? null) === 'pass')),
+            'warn' => count(array_filter($checks, fn ($c) => ($c['status'] ?? null) === 'warn')),
+            'fail' => count(array_filter($checks, fn ($c) => ($c['status'] ?? null) === 'fail')),
+            'total' => count($checks),
+        ];
+
+        return [
+            'seo_counts' => $counts($results['seo']['checks'] ?? []),
+            'security_counts' => $counts($results['security']['checks'] ?? []),
+            'sample_check' => $results['security']['checks'][0] ?? null,
+        ];
+    }
+
+    /**
+     * @return array{cents:int, label:string}
+     */
+    protected function priceLabel(?int $cents = null): array
+    {
+        $cents ??= (int) config('audit.price_cents', 2900);
+        return [
+            'cents' => $cents,
+            'label' => number_format($cents / 100, 2, ',', ' ').' €',
+        ];
     }
 }

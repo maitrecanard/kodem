@@ -16,30 +16,32 @@ Stack monolithique : **Laravel 11** (PHP 8.3) + **Inertia.js** + **React 18** + 
 | Axe | État | Détail |
 |---|---|---|
 | Fonctionnalités du cahier des charges | ✅ **17 / 17 livrées** | Voir § 1 ci-dessous pour la traçabilité point par point |
-| Suite de tests PHPUnit | ✅ **56 tests passés (276 assertions)** en 2,55 s | `php artisan test` — 0 échec, 0 erreur, 0 skipped |
-| Build des assets front (Vite) | ✅ OK | Client : 8,80 s · SSR : 1,50 s |
-| Migrations base de données | ✅ OK | 7 migrations appliquées (SQLite et MySQL) |
-| Routes applicatives | ✅ OK | 39 routes (`php artisan route:list`) |
+| Audit monétisé (freemium) | ✅ Livré | Aperçu gratuit (score global) + rapport complet à **29 €** · checkout stub prêt à brancher sur Stripe |
+| Suite de tests PHPUnit | ✅ **64 tests passés (351 assertions)** en 3,23 s | `php artisan test` — 0 échec, 0 erreur, 0 skipped |
+| Build des assets front (Vite) | ✅ OK | Client : 16,18 s · SSR : 1,54 s |
+| Migrations base de données | ✅ OK | 8 migrations appliquées (SQLite et MySQL) |
+| Routes applicatives | ✅ OK | 41 routes (`php artisan route:list`) |
 | Smoke test HTTP | ✅ OK | `/`, `/audit`, `/cgv` → 200 avec tous les en-têtes de sécurité attendus |
 | Sécurité (en-têtes) | ✅ Cible 100/100 | CSP, HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy, COOP, CORP |
 
 ### Tests exécutés
 
 ```
-Tests:     56 passed (276 assertions)
-Duration:  2.55 s
+Tests:     64 passed (351 assertions)
+Duration:  3,23 s
 ```
 
 | Suite | Tests | Couvre |
 |---|---:|---|
 | `tests/Feature/PublicPagesTest.php` | 6 | Rendu des 6 pages publiques + balises SEO (titre, description, mots-clés) |
 | `tests/Feature/ContactTest.php` | 4 | Insertion valide, validation, honeypot silencieux, rate-limit 5/min |
-| `tests/Feature/AuditTest.php` | 4 | Happy path, URL invalide, rapport public, score faible si en-têtes manquants |
+| `tests/Feature/AuditTest.php` | 6 | Happy path, URL invalide, aperçu gratuit vs rapport complet, admin sans paiement, score faible |
+| `tests/Feature/AuditPaymentTest.php` | 5 | Checkout rendu, redirection si déjà payé, paiement stub OK, confirmation requise, pas de double-paiement |
 | `tests/Feature/SecurityHeadersTest.php` | 1 | Présence CSP, HSTS, X-Frame, Referrer-Policy, Permissions-Policy |
 | `tests/Feature/VisitTrackingTest.php` | 3 | Tracking public, exclusion admin, hash SHA-256 de l'IP |
 | `tests/Feature/AdminAccessTest.php` | 6 | Guest → login, non-admin → 403, admin → setup 2FA, TOTP valide/invalide |
 | `tests/Unit/AuditRunnerTest.php` | 4 | Refus localhost/IP privées, normalisation URL, score fort/faible |
-| `tests/Unit/PrestationCatalogTest.php` | 3 | Slugs attendus, teaser ⊂ catalogue, champs obligatoires |
+| `tests/Unit/PrestationCatalogTest.php` | 4 | Slugs attendus, teaser ⊂ catalogue, champs obligatoires, audits marqués comme payants |
 | `tests/Feature/Auth/*` + héritage Breeze | 25 | Flux login / register / reset / profile non régressés |
 
 ### Incidents rencontrés pendant le cycle et corrections appliquées
@@ -69,7 +71,7 @@ Le README d'origine demandait :
 | 1 | Description du projet : société de dév logiciel, hébergement, audit SEO & sécurité | ✅ | Positionnement tenu dans tout le site (hero, services, méta SEO) |
 | 2 | Stack : Laravel + Vite en back, React en front, MySQL en base | ✅ | Laravel 11 + Vite 6 + React 18 + Inertia.js ; SQLite par défaut, MySQL via `.env` |
 | 3 | Page d'accueil | ✅ | `resources/js/Pages/Public/Home.jsx` + `PublicController@home` |
-| 4 | Système d'audit (en ligne, libre-service) | ✅ | `AuditRunner`, `AuditController`, `Public/Audit.jsx`, `Public/AuditResult.jsx` |
+| 4 | Système d'audit (en ligne, libre-service) | ✅ | `AuditRunner`, `AuditController`, `Public/Audit.jsx`, `Public/AuditResult.jsx` · **freemium** : aperçu gratuit, rapport complet à 29 € via `AuditPaymentController` |
 | 5 | Présentation des prestations | ✅ | `Public/Services.jsx` + `PrestationCatalog` (7 prestations) |
 | 6 | Page contact | ✅ | `Public/Contact.jsx` + `ContactController` (rate-limit + honeypot) |
 | 7 | Mentions légales | ✅ | `Public/Mentions.jsx` |
@@ -141,14 +143,22 @@ database/migrations/
 - **Contact** (`/contact`) : formulaire validé, anti-spam honeypot, throttle 5 req/min/IP.
 - **Mentions légales** (`/mentions-legales`), **CGV** (`/cgv`).
 
-### 3.2 Audit en libre-service
+### 3.2 Audit en libre-service (freemium)
 
 Parcours :
 1. L'utilisateur saisit une URL sur `/audit`.
 2. `AuditController@store` crée un audit (statut `running`), délègue à `AuditRunner::run()`.
 3. `AuditRunner` fait un `HTTP GET` (timeout 15 s), extrait les balises SEO, sonde les en-têtes de sécurité, et vérifie `robots.txt`/`sitemap.xml`.
 4. Chaque contrôle est pondéré (`pass` = 100 %, `warn` = 50 %, `fail` = 0 %). Scores SEO / sécurité / total sont calculés sur 100.
-5. L'utilisateur est redirigé vers `/audit/{uuid}` (page publique, partageable).
+5. L'utilisateur est redirigé vers `/audit/{uuid}` — **page publique partageable, avec aperçu gratuit** : score global visible, scores SEO et sécurité masqués, comptage pass/warn/fail par catégorie et 1 contrôle d'exemple affichés en teaser.
+6. Un bouton « Débloquer le rapport complet » mène vers `/audit/{uuid}/pay` qui affiche le checkout (**29 €** par défaut, configurable via `AUDIT_PRICE_CENTS`).
+7. Après paiement, les 20 contrôles détaillés + recommandations sont visibles sur `/audit/{uuid}`.
+
+**Monétisation** :
+- Prix par défaut : **29 €** (surchargeable par `config/audit.php` ou `AUDIT_PRICE_CENTS`).
+- Driver de paiement : `stub` par défaut (simulation pour démo), `stripe` à brancher via `laravel/cashier`.
+- Les administrateurs authentifiés voient toujours le rapport complet sans paiement.
+- Pas de double paiement possible : `paid_at` est vérifié avant chaque charge.
 
 Contrôles SEO automatisés (10) : HTTP 200, `<title>`, meta description, `<h1>`, viewport, `lang`, canonical, Open Graph, Twitter Card, compression.
 
@@ -162,8 +172,8 @@ Protection : 3 audits/h/IP, blocage des adresses `localhost` / `127.0.0.1` / pla
 
 | Slug | Prix | Type |
 |---|---|---|
-| `audit-seo` | gratuit | service en ligne |
-| `audit-securite` | gratuit | service en ligne |
+| `audit-seo` | 29 € (aperçu gratuit) | service en ligne |
+| `audit-securite` | 29 € (aperçu gratuit) | service en ligne |
 | `monitoring` | 49 €/mois | abonnement |
 | `hebergement-web` | 19 €/mois | abonnement |
 | `developpement-web` | sur devis | prestation |

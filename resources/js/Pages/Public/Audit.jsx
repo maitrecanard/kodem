@@ -1,7 +1,7 @@
 import { useForm, Link } from '@inertiajs/react';
 import PublicLayout from '@/Layouts/PublicLayout';
 
-export default function Audit({ meta, paidPrestations = [] }) {
+export default function Audit({ meta, price, paidPrestations = [] }) {
     const { data, setData, post, processing, errors } = useForm({
         url: '',
         email: '',
@@ -18,9 +18,9 @@ export default function Audit({ meta, paidPrestations = [] }) {
             <section className="bg-gradient-to-b from-indigo-600 to-indigo-800 text-white">
                 <div className="max-w-3xl mx-auto px-6 py-20 text-center">
                     <p className="uppercase tracking-widest text-xs text-indigo-200">Audit automatisé</p>
-                    <h1 className="mt-2 text-4xl md:text-5xl font-bold">Audit SEO et de sécurité en ligne, gratuit</h1>
+                    <h1 className="mt-2 text-4xl md:text-5xl font-bold">Audit SEO et de sécurité en ligne</h1>
                     <p className="mt-4 text-indigo-100">
-                        Saisissez une URL, obtenez un rapport complet sur 100 en moins d'une minute.
+                        Saisissez une URL. Aperçu du score global <strong>gratuit</strong>, rapport complet et recommandations à <strong>{price?.label ?? '29,00 €'}</strong>.
                     </p>
 
                     <form onSubmit={submit} className="mt-10 bg-white text-slate-800 rounded-xl shadow-xl p-6 md:p-8 text-left">
@@ -71,7 +71,8 @@ export default function Audit({ meta, paidPrestations = [] }) {
                             {processing ? 'Audit en cours…' : 'Lancer l\'audit'}
                         </button>
                         <p className="mt-3 text-xs text-slate-500 text-center">
-                            Vos données sont anonymisées. Pas de cookie publicitaire. 3 audits/h maximum.
+                            Aperçu gratuit immédiat. Rapport complet à {price?.label ?? '29,00 €'} après paiement.
+                            Vos données sont anonymisées. 3 audits/h maximum.
                         </p>
                     </form>
                 </div>

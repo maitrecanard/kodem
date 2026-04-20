@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\AdminContactController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\TwoFactorController;
 use App\Http\Controllers\AuditController;
+use App\Http\Controllers\AuditPaymentController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicController;
@@ -31,6 +32,8 @@ Route::post('/audit', [AuditController::class, 'store'])
     ->middleware('throttle:audit')
     ->name('audit.store');
 Route::get('/audit/{audit:uuid}', [AuditController::class, 'show'])->name('audit.show');
+Route::get('/audit/{audit:uuid}/pay', [AuditPaymentController::class, 'create'])->name('audit.pay');
+Route::post('/audit/{audit:uuid}/pay', [AuditPaymentController::class, 'store'])->name('audit.pay.store');
 
 /*
  * Espace utilisateur (Breeze)

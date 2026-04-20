@@ -11,6 +11,7 @@ class Audit extends Model
         'uuid', 'url', 'email', 'type', 'status',
         'score_seo', 'score_security', 'score_total',
         'results', 'error', 'ip_hash',
+        'price_cents', 'paid_at', 'payment_reference',
     ];
 
     protected $casts = [
@@ -18,6 +19,8 @@ class Audit extends Model
         'score_seo' => 'integer',
         'score_security' => 'integer',
         'score_total' => 'integer',
+        'price_cents' => 'integer',
+        'paid_at' => 'datetime',
     ];
 
     protected static function booted(): void
@@ -32,5 +35,10 @@ class Audit extends Model
     public function getRouteKeyName(): string
     {
         return 'uuid';
+    }
+
+    public function isPaid(): bool
+    {
+        return $this->paid_at !== null;
     }
 }
