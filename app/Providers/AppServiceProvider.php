@@ -27,5 +27,6 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('contact', fn (Request $r) => Limit::perMinute(5)->by($r->ip()));
         RateLimiter::for('audit', fn (Request $r) => Limit::perHour(3)->by($r->ip()));
         RateLimiter::for('two-factor', fn (Request $r) => Limit::perMinute(5)->by(optional($r->user())->id ?: $r->ip()));
+        RateLimiter::for('tracking', fn (Request $r) => Limit::perMinute(120)->by($r->ip()));
     }
 }

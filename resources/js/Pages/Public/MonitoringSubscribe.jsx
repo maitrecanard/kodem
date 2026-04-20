@@ -1,11 +1,16 @@
 import { useForm, Link } from '@inertiajs/react';
 import PublicLayout from '@/Layouts/PublicLayout';
+import { trackClick } from '@/lib/track';
 
 export default function MonitoringSubscribe({ meta, price, period_days, driver }) {
     const { data, setData, post, processing, errors } = useForm({
         url: '', email: '', confirm: false,
     });
-    const submit = (e) => { e.preventDefault(); post('/monitoring/subscribe'); };
+    const submit = (e) => {
+        e.preventDefault();
+        trackClick('monitoring_subscribe_confirm');
+        post('/monitoring/subscribe');
+    };
 
     return (
         <PublicLayout meta={meta}>

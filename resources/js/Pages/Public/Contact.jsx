@@ -1,5 +1,6 @@
 import { useForm } from '@inertiajs/react';
 import PublicLayout from '@/Layouts/PublicLayout';
+import { trackClick } from '@/lib/track';
 
 export default function Contact({ meta, flash }) {
     const { data, setData, post, processing, errors, reset, wasSuccessful } = useForm({
@@ -13,6 +14,7 @@ export default function Contact({ meta, flash }) {
 
     const submit = (e) => {
         e.preventDefault();
+        trackClick('contact_submit_button');
         post('/contact', {
             preserveScroll: true,
             onSuccess: () => reset('name', 'email', 'company', 'subject', 'message'),

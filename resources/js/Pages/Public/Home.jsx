@@ -1,5 +1,6 @@
 import { Link } from '@inertiajs/react';
 import PublicLayout from '@/Layouts/PublicLayout';
+import { trackClick } from '@/lib/track';
 
 export default function Home({ meta, prestations = [] }) {
     return (
@@ -18,12 +19,14 @@ export default function Home({ meta, prestations = [] }) {
                     <div className="mt-8 flex flex-wrap gap-3">
                         <Link
                             href="/audit"
+                            onClick={() => trackClick('hero_cta_audit', { location: 'home_hero' })}
                             className="inline-flex items-center rounded-md bg-white text-indigo-700 px-5 py-3 font-semibold shadow-lg hover:bg-indigo-50"
                         >
                             Lancer un audit gratuit
                         </Link>
                         <Link
                             href="/prestations"
+                            onClick={() => trackClick('hero_cta_services', { location: 'home_hero' })}
                             className="inline-flex items-center rounded-md border border-indigo-300/60 px-5 py-3 font-medium hover:bg-white/10"
                         >
                             Découvrir les prestations
@@ -109,10 +112,18 @@ export default function Home({ meta, prestations = [] }) {
                     un projet de développement web, création de SaaS ou hébergement.
                 </p>
                 <div className="mt-8 flex flex-wrap justify-center gap-3">
-                    <Link href="/audit" className="rounded-md bg-indigo-600 text-white px-5 py-3 font-medium hover:bg-indigo-700">
+                    <Link
+                        href="/audit"
+                        onClick={() => trackClick('home_final_cta_audit')}
+                        className="rounded-md bg-indigo-600 text-white px-5 py-3 font-medium hover:bg-indigo-700"
+                    >
                         Lancer un audit
                     </Link>
-                    <Link href="/contact" className="rounded-md border border-slate-300 px-5 py-3 font-medium hover:bg-slate-100">
+                    <Link
+                        href="/contact"
+                        onClick={() => trackClick('home_final_cta_contact')}
+                        className="rounded-md border border-slate-300 px-5 py-3 font-medium hover:bg-slate-100"
+                    >
                         Contacter l'équipe
                     </Link>
                 </div>

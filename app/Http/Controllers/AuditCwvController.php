@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Audit;
 use App\Services\PageSpeedClient;
+use App\Services\TrackingService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -62,7 +63,7 @@ class AuditCwvController extends Controller
         ]);
     }
 
-    public function confirmPayment(Request $request, Audit $audit, PageSpeedClient $client): RedirectResponse
+    public function confirmPayment(Request $request, Audit $audit, PageSpeedClient $client, TrackingService $tracking): RedirectResponse
     {
         $this->requirePaidAudit($audit);
 
@@ -84,6 +85,13 @@ class AuditCwvController extends Controller
             'cwv_results' => $result,
             'payment_reference' => trim(($audit->payment_reference ?? '').' CWV-'.strtoupper(Str::random(8))),
         ]);
+
+        $tracking->record('audit.cwv.paid', 'audit_'.substr($audit->uuid, 0, 8), [
+            'audit_uuid' => $audit->uuid,
+            'price_cents' => $audit->cwv_price_cents,
+            'psi_status' => $result['status'] ?? null,
+            'performance_score' => $result['performance_score'] ?? null,
+        ], $request);
 
         return redirect()
             ->route('audit.cwv', $audit->uuid)

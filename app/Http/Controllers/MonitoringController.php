@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\MonitoringSubscription;
+use App\Services\TrackingService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -31,7 +32,7 @@ class MonitoringController extends Controller
         ]);
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request, TrackingService $tracking): RedirectResponse
     {
         $validated = $request->validate([
             'url' => ['required', 'string', 'max:500', 'regex:/^(https?:\/\/)?[^\s]+\.[^\s]+$/i'],
@@ -54,6 +55,12 @@ class MonitoringController extends Controller
             'active_until' => now()->addDays($period),
             'payment_reference' => 'STUB-MON-'.strtoupper(Str::random(10)),
         ]);
+
+        $tracking->record('monitoring.subscribed', 'sub_'.substr($sub->token, 0, 8), [
+            'sub_token' => $sub->token,
+            'price_cents' => $sub->price_cents,
+            'period_days' => $period,
+        ], $request);
 
         return redirect()
             ->route('monitoring.show', $sub->token)
@@ -82,9 +89,14 @@ class MonitoringController extends Controller
         ]);
     }
 
-    public function cancel(MonitoringSubscription $subscription): RedirectResponse
+    public function cancel(Request $request, MonitoringSubscription $subscription, TrackingService $tracking): RedirectResponse
     {
         $subscription->update(['status' => 'cancelled']);
+
+        $tracking->record('monitoring.cancelled', 'sub_'.substr($subscription->token, 0, 8), [
+            'sub_token' => $subscription->token,
+        ], $request);
+
         return back()->with('success', 'Abonnement annulé. Il reste actif jusqu\'à la fin de la période en cours.');
     }
 }

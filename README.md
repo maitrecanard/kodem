@@ -21,18 +21,19 @@ Stack monolithique : **Laravel 11** (PHP 8.3) + **Inertia.js** + **React 18** + 
 | Add-on Core Web Vitals | ✅ Livré | **+19 €** — intègre l'API PageSpeed Insights de Google (LCP, CLS, INP, FCP, TBT) |
 | Abonnement monitoring mensuel | ✅ Livré | **49 €/mois** — audits hebdomadaires automatiques (`monitoring:run` planifié le lundi 03h00), alertes email sur régression, dashboard par lien magique |
 | Plan d'action vers 100/100 | ✅ Livré | Chaque contrôle non-pass est enrichi d'une **recommandation concrète** (texte + snippet nginx/HTML copiable + lien MDN/OWASP + niveau d'effort). Plan trié par gain potentiel, chiffré en points de score gagnables. |
-| Suite de tests PHPUnit | ✅ **86 tests passés (587 assertions)** en 4,83 s | `php artisan test` — 0 échec, 0 erreur, 0 skipped |
-| Build des assets front (Vite) | ✅ OK | Client : 8,54 s · SSR : 1,57 s |
-| Migrations base de données | ✅ OK | 10 migrations appliquées (SQLite et MySQL) |
-| Routes applicatives | ✅ OK | 49 routes (`php artisan route:list`) |
+| Tracking événementiel complet | ✅ Livré | Table `events` + `TrackingService`. **Frontend** : helper `track.js`, 13 boutons instrumentés (nav, CTAs hero, formulaires, paiements, téléchargements). **Serveur** : événements `audit.submitted/completed/paid/pdf.paid/cwv.paid`, `pdf.downloaded`, `contact.submitted/spam_blocked`, `monitoring.subscribed/cancelled`. **Admin** : dashboard `/admin/events` avec funnel de conversion (visites → audit → payé → add-ons → monitoring), top events, flux récent. IP et session hachées (RGPD). |
+| Suite de tests PHPUnit | ✅ **99 tests passés (770 assertions)** en 4,73 s | `php artisan test` — 0 échec, 0 erreur, 0 skipped |
+| Build des assets front (Vite) | ✅ OK | Client : 9,98 s · SSR : 1,99 s |
+| Migrations base de données | ✅ OK | 11 migrations appliquées (SQLite et MySQL) |
+| Routes applicatives | ✅ OK | 51 routes (`php artisan route:list`) |
 | Smoke test HTTP | ✅ OK | `/`, `/audit`, `/cgv`, `/monitoring` → 200 avec tous les en-têtes de sécurité attendus |
 | Sécurité (en-têtes) | ✅ Cible 100/100 | CSP, HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy, COOP, CORP |
 
 ### Tests exécutés
 
 ```
-Tests:     86 passed (587 assertions)
-Duration:  4,83 s
+Tests:     99 passed (770 assertions)
+Duration:  4,73 s
 ```
 
 | Suite | Tests | Couvre |
@@ -50,6 +51,9 @@ Duration:  4,83 s
 | `tests/Unit/AuditRunnerTest.php` | 4 | Refus localhost/IP privées, normalisation URL, score fort/faible |
 | `tests/Unit/PrestationCatalogTest.php` | 4 | Slugs attendus, teaser ⊂ catalogue, champs obligatoires, audits marqués comme payants |
 | `tests/Unit/AuditRecommendationsTest.php` | 5 | Couverture complète des 20 clés, lookup inconnu, recommandations attachées aux non-pass uniquement, tri fail-first + gain desc, site parfait |
+| `tests/Feature/TrackingTest.php` | 5 | Endpoint `/track` stocke bien, IP hachée, refus types/noms invalides, rate-limit 120/min, user_id attaché si connecté |
+| `tests/Feature/ServerSideEventsTest.php` | 6 | Événements serveur émis pour audit submit/complete/paid, contact submit + honeypot, pdf.downloaded, monitoring subscribe/cancel |
+| `tests/Feature/AdminEventsTest.php` | 2 | `/admin/events` rend les stats + funnel corrects, exige auth + admin + 2FA |
 | `tests/Feature/Auth/*` + héritage Breeze | 25 | Flux login / register / reset / profile non régressés |
 
 ### Incidents rencontrés pendant le cycle et corrections appliquées
@@ -241,7 +245,30 @@ Après activation, la clé TOTP est chiffrée en base (`cast: 'encrypted'`), un 
 
 Le dashboard affiche : visites 7j / 30j, visiteurs uniques 30j (clés : hash d'IP distincts), audits totaux / 7j, messages totaux / non lus, top 10 des pages (30j), 5 audits et 5 messages récents.
 
-### 3.6 Analytics (RGPD-friendly)
+### 3.6 Tracking événementiel
+
+**Deux sources** de données complémentaires :
+
+1. **Événements frontend (clics de boutons, CTAs).** Helper `resources/js/lib/track.js` avec `trackClick(name, metadata)` posté sur `POST /track` (CSRF + rate-limit 120/min/IP). Fallback `navigator.sendBeacon` pour survivre aux navigations. 13 boutons instrumentés : navigation haute (home, prestations, audit, contact), CTAs hero (`hero_cta_audit`, `hero_cta_services`), CTAs de fin de page, soumissions de formulaires (audit, contact, monitoring), CTAs de déverrouillage payant (`audit_unlock_cta`, `pdf_unlock_cta`, `cwv_unlock_cta`), checkouts (`audit_checkout_confirm`, `pdf_checkout_confirm`, `cwv_checkout_confirm`), téléchargements (`pdf_download_cta`), annulation d'abonnement.
+
+2. **Événements serveur (émis depuis les controllers — source fiable, indépendante du JS).** Via `App\Services\TrackingService` :
+   - `audit.submitted`, `audit.completed`, `audit.failed` (AuditController)
+   - `audit.paid` (AuditPaymentController)
+   - `audit.pdf.paid`, `pdf.downloaded` (AuditPdfController)
+   - `audit.cwv.paid` (AuditCwvController)
+   - `contact.submitted`, `contact.spam_blocked` (ContactController)
+   - `monitoring.subscribed`, `monitoring.cancelled` (MonitoringController)
+
+**Confidentialité** : l'adresse IP et l'ID de session sont systématiquement **hachés en SHA-256 salé par `APP_KEY`** avant stockage. Aucune donnée personnelle en clair n'entre dans la table `events`.
+
+**Dashboard admin** (`/admin/events`) :
+- KPIs : événements 7j/30j, visites 30j, sessions uniques 30j
+- **Funnel de conversion (30 j)** : Visites → Audits lancés → Rapports payés 29 € → Add-on PDF 9 € → Add-on CWV 19 € → Monitoring 49 €/mois. Pourcentage calculé sur la base (= visites).
+- Top 20 des événements (type + nom)
+- Volumes par type
+- Feed des 50 derniers événements avec métadonnées (JSON), URL, session hachée
+
+### 3.7 Analytics (RGPD-friendly)
 
 `TrackVisit` middleware — une ligne `page_visits` par GET public (hors admin, hors bots). **L'IP n'est jamais stockée en clair** : elle est hachée en SHA-256 avec le `APP_KEY` comme sel. Le hash permet de compter les visiteurs uniques sans identifier une personne.
 

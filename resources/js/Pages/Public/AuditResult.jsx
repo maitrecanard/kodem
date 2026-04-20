@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from '@inertiajs/react';
 import PublicLayout from '@/Layouts/PublicLayout';
+import { trackClick } from '@/lib/track';
 
 function CodeSnippet({ code, lang }) {
     const [copied, setCopied] = useState(false);
@@ -215,6 +216,7 @@ export default function AuditResult({ meta, audit, paid, price, paidPrestations 
                                 <div className="text-sm text-indigo-200 mt-1">paiement unique, TTC</div>
                                 <Link
                                     href={`/audit/${audit.uuid}/pay`}
+                                    onClick={() => trackClick('audit_unlock_cta', { audit_uuid: audit.uuid, score_total: audit.score_total })}
                                     className="mt-6 inline-flex items-center rounded-md bg-white text-indigo-700 px-6 py-3 font-semibold shadow hover:bg-indigo-50"
                                 >
                                     Débloquer maintenant
@@ -290,6 +292,7 @@ export default function AuditResult({ meta, audit, paid, price, paidPrestations 
                                 </div>
                                 <Link
                                     href={audit.pdf_paid ? `/audit/${audit.uuid}/pdf` : `/audit/${audit.uuid}/pdf/pay`}
+                                    onClick={() => trackClick(audit.pdf_paid ? 'pdf_download_cta' : 'pdf_unlock_cta', { audit_uuid: audit.uuid })}
                                     className="mt-4 inline-flex rounded-md bg-indigo-600 text-white px-4 py-2 text-sm font-medium hover:bg-indigo-700"
                                 >
                                     {audit.pdf_paid ? 'Télécharger le PDF' : 'Débloquer le PDF'}
@@ -305,6 +308,7 @@ export default function AuditResult({ meta, audit, paid, price, paidPrestations 
                                 </div>
                                 <Link
                                     href={audit.cwv_paid ? `/audit/${audit.uuid}/performance` : `/audit/${audit.uuid}/performance/pay`}
+                                    onClick={() => trackClick(audit.cwv_paid ? 'cwv_view_cta' : 'cwv_unlock_cta', { audit_uuid: audit.uuid })}
                                     className="mt-4 inline-flex rounded-md bg-indigo-600 text-white px-4 py-2 text-sm font-medium hover:bg-indigo-700"
                                 >
                                     {audit.cwv_paid ? 'Voir les Core Web Vitals' : 'Débloquer les Core Web Vitals'}

@@ -15,6 +15,7 @@ export default function AdminLayout({ title, children }) {
                             <Link href="/admin" className="hover:text-indigo-300">Tableau de bord</Link>
                             <Link href="/admin/audits" className="hover:text-indigo-300">Audits</Link>
                             <Link href="/admin/messages" className="hover:text-indigo-300">Messages</Link>
+                            <Link href="/admin/events" className="hover:text-indigo-300">Événements</Link>
                         </nav>
                     </div>
                     <div className="flex items-center gap-3 text-sm">

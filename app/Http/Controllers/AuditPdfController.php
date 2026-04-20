@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Audit;
 use App\Services\PdfReportGenerator;
+use App\Services\TrackingService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -13,7 +14,7 @@ use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 
 class AuditPdfController extends Controller
 {
-    public function download(Request $request, Audit $audit, PdfReportGenerator $generator): SymfonyResponse
+    public function download(Request $request, Audit $audit, PdfReportGenerator $generator, TrackingService $tracking): SymfonyResponse
     {
         $this->requirePaidAudit($audit);
 
@@ -21,6 +22,11 @@ class AuditPdfController extends Controller
         if (! $audit->isPdfPaid() && ! $isAdmin) {
             return redirect()->route('audit.pdf.pay', $audit->uuid);
         }
+
+        $tracking->record('pdf.downloaded', 'audit_'.substr($audit->uuid, 0, 8), [
+            'audit_uuid' => $audit->uuid,
+            'is_admin' => $isAdmin,
+        ], $request);
 
         $pdf = $generator->generate($audit);
         $filename = 'kodem-audit-'.substr($audit->uuid, 0, 8).'.pdf';
@@ -55,7 +61,7 @@ class AuditPdfController extends Controller
         ]);
     }
 
-    public function confirmPayment(Request $request, Audit $audit): RedirectResponse
+    public function confirmPayment(Request $request, Audit $audit, TrackingService $tracking): RedirectResponse
     {
         $this->requirePaidAudit($audit);
 
@@ -75,6 +81,11 @@ class AuditPdfController extends Controller
             'pdf_paid_at' => now(),
             'payment_reference' => trim(($audit->payment_reference ?? '').' PDF-'.strtoupper(Str::random(8))),
         ]);
+
+        $tracking->record('audit.pdf.paid', 'audit_'.substr($audit->uuid, 0, 8), [
+            'audit_uuid' => $audit->uuid,
+            'price_cents' => $audit->pdf_price_cents,
+        ], $request);
 
         return redirect()
             ->route('audit.pdf', $audit->uuid)

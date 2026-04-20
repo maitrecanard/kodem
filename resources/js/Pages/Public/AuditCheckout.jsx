@@ -1,5 +1,6 @@
 import { useForm, Link } from '@inertiajs/react';
 import PublicLayout from '@/Layouts/PublicLayout';
+import { trackClick } from '@/lib/track';
 
 export default function AuditCheckout({ meta, audit, price, driver }) {
     const { data, setData, post, processing, errors } = useForm({
@@ -12,6 +13,7 @@ export default function AuditCheckout({ meta, audit, price, driver }) {
 
     const submit = (e) => {
         e.preventDefault();
+        trackClick('audit_checkout_confirm', { audit_uuid: audit.uuid });
         post(`/audit/${audit.uuid}/pay`);
     };
 

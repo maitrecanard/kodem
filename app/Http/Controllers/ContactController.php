@@ -3,15 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\Models\ContactMessage;
+use App\Services\TrackingService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 class ContactController extends Controller
 {
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request, TrackingService $tracking): RedirectResponse
     {
         // Honeypot — si rempli, on silent-discard.
         if (filled($request->input('website'))) {
+            $tracking->record('contact.spam_blocked', 'honeypot', [], $request);
             return back()->with('success', 'Merci.');
         }
 
@@ -23,11 +25,16 @@ class ContactController extends Controller
             'message' => ['required', 'string', 'min:10', 'max:5000'],
         ]);
 
-        ContactMessage::create([
+        $message = ContactMessage::create([
             ...$validated,
             'ip_hash' => hash('sha256', (string) $request->ip().config('app.key')),
             'status' => 'new',
         ]);
+
+        $tracking->record('contact.submitted', 'msg_'.$message->id, [
+            'message_id' => $message->id,
+            'has_company' => ! empty($validated['company']),
+        ], $request);
 
         return back()->with('success', 'Message envoyé.');
     }

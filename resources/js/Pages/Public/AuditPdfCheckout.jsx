@@ -1,9 +1,14 @@
 import { useForm, Link } from '@inertiajs/react';
 import PublicLayout from '@/Layouts/PublicLayout';
+import { trackClick } from '@/lib/track';
 
 export default function AuditPdfCheckout({ meta, audit, price, driver }) {
     const { data, setData, post, processing, errors } = useForm({ confirm: false });
-    const submit = (e) => { e.preventDefault(); post(`/audit/${audit.uuid}/pdf/pay`); };
+    const submit = (e) => {
+        e.preventDefault();
+        trackClick('pdf_checkout_confirm', { audit_uuid: audit.uuid });
+        post(`/audit/${audit.uuid}/pdf/pay`);
+    };
 
     return (
         <PublicLayout meta={meta}>

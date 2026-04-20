@@ -1,9 +1,11 @@
 import { Link, router } from '@inertiajs/react';
 import PublicLayout from '@/Layouts/PublicLayout';
+import { trackClick } from '@/lib/track';
 
 export default function MonitoringDashboard({ meta, subscription }) {
     const cancel = () => {
         if (confirm('Annuler l\'abonnement ? Il reste actif jusqu\'à la fin de la période en cours.')) {
+            trackClick('monitoring_cancel_confirm', { sub_token: subscription.token });
             router.post(`/monitoring/${subscription.token}/cancel`);
         }
     };

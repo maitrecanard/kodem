@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\AdminAuditController;
 use App\Http\Controllers\Admin\AdminContactController;
 use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\AdminEventController;
 use App\Http\Controllers\Admin\TwoFactorController;
 use App\Http\Controllers\AuditController;
 use App\Http\Controllers\AuditCwvController;
@@ -10,6 +11,7 @@ use App\Http\Controllers\AuditPaymentController;
 use App\Http\Controllers\AuditPdfController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\MonitoringController;
+use App\Http\Controllers\TrackingController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicController;
 use Illuminate\Support\Facades\Route;
@@ -26,6 +28,13 @@ Route::get('/cgv', [PublicController::class, 'cgv'])->name('cgv');
 Route::post('/contact', [ContactController::class, 'store'])
     ->middleware('throttle:contact')
     ->name('contact.store');
+
+/*
+ * Tracking client : relayé par le helper JS
+ */
+Route::post('/track', [TrackingController::class, 'store'])
+    ->middleware('throttle:tracking')
+    ->name('track');
 
 /*
  * Audit automatisé en libre-service
@@ -90,6 +99,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::get('/messages', [AdminContactController::class, 'index'])->name('messages.index');
         Route::get('/messages/{message}', [AdminContactController::class, 'show'])->name('messages.show');
         Route::patch('/messages/{message}', [AdminContactController::class, 'update'])->name('messages.update');
+        Route::get('/events', [AdminEventController::class, 'index'])->name('events.index');
     });
 });
 

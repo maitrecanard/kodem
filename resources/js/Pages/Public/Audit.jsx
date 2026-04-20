@@ -1,5 +1,6 @@
 import { useForm, Link } from '@inertiajs/react';
 import PublicLayout from '@/Layouts/PublicLayout';
+import { trackClick } from '@/lib/track';
 
 export default function Audit({ meta, price, paidPrestations = [] }) {
     const { data, setData, post, processing, errors } = useForm({
@@ -10,6 +11,7 @@ export default function Audit({ meta, price, paidPrestations = [] }) {
 
     const submit = (e) => {
         e.preventDefault();
+        trackClick('audit_submit_button', { type: data.type, has_email: !!data.email });
         post('/audit');
     };
 

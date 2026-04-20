@@ -1,9 +1,14 @@
 import { useForm, Link } from '@inertiajs/react';
 import PublicLayout from '@/Layouts/PublicLayout';
+import { trackClick } from '@/lib/track';
 
 export default function AuditCwvCheckout({ meta, audit, price, driver }) {
     const { data, setData, post, processing, errors } = useForm({ confirm: false });
-    const submit = (e) => { e.preventDefault(); post(`/audit/${audit.uuid}/performance/pay`); };
+    const submit = (e) => {
+        e.preventDefault();
+        trackClick('cwv_checkout_confirm', { audit_uuid: audit.uuid });
+        post(`/audit/${audit.uuid}/performance/pay`);
+    };
 
     return (
         <PublicLayout meta={meta}>

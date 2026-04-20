@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Audit;
 use App\Services\AuditRunner;
 use App\Services\PrestationCatalog;
+use App\Services\TrackingService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -25,7 +26,7 @@ class AuditController extends Controller
         ]);
     }
 
-    public function store(Request $request, AuditRunner $runner): RedirectResponse
+    public function store(Request $request, AuditRunner $runner, TrackingService $tracking): RedirectResponse
     {
         $validated = $request->validate([
             'url' => ['required', 'string', 'max:500', 'regex:/^(https?:\/\/)?[^\s]+\.[^\s]+$/i'],
@@ -42,6 +43,12 @@ class AuditController extends Controller
             'ip_hash' => hash('sha256', (string) $request->ip().config('app.key')),
         ]);
 
+        $tracking->record('audit.submitted', 'audit_'.substr($audit->uuid, 0, 8), [
+            'audit_uuid' => $audit->uuid,
+            'type' => $audit->type,
+            'has_email' => ! empty($validated['email']),
+        ], $request);
+
         $outcome = $runner->run($validated['url']);
 
         $audit->update([
@@ -52,6 +59,18 @@ class AuditController extends Controller
             'results' => $outcome['results'],
             'error' => $outcome['error'],
         ]);
+
+        $tracking->record(
+            $outcome['status'] === 'completed' ? 'audit.completed' : 'audit.failed',
+            'audit_'.substr($audit->uuid, 0, 8),
+            [
+                'audit_uuid' => $audit->uuid,
+                'score_total' => $outcome['score_total'],
+                'score_seo' => $outcome['score_seo'],
+                'score_security' => $outcome['score_security'],
+            ],
+            $request
+        );
 
         return redirect()->route('audit.show', $audit->uuid);
     }

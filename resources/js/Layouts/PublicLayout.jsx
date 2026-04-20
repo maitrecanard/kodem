@@ -1,4 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
+import { trackClick } from '@/lib/track';
 
 export default function PublicLayout({ meta, children }) {
     const title = meta?.title || 'Kodem — Développement web, hébergement et audits SEO/sécurité';
@@ -31,13 +32,14 @@ export default function PublicLayout({ meta, children }) {
                         <span>Kodem</span>
                     </Link>
                     <nav className="hidden md:flex items-center gap-6 text-sm">
-                        <Link href="/" className="hover:text-indigo-600">Accueil</Link>
-                        <Link href="/prestations" className="hover:text-indigo-600">Prestations</Link>
-                        <Link href="/audit" className="hover:text-indigo-600">Audit en ligne</Link>
-                        <Link href="/contact" className="hover:text-indigo-600">Contact</Link>
+                        <Link href="/" onClick={() => trackClick('nav_home')} className="hover:text-indigo-600">Accueil</Link>
+                        <Link href="/prestations" onClick={() => trackClick('nav_services')} className="hover:text-indigo-600">Prestations</Link>
+                        <Link href="/audit" onClick={() => trackClick('nav_audit')} className="hover:text-indigo-600">Audit en ligne</Link>
+                        <Link href="/contact" onClick={() => trackClick('nav_contact')} className="hover:text-indigo-600">Contact</Link>
                     </nav>
                     <Link
                         href="/audit"
+                        onClick={() => trackClick('header_cta_audit')}
                         className="hidden md:inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 text-white text-sm font-medium hover:bg-indigo-700"
                     >
                         Lancer un audit
