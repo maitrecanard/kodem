@@ -6,6 +6,60 @@ Stack monolithique : **Laravel 11** (PHP 8.3) + **Inertia.js** + **React 18** + 
 
 ---
 
+## 📋 Rapport de livraison
+
+> Livraison effectuée le **20 avril 2026** sur la branche `feature/full-implementation`.
+> Cycle qualité appliqué à chaque fonctionnalité : **développement → vérification → tests unitaires → exécution → correction → régression**.
+
+### Statut global
+
+| Axe | État | Détail |
+|---|---|---|
+| Fonctionnalités du cahier des charges | ✅ **17 / 17 livrées** | Voir § 1 ci-dessous pour la traçabilité point par point |
+| Suite de tests PHPUnit | ✅ **56 tests passés (276 assertions)** en 2,55 s | `php artisan test` — 0 échec, 0 erreur, 0 skipped |
+| Build des assets front (Vite) | ✅ OK | Client : 8,80 s · SSR : 1,50 s |
+| Migrations base de données | ✅ OK | 7 migrations appliquées (SQLite et MySQL) |
+| Routes applicatives | ✅ OK | 39 routes (`php artisan route:list`) |
+| Smoke test HTTP | ✅ OK | `/`, `/audit`, `/cgv` → 200 avec tous les en-têtes de sécurité attendus |
+| Sécurité (en-têtes) | ✅ Cible 100/100 | CSP, HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy, COOP, CORP |
+
+### Tests exécutés
+
+```
+Tests:     56 passed (276 assertions)
+Duration:  2.55 s
+```
+
+| Suite | Tests | Couvre |
+|---|---:|---|
+| `tests/Feature/PublicPagesTest.php` | 6 | Rendu des 6 pages publiques + balises SEO (titre, description, mots-clés) |
+| `tests/Feature/ContactTest.php` | 4 | Insertion valide, validation, honeypot silencieux, rate-limit 5/min |
+| `tests/Feature/AuditTest.php` | 4 | Happy path, URL invalide, rapport public, score faible si en-têtes manquants |
+| `tests/Feature/SecurityHeadersTest.php` | 1 | Présence CSP, HSTS, X-Frame, Referrer-Policy, Permissions-Policy |
+| `tests/Feature/VisitTrackingTest.php` | 3 | Tracking public, exclusion admin, hash SHA-256 de l'IP |
+| `tests/Feature/AdminAccessTest.php` | 6 | Guest → login, non-admin → 403, admin → setup 2FA, TOTP valide/invalide |
+| `tests/Unit/AuditRunnerTest.php` | 4 | Refus localhost/IP privées, normalisation URL, score fort/faible |
+| `tests/Unit/PrestationCatalogTest.php` | 3 | Slugs attendus, teaser ⊂ catalogue, champs obligatoires |
+| `tests/Feature/Auth/*` + héritage Breeze | 25 | Flux login / register / reset / profile non régressés |
+
+### Incidents rencontrés pendant le cycle et corrections appliquées
+
+| # | Incident | Cause | Correction |
+|---|---|---|---|
+| 1 | `sh: exec: composer: not found` pendant `breeze:install` | Composer installé en `.phar` local, pas dans le PATH | Symlink `~/.local/bin/composer` puis ré-export `PATH` |
+| 2 | `Unable to locate file in Vite manifest: Public/Home.jsx` (16 tests en échec) | Les pages Inertia créées après le `npm run build` de Breeze n'étaient pas dans le manifest | `npm run build` après création des pages |
+| 3 | `ErrorException: Undefined array key 1` dans `AuditRunner::regexFirst` (4 tests en échec, HTTP 500 sur `/audit`) | Regex viewport sans groupe capturant ; le helper accédait à `$m[1]` inconditionnellement | Appel à `preg_match` direct pour le viewport + durcissement du helper (`$m[1] ?? $m[0] ?? null`) |
+
+Après corrections et régression finale : **56 / 56 passants**.
+
+### Avertissements connus (non bloquants)
+
+- L'audit est exécuté **synchronement** dans la requête HTTP. Pour un volume plus élevé, basculer vers `QUEUE_CONNECTION=database` + `php artisan queue:work` et encapsuler `AuditRunner::run()` dans un `ShouldQueue` job.
+- `MAIL_MAILER=log` en développement. Configurer un MTA en production (SendGrid, Mailgun, SMTP).
+- Le mot de passe admin seedé (`KodemAdmin!2026`) doit être changé en production, et le seed idéalement remplacé par une commande `artisan make:admin` interactive.
+
+---
+
 ## 1. Cahier des charges initial et traçabilité
 
 Le README d'origine demandait :
