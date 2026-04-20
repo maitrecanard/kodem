@@ -45,9 +45,14 @@ class AuditRunner
 
         $companions = $this->probeCompanions($normalized);
 
+        $seo['checks'] = $this->attachRecommendations($seo['checks']);
+        $sec['checks'] = $this->attachRecommendations($sec['checks']);
+
         $scoreSeo = $this->score($seo['checks']);
         $scoreSec = $this->score($sec['checks']);
         $scoreTotal = (int) round(($scoreSeo + $scoreSec) / 2);
+
+        $actionPlan = $this->buildActionPlan($seo['checks'], $sec['checks'], $scoreSeo, $scoreSec);
 
         return [
             'status' => 'completed',
@@ -61,9 +66,86 @@ class AuditRunner
                 'seo' => $seo,
                 'security' => $sec,
                 'companions' => $companions,
+                'action_plan' => $actionPlan,
                 'audited_at' => now()->toIso8601String(),
             ],
             'error' => null,
+        ];
+    }
+
+    /**
+     * Ajoute la recommandation à chaque contrôle non-pass.
+     *
+     * @param array<int, array<string,mixed>> $checks
+     * @return array<int, array<string,mixed>>
+     */
+    protected function attachRecommendations(array $checks): array
+    {
+        foreach ($checks as $i => $c) {
+            if (($c['status'] ?? '') === 'pass') {
+                continue;
+            }
+            $rec = AuditRecommendations::for($c['key'] ?? '');
+            if ($rec) {
+                $checks[$i]['recommendation'] = $rec;
+            }
+        }
+        return $checks;
+    }
+
+    /**
+     * Construit un plan d'action trié par impact : fail > warn,
+     * puis par poids (gain potentiel) décroissant.
+     *
+     * @param array<int, array<string,mixed>> $seoChecks
+     * @param array<int, array<string,mixed>> $secChecks
+     * @return array{items: array<int, array<string,mixed>>, potential_gain_seo: int, potential_gain_security: int, potential_gain_total: int}
+     */
+    protected function buildActionPlan(array $seoChecks, array $secChecks, int $scoreSeo, int $scoreSec): array
+    {
+        $items = [];
+
+        foreach ([['seo', $seoChecks], ['security', $secChecks]] as [$category, $checks]) {
+            $totalWeight = array_sum(array_map(fn ($c) => $c['weight'] ?? 1, $checks)) ?: 1;
+
+            foreach ($checks as $c) {
+                $status = $c['status'] ?? 'fail';
+                if ($status === 'pass') {
+                    continue;
+                }
+                $weight = $c['weight'] ?? 1;
+                // Gain de points si on passe de l'état courant à pass.
+                $current = $status === 'warn' ? $weight * 0.5 : 0;
+                $gain = (($weight - $current) / $totalWeight) * 100;
+
+                $items[] = [
+                    'category' => $category,
+                    'key' => $c['key'] ?? '',
+                    'label' => $c['label'] ?? '',
+                    'status' => $status,
+                    'detail' => $c['detail'] ?? '',
+                    'weight' => $weight,
+                    'potential_gain' => (int) round($gain),
+                    'recommendation' => $c['recommendation'] ?? null,
+                ];
+            }
+        }
+
+        usort($items, function (array $a, array $b) {
+            // fail avant warn
+            $sa = $a['status'] === 'fail' ? 0 : 1;
+            $sb = $b['status'] === 'fail' ? 0 : 1;
+            if ($sa !== $sb) {
+                return $sa <=> $sb;
+            }
+            return $b['potential_gain'] <=> $a['potential_gain'];
+        });
+
+        return [
+            'items' => $items,
+            'potential_gain_seo' => max(0, 100 - $scoreSeo),
+            'potential_gain_security' => max(0, 100 - $scoreSec),
+            'potential_gain_total' => max(0, 100 - (int) round(($scoreSeo + $scoreSec) / 2)),
         ];
     }
 

@@ -1,5 +1,87 @@
+import { useState } from 'react';
 import { Link } from '@inertiajs/react';
 import PublicLayout from '@/Layouts/PublicLayout';
+
+function CodeSnippet({ code, lang }) {
+    const [copied, setCopied] = useState(false);
+    const copy = async () => {
+        try {
+            await navigator.clipboard.writeText(code);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 1500);
+        } catch { /* noop */ }
+    };
+    return (
+        <div className="relative mt-2">
+            <button
+                type="button"
+                onClick={copy}
+                className="absolute top-1 right-1 text-[10px] uppercase tracking-wide bg-slate-700 text-slate-100 px-2 py-0.5 rounded hover:bg-slate-600"
+            >
+                {copied ? 'copié' : 'copier'}
+            </button>
+            <pre className="bg-slate-900 text-slate-100 text-xs p-3 pr-16 rounded-md overflow-x-auto whitespace-pre"><code>{code}</code></pre>
+            {lang && <div className="text-[10px] uppercase tracking-wide text-slate-500 mt-1">{lang}</div>}
+        </div>
+    );
+}
+
+function ActionPlanItem({ item, index }) {
+    const statusColor = item.status === 'fail'
+        ? 'bg-rose-50 border-rose-200 text-rose-800'
+        : 'bg-amber-50 border-amber-200 text-amber-800';
+    const effortLabel = {
+        low: 'Effort faible',
+        medium: 'Effort modéré',
+        high: 'Effort élevé',
+    }[item.recommendation?.effort] ?? 'Effort modéré';
+
+    return (
+        <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+            <div className="flex items-start gap-4">
+                <div className="flex-none rounded-full bg-slate-900 text-white w-7 h-7 flex items-center justify-center text-xs font-semibold">
+                    {index + 1}
+                </div>
+                <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between gap-3 flex-wrap">
+                        <h3 className="font-semibold">{item.label}</h3>
+                        <div className="flex items-center gap-2 flex-wrap">
+                            <span className={`text-xs rounded-full border px-2 py-0.5 ${statusColor}`}>
+                                {item.status === 'fail' ? 'À corriger' : 'À améliorer'}
+                            </span>
+                            <span className="text-xs rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 px-2 py-0.5">
+                                +{item.potential_gain} pts
+                            </span>
+                            <span className="text-xs text-slate-500">{effortLabel}</span>
+                            <span className="text-xs uppercase tracking-wide text-slate-500">{item.category}</span>
+                        </div>
+                    </div>
+                    <p className="text-sm text-slate-600 mt-1">
+                        <span className="font-mono text-slate-500">Constat : </span>{item.detail}
+                    </p>
+                    {item.recommendation && (
+                        <>
+                            <p className="text-sm text-slate-800 mt-3">{item.recommendation.fix}</p>
+                            {item.recommendation.snippet && (
+                                <CodeSnippet code={item.recommendation.snippet} lang={item.recommendation.snippet_lang} />
+                            )}
+                            {item.recommendation.reference && (
+                                <a
+                                    href={item.recommendation.reference}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="mt-2 inline-block text-xs text-indigo-600 hover:underline"
+                                >
+                                    Documentation de référence →
+                                </a>
+                            )}
+                        </>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+}
 
 function ScoreBadge({ score }) {
     if (score === null || score === undefined) return <span className="text-slate-400">—</span>;
@@ -107,8 +189,9 @@ export default function AuditResult({ meta, audit, paid, price, paidPrestations 
                             <div className="max-w-xl">
                                 <h2 className="text-2xl font-bold">Débloquez le rapport complet</h2>
                                 <p className="mt-2 text-indigo-100">
-                                    Obtenez le détail des 20 contrôles SEO + sécurité, les recommandations priorisées
-                                    et un lien partageable pendant 90 jours.
+                                    Détail des 20 contrôles SEO + sécurité, <strong>plan d'action priorisé pour atteindre 100/100</strong>
+                                    (snippets nginx/HTML à copier-coller, gain de points estimé par correction)
+                                    et lien partageable pendant 90 jours.
                                 </p>
                                 {audit.teaser && (
                                     <div className="mt-6 bg-white/10 rounded-lg p-4">
@@ -143,6 +226,44 @@ export default function AuditResult({ meta, audit, paid, price, paidPrestations 
 
                 {paid && audit.status !== 'failed' && (
                     <>
+                        {audit.results?.action_plan?.items?.length > 0 && (
+                            <section className="mt-8">
+                                <div className="bg-gradient-to-br from-slate-900 to-slate-800 text-white rounded-xl p-6">
+                                    <div className="flex items-start justify-between gap-4 flex-wrap">
+                                        <div>
+                                            <h2 className="text-xl font-bold">Plan d'action vers 100/100</h2>
+                                            <p className="text-slate-300 text-sm mt-1">
+                                                {audit.results.action_plan.items.length} action{audit.results.action_plan.items.length > 1 ? 's' : ''} triée{audit.results.action_plan.items.length > 1 ? 's' : ''} par gain potentiel et gravité.
+                                            </p>
+                                        </div>
+                                        <div className="text-right">
+                                            <div className="text-xs uppercase tracking-wide text-slate-400">Gain potentiel global</div>
+                                            <div className="text-3xl font-bold">+{audit.results.action_plan.potential_gain_total} pts</div>
+                                            <div className="text-xs text-slate-400 mt-0.5">
+                                                SEO +{audit.results.action_plan.potential_gain_seo} · Sécurité +{audit.results.action_plan.potential_gain_security}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="mt-4 space-y-3">
+                                    {audit.results.action_plan.items.map((it, i) => (
+                                        <ActionPlanItem key={`${it.category}-${it.key}`} item={it} index={i} />
+                                    ))}
+                                </div>
+                            </section>
+                        )}
+
+                        {audit.results?.action_plan?.items?.length === 0 && (
+                            <section className="mt-8 bg-emerald-50 border border-emerald-200 text-emerald-900 rounded-xl p-6 text-center">
+                                <h2 className="text-xl font-bold">🎉 Score 100/100 atteint</h2>
+                                <p className="mt-2 text-sm">
+                                    Tous les contrôles sont au vert. Pensez à lancer un nouvel audit régulièrement
+                                    pour détecter d'éventuelles régressions — ou souscrivez au{' '}
+                                    <Link href="/monitoring" className="underline font-medium">monitoring mensuel</Link>.
+                                </p>
+                            </section>
+                        )}
+
                         <div className="mt-8 grid md:grid-cols-2 gap-6">
                             <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
                                 <h2 className="font-semibold">Contrôles SEO</h2>

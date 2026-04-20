@@ -20,8 +20,9 @@ Stack monolithique : **Laravel 11** (PHP 8.3) + **Inertia.js** + **React 18** + 
 | Add-on PDF téléchargeable | ✅ Livré | **+9 €** après paiement du rapport — PDF généré à la volée via DomPDF |
 | Add-on Core Web Vitals | ✅ Livré | **+19 €** — intègre l'API PageSpeed Insights de Google (LCP, CLS, INP, FCP, TBT) |
 | Abonnement monitoring mensuel | ✅ Livré | **49 €/mois** — audits hebdomadaires automatiques (`monitoring:run` planifié le lundi 03h00), alertes email sur régression, dashboard par lien magique |
-| Suite de tests PHPUnit | ✅ **81 tests passés (465 assertions)** en 3,94 s | `php artisan test` — 0 échec, 0 erreur, 0 skipped |
-| Build des assets front (Vite) | ✅ OK | Client : 13,76 s · SSR : 4,96 s |
+| Plan d'action vers 100/100 | ✅ Livré | Chaque contrôle non-pass est enrichi d'une **recommandation concrète** (texte + snippet nginx/HTML copiable + lien MDN/OWASP + niveau d'effort). Plan trié par gain potentiel, chiffré en points de score gagnables. |
+| Suite de tests PHPUnit | ✅ **86 tests passés (587 assertions)** en 4,83 s | `php artisan test` — 0 échec, 0 erreur, 0 skipped |
+| Build des assets front (Vite) | ✅ OK | Client : 8,54 s · SSR : 1,57 s |
 | Migrations base de données | ✅ OK | 10 migrations appliquées (SQLite et MySQL) |
 | Routes applicatives | ✅ OK | 49 routes (`php artisan route:list`) |
 | Smoke test HTTP | ✅ OK | `/`, `/audit`, `/cgv`, `/monitoring` → 200 avec tous les en-têtes de sécurité attendus |
@@ -30,8 +31,8 @@ Stack monolithique : **Laravel 11** (PHP 8.3) + **Inertia.js** + **React 18** + 
 ### Tests exécutés
 
 ```
-Tests:     81 passed (465 assertions)
-Duration:  3,94 s
+Tests:     86 passed (587 assertions)
+Duration:  4,83 s
 ```
 
 | Suite | Tests | Couvre |
@@ -48,6 +49,7 @@ Duration:  3,94 s
 | `tests/Feature/AdminAccessTest.php` | 6 | Guest → login, non-admin → 403, admin → setup 2FA, TOTP valide/invalide |
 | `tests/Unit/AuditRunnerTest.php` | 4 | Refus localhost/IP privées, normalisation URL, score fort/faible |
 | `tests/Unit/PrestationCatalogTest.php` | 4 | Slugs attendus, teaser ⊂ catalogue, champs obligatoires, audits marqués comme payants |
+| `tests/Unit/AuditRecommendationsTest.php` | 5 | Couverture complète des 20 clés, lookup inconnu, recommandations attachées aux non-pass uniquement, tri fail-first + gain desc, site parfait |
 | `tests/Feature/Auth/*` + héritage Breeze | 25 | Flux login / register / reset / profile non régressés |
 
 ### Incidents rencontrés pendant le cycle et corrections appliquées
@@ -169,6 +171,17 @@ Parcours :
 Contrôles SEO automatisés (10) : HTTP 200, `<title>`, meta description, `<h1>`, viewport, `lang`, canonical, Open Graph, Twitter Card, compression.
 
 Contrôles sécurité automatisés (10) : HTTPS, HSTS, Content-Security-Policy, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy, en-tête Server masqué, absence de X-Powered-By, cookies Secure+HttpOnly.
+
+**Plan d'action vers 100/100** (inclus dans le rapport payant) :
+- Chaque contrôle `fail` ou `warn` est enrichi par `App\Services\AuditRecommendations` avec :
+  - **`fix`** : une explication concrète de ce qu'il faut faire,
+  - **`snippet`** + `snippet_lang` : un bout de code prêt à copier-coller (HTML, nginx, bash…),
+  - **`reference`** : un lien vers la doc officielle (MDN, Google, OWASP…),
+  - **`effort`** : `low` / `medium` / `high`.
+- Un `action_plan` est trié par priorité : `fail` avant `warn`, puis par gain de points décroissant.
+- Le gain potentiel est calculé sur la base des poids de chaque contrôle (ex. : passer HSTS de `fail` à `pass` = +9 pts sécurité).
+- Le total est aussi exprimé en points gagnables (`potential_gain_total`), affiché en tête de la section.
+- Le PDF reprend intégralement le plan d'action.
 
 Protection : 3 audits/h/IP, blocage des adresses `localhost` / `127.0.0.1` / plages privées (`10.*`, `172.16/12`, `192.168.*`) pour éviter le SSRF.
 

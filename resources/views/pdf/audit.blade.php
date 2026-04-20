@@ -22,6 +22,13 @@
     .footer { margin-top: 30px; color: #64748b; font-size: 9px; text-align: center; }
     .kv { margin: 4px 0; }
     .kv strong { display: inline-block; min-width: 120px; }
+    .action { background: #f8fafc; border: 1px solid #e2e8f0; border-left: 4px solid #4f46e5; padding: 10px 12px; margin: 10px 0; }
+    .action .title { font-weight: bold; font-size: 12px; }
+    .action .gain { color: #047857; font-weight: bold; }
+    .action .snippet { background: #0f172a; color: #f8fafc; padding: 8px; font-family: DejaVu Sans Mono, monospace; font-size: 9px; white-space: pre-wrap; word-break: break-all; margin-top: 6px; }
+    .tag { display: inline-block; border-radius: 10px; padding: 1px 8px; font-size: 9px; font-weight: bold; margin-right: 4px; }
+    .tag.fail { background: #fee2e2; color: #991b1b; }
+    .tag.warn { background: #fef3c7; color: #92400e; }
 </style>
 </head>
 <body>
@@ -54,6 +61,40 @@
     <h2>Erreur d'audit</h2>
     <p>{{ $audit->error }}</p>
 @else
+    @php
+        $actionPlan = $audit->results['action_plan'] ?? null;
+    @endphp
+    @if ($actionPlan && count($actionPlan['items'] ?? []))
+        <h2>Plan d'action vers 100/100</h2>
+        <p style="margin:4px 0 10px;">
+            Gain potentiel global&nbsp;: <strong class="gain">+{{ $actionPlan['potential_gain_total'] }} pts</strong>
+            (SEO +{{ $actionPlan['potential_gain_seo'] }} · Sécurité +{{ $actionPlan['potential_gain_security'] }})
+        </p>
+        @foreach ($actionPlan['items'] as $i => $item)
+            <div class="action">
+                <div class="title">{{ $i + 1 }}. {{ $item['label'] }}</div>
+                <div style="margin:4px 0;">
+                    <span class="tag {{ $item['status'] }}">{{ $item['status'] === 'fail' ? 'à corriger' : 'à améliorer' }}</span>
+                    <span class="gain">+{{ $item['potential_gain'] }} pts</span>
+                    &nbsp;·&nbsp; {{ strtoupper($item['category']) }}
+                </div>
+                <div><em>Constat :</em> {{ $item['detail'] }}</div>
+                @if (! empty($item['recommendation']['fix']))
+                    <div style="margin-top:4px;">{{ $item['recommendation']['fix'] }}</div>
+                @endif
+                @if (! empty($item['recommendation']['snippet']))
+                    <div class="snippet">{{ $item['recommendation']['snippet'] }}</div>
+                @endif
+                @if (! empty($item['recommendation']['reference']))
+                    <div style="font-size:9px; color:#64748b; margin-top:4px;">{{ $item['recommendation']['reference'] }}</div>
+                @endif
+            </div>
+        @endforeach
+    @elseif ($actionPlan)
+        <h2>Plan d'action</h2>
+        <p>🎉 Tous les contrôles sont en pass — score 100/100 atteint.</p>
+    @endif
+
     @php $seo = $audit->results['seo']['checks'] ?? []; @endphp
     @if ($seo)
         <h2>Contrôles SEO</h2>
