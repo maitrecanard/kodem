@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Audit;
 use App\Services\AuditRunner;
+use App\Services\DiscordNotifier;
 use App\Services\PrestationCatalog;
 use App\Services\TrackingService;
 use Illuminate\Http\RedirectResponse;
@@ -26,7 +27,7 @@ class AuditController extends Controller
         ]);
     }
 
-    public function store(Request $request, AuditRunner $runner, TrackingService $tracking): RedirectResponse
+    public function store(Request $request, AuditRunner $runner, TrackingService $tracking, DiscordNotifier $discord): RedirectResponse
     {
         $validated = $request->validate([
             'url' => ['required', 'string', 'max:500', 'regex:/^(https?:\/\/)?[^\s]+\.[^\s]+$/i'],
@@ -49,6 +50,10 @@ class AuditController extends Controller
             'has_email' => ! empty($validated['email']),
         ], $request);
 
+        $discord->notifyAuditEvent(DiscordNotifier::EVENT_SUBMITTED, $audit, [
+            'Type' => $audit->type,
+        ]);
+
         $outcome = $runner->run($validated['url']);
 
         $audit->update([
@@ -70,6 +75,12 @@ class AuditController extends Controller
                 'score_security' => $outcome['score_security'],
             ],
             $request
+        );
+
+        $discord->notifyAuditEvent(
+            $outcome['status'] === 'completed' ? DiscordNotifier::EVENT_COMPLETED : DiscordNotifier::EVENT_FAILED,
+            $audit->fresh(),
+            $outcome['status'] === 'failed' ? ['Erreur' => (string) $outcome['error']] : []
         );
 
         return redirect()->route('audit.show', $audit->uuid);

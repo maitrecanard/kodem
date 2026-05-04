@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Audit;
+use App\Services\DiscordNotifier;
 use App\Services\PageSpeedClient;
 use App\Services\TrackingService;
 use Illuminate\Http\RedirectResponse;
@@ -63,7 +64,7 @@ class AuditCwvController extends Controller
         ]);
     }
 
-    public function confirmPayment(Request $request, Audit $audit, PageSpeedClient $client, TrackingService $tracking): RedirectResponse
+    public function confirmPayment(Request $request, Audit $audit, PageSpeedClient $client, TrackingService $tracking, DiscordNotifier $discord): RedirectResponse
     {
         $this->requirePaidAudit($audit);
 
@@ -92,6 +93,12 @@ class AuditCwvController extends Controller
             'psi_status' => $result['status'] ?? null,
             'performance_score' => $result['performance_score'] ?? null,
         ], $request);
+
+        $discord->notifyAuditEvent(DiscordNotifier::EVENT_CWV_PAID, $audit->fresh(), [
+            'Montant' => number_format($audit->cwv_price_cents / 100, 2, ',', ' ').' €',
+            'PSI' => (string) ($result['status'] ?? 'n/a'),
+            'Perf' => (string) ($result['performance_score'] ?? 'n/a'),
+        ]);
 
         return redirect()
             ->route('audit.cwv', $audit->uuid)

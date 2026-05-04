@@ -22,10 +22,10 @@ Stack monolithique : **Laravel 11** (PHP 8.3) + **Inertia.js** + **React 18** + 
 | Abonnement monitoring mensuel | ✅ Livré | **49 €/mois** — audits hebdomadaires automatiques (`monitoring:run` planifié le lundi 03h00), alertes email sur régression, dashboard par lien magique |
 | Plan d'action vers 100/100 | ✅ Livré | Chaque contrôle non-pass est enrichi d'une **recommandation concrète** (texte + snippet nginx/HTML copiable + lien MDN/OWASP + niveau d'effort). Plan trié par gain potentiel, chiffré en points de score gagnables. |
 | Tracking événementiel complet | ✅ Livré | Table `events` + `TrackingService`. **Frontend** : helper `track.js`, 13 boutons instrumentés (nav, CTAs hero, formulaires, paiements, téléchargements). **Serveur** : événements `audit.submitted/completed/paid/pdf.paid/cwv.paid`, `pdf.downloaded`, `contact.submitted/spam_blocked`, `monitoring.subscribed/cancelled`. **Admin** : dashboard `/admin/events` avec funnel de conversion (visites → audit → payé → add-ons → monitoring), top events, flux récent. IP et session hachées (RGPD). |
-| Suite de tests PHPUnit | ✅ **99 tests passés (770 assertions)** en 4,73 s | `php artisan test` — 0 échec, 0 erreur, 0 skipped |
-| Build des assets front (Vite) | ✅ OK | Client : 9,98 s · SSR : 1,99 s |
-| Migrations base de données | ✅ OK | 11 migrations appliquées (SQLite et MySQL) |
-| Routes applicatives | ✅ OK | 51 routes (`php artisan route:list`) |
+| Suite de tests PHPUnit | ✅ **117 tests passés (814 assertions)** en 4,45 s | `php artisan test` — 0 échec, 0 erreur, 0 skipped |
+| Build des assets front (Vite) | ✅ OK | Client + SSR rebuild après ajout de `Public/AuditFollowupUnsubscribed.jsx` |
+| Migrations base de données | ✅ OK | 13 migrations appliquées (SQLite et MySQL) |
+| Routes applicatives | ✅ OK | 52 routes (`php artisan route:list`) |
 | Smoke test HTTP | ✅ OK | `/`, `/audit`, `/cgv`, `/monitoring` → 200 avec tous les en-têtes de sécurité attendus |
 | Sécurité (en-têtes) | ✅ Cible 100/100 | CSP, HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy, COOP, CORP |
 
@@ -71,6 +71,88 @@ Après corrections et régression finale : **56 / 56 passants**.
 - L'audit est exécuté **synchronement** dans la requête HTTP. Pour un volume plus élevé, basculer vers `QUEUE_CONNECTION=database` + `php artisan queue:work` et encapsuler `AuditRunner::run()` dans un `ShouldQueue` job.
 - `MAIL_MAILER=log` en développement. Configurer un MTA en production (SendGrid, Mailgun, SMTP).
 - Le mot de passe admin seedé (`KodemAdmin!2026`) doit être changé en production, et le seed idéalement remplacé par une commande `artisan make:admin` interactive.
+
+---
+
+## 📋 Itération 2 — Relance commerciale + alertes Discord (4 mai 2026)
+
+> Ajouts livrés sur la même branche `feature/full-implementation` après le rapport initial.
+> Cycle qualité : développement → vérification → tests unitaires → exécution → correction → régression.
+
+### Fonctionnalités ajoutées
+
+| # | Fonctionnalité | Implémentation |
+|---|---|---|
+| 18 | Mail de relance commerciale 1 semaine après l'audit si score < 75 % | Commande `audits:send-followup` planifiée tous les jours à 09h00 (`routes/console.php`). Filtres : `status=completed`, `email` non null, score `< 75`, créé entre 7 et 30 jours, pas déjà relancé, pas désinscrit. Mailable `App\Mail\AuditFollowupMail` + vue Blade `emails.audit_followup` (réutilise `AuditRecommendations` pour les top reco). |
+| 19 | Trace du mail rattachée à l'audit du contact | Nouvelle table `audit_followups` (FK `audit_id` cascadeOnDelete) avec snapshot `email`, `reason`, `score_at_send`, `subject`, `status` (sent/failed/bounced), `error`, `metadata` (recos, scores SEO/sécu), `sent_at`, `opened_at`, `clicked_at`. Relation `Audit::followups()` (hasMany) + `Audit::hasFollowupBeenSent()`. Visible dans la fiche audit admin. Idempotence garantie via `whereDoesntHave('followups', reason=low_score, status=sent)`. |
+| 20 | Désinscription RGPD des relances | Route signée `GET /audit/{uuid}/followup/unsubscribe?token=...` (`AuditFollowupController`) avec token HMAC-SHA256(`'followup:'.$uuid`, `APP_KEY`). Set `audits.followup_unsubscribed_at`. Page Inertia `Public/AuditFollowupUnsubscribed.jsx`. |
+| 21 | Alerte Discord à chaque étape du cycle de vie d'un audit | Service `App\Services\DiscordNotifier` (silent-fail, `Http::timeout(3)`) + config `audit.discord_webhook_url` / `audit.discord_enabled`. Embeds colorés et fields automatiques (URL, UUID, email, score). Hook sur 8 événements : `audit.submitted` (📝 indigo), `audit.completed` (✅ vert), `audit.failed` (❌ rouge), `audit.paid` (💳 vert sombre), `audit.pdf.paid` (📄 cyan), `audit.cwv.paid` (⚡ violet), `audit.followup.sent` (📬 orange), `audit.followup.unsubscribed` (🚪 gris). |
+
+### Migrations ajoutées
+
+| Fichier | Contenu |
+|---|---|
+| `2026_05_04_100000_create_audit_followups_table.php` | Table `audit_followups` avec index `(audit_id, sent_at)` et `(reason, sent_at)` |
+| `2026_05_04_100001_add_followup_unsubscribed_to_audits_table.php` | Colonne `followup_unsubscribed_at` (timestamp nullable) sur `audits` |
+
+### Commande planifiée
+
+```bash
+php artisan audits:send-followup
+    [--threshold=75] [--delay-days=7] [--max-age-days=30]
+    [--audit=UUID] [--dry-run]
+```
+
+`Schedule::command('audits:send-followup')->dailyAt('09:00')->withoutOverlapping()->onOneServer();`
+
+### Configuration Discord (.env)
+
+```env
+DISCORD_AUDIT_ENABLED=true
+DISCORD_AUDIT_WEBHOOK_URL=https://discord.com/api/webhooks/XXXX/YYYY
+```
+
+Désactivé par défaut (l'app ne fait rien si l'une des deux variables est absente / vide).
+
+### Tests ajoutés (18 tests / 44 assertions)
+
+| Suite | Tests | Couvre |
+|---|---:|---|
+| `tests/Feature/AuditFollowupTest.php` | 10 | Envoi pour score < 75 % après 7 jours · skip seuil OK / trop jeune / trop vieux / sans email / unsubscribed · idempotence · token unsubscribe (rejet 403 sur mauvais token, 200 OK sur bon token) · relation `audit→followups` rattachée · `--dry-run` ne touche ni mail ni base |
+| `tests/Feature/DiscordNotifierTest.php` | 8 | Skip si désactivé / URL vide · embed posté avec bonnes couleurs/titres · silent-fail si Discord down · hook déclenché à `audit.submitted` + `audit.completed` · paiement → `audit.paid` · commande relance → `audit.followup.sent` · unsubscribe → `audit.followup.unsubscribed` |
+
+### Régression
+
+```
+Tests:    117 passed (814 assertions)
+Duration: 4,45 s
+```
+
+Aucune régression sur les 99 tests existants.
+
+### Incidents rencontrés sur cette itération
+
+| # | Incident | Cause | Correction |
+|---|---|---|---|
+| 1 | 4 tests `AuditFollowupTest` en échec : `created_at` overrides ignorés | Eloquent réécrit `created_at`/`updated_at` sur `Audit::create()` même si fournis | Helper `makeAudit()` qui force ensuite via `Audit::query()->update(['created_at' => …])` puis `->fresh()` |
+| 2 | `Unable to locate file in Vite manifest: Public/AuditFollowupUnsubscribed.jsx` | Page Inertia créée après le dernier `npm run build` | `npm run build` (1,28 s) |
+
+### Modèle de données mis à jour
+
+```text
+audits ────┬── 1..N ──→ audit_followups
+           │              ├ email (snapshot)
+           │              ├ reason (low_score)
+           │              ├ score_at_send
+           │              ├ subject
+           │              ├ status (sent | failed | bounced)
+           │              ├ message_id
+           │              ├ metadata (json: recos, scores)
+           │              ├ sent_at
+           │              ├ opened_at  (futur tracking pixel)
+           │              └ clicked_at (futur tracking liens)
+           └── followup_unsubscribed_at (opt-out RGPD par audit)
+```
 
 ---
 
