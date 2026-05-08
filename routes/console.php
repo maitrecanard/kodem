@@ -12,3 +12,8 @@ Schedule::command('monitoring:run')
     ->weeklyOn(1, '03:00') // lundi 03 h 00
     ->withoutOverlapping()
     ->onOneServer();
+
+Schedule::command('audits:send-followup')
+    ->dailyAt('09:00')
+    ->withoutOverlapping()
+    ->onOneServer();

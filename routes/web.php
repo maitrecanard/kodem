@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\AdminEventController;
 use App\Http\Controllers\Admin\TwoFactorController;
 use App\Http\Controllers\AuditController;
 use App\Http\Controllers\AuditCwvController;
+use App\Http\Controllers\AuditFollowupController;
 use App\Http\Controllers\AuditPaymentController;
 use App\Http\Controllers\AuditPdfController;
 use App\Http\Controllers\ContactController;
@@ -56,6 +57,10 @@ Route::post('/audit/{audit:uuid}/pdf/pay', [AuditPdfController::class, 'confirmP
 Route::get('/audit/{audit:uuid}/performance', [AuditCwvController::class, 'show'])->name('audit.cwv');
 Route::get('/audit/{audit:uuid}/performance/pay', [AuditCwvController::class, 'pay'])->name('audit.cwv.pay');
 Route::post('/audit/{audit:uuid}/performance/pay', [AuditCwvController::class, 'confirmPayment'])->name('audit.cwv.pay.store');
+
+// Désinscription des relances commerciales liées à un audit
+Route::get('/audit/{audit:uuid}/followup/unsubscribe', [AuditFollowupController::class, 'unsubscribe'])
+    ->name('audit.followup.unsubscribe');
 
 // Abonnement monitoring mensuel
 Route::get('/monitoring', [MonitoringController::class, 'create'])->name('monitoring.create');

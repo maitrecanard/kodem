@@ -28,8 +28,20 @@ class AdminAuditController extends Controller
 
     public function show(Audit $audit): Response
     {
+        $audit->load(['followups' => fn ($q) => $q->orderByDesc('sent_at')]);
+
         return Inertia::render('Admin/Audits/Show', [
             'audit' => $audit,
+            'followups' => $audit->followups->map(fn ($f) => [
+                'id' => $f->id,
+                'reason' => $f->reason,
+                'status' => $f->status,
+                'email' => $f->email,
+                'subject' => $f->subject,
+                'score_at_send' => $f->score_at_send,
+                'sent_at' => $f->sent_at?->toIso8601String(),
+                'error' => $f->error,
+            ])->values(),
         ]);
     }
 }

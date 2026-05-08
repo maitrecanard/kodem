@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Audit;
+use App\Services\DiscordNotifier;
 use App\Services\TrackingService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -37,7 +38,7 @@ class AuditPaymentController extends Controller
         ]);
     }
 
-    public function store(Request $request, Audit $audit, TrackingService $tracking): RedirectResponse
+    public function store(Request $request, Audit $audit, TrackingService $tracking, DiscordNotifier $discord): RedirectResponse
     {
         if ($audit->isPaid()) {
             return redirect()->route('audit.show', $audit->uuid);
@@ -60,6 +61,11 @@ class AuditPaymentController extends Controller
                 'price_cents' => $audit->price_cents,
                 'driver' => 'stub',
             ], $request);
+
+            $discord->notifyAuditEvent(DiscordNotifier::EVENT_PAID, $audit->fresh(), [
+                'Montant' => number_format($audit->price_cents / 100, 2, ',', ' ').' €',
+                'Driver' => 'stub',
+            ]);
 
             return redirect()
                 ->route('audit.show', $audit->uuid)

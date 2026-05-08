@@ -33,4 +33,12 @@ return [
      * Mode de paiement : "stub" (simulation) ou "stripe".
      */
     'payment_driver' => env('AUDIT_PAYMENT_DRIVER', 'stub'),
+
+    /*
+     * Webhook Discord recevant les notifications du cycle de vie d'un audit
+     * (création, complétion, échec, paiements, relance, désinscription).
+     * Laisser DISCORD_AUDIT_ENABLED=false pour désactiver.
+     */
+    'discord_webhook_url' => env('DISCORD_AUDIT_WEBHOOK_URL'),
+    'discord_enabled' => (bool) env('DISCORD_AUDIT_ENABLED', false),
 ];

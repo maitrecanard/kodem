@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Audit;
+use App\Services\DiscordNotifier;
 use App\Services\PdfReportGenerator;
 use App\Services\TrackingService;
 use Illuminate\Http\RedirectResponse;
@@ -61,7 +62,7 @@ class AuditPdfController extends Controller
         ]);
     }
 
-    public function confirmPayment(Request $request, Audit $audit, TrackingService $tracking): RedirectResponse
+    public function confirmPayment(Request $request, Audit $audit, TrackingService $tracking, DiscordNotifier $discord): RedirectResponse
     {
         $this->requirePaidAudit($audit);
 
@@ -86,6 +87,10 @@ class AuditPdfController extends Controller
             'audit_uuid' => $audit->uuid,
             'price_cents' => $audit->pdf_price_cents,
         ], $request);
+
+        $discord->notifyAuditEvent(DiscordNotifier::EVENT_PDF_PAID, $audit->fresh(), [
+            'Montant' => number_format($audit->pdf_price_cents / 100, 2, ',', ' ').' €',
+        ]);
 
         return redirect()
             ->route('audit.pdf', $audit->uuid)
