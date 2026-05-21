@@ -12,7 +12,7 @@ class Audit extends Model
         'uuid', 'url', 'email', 'type', 'status',
         'score_seo', 'score_security', 'score_total',
         'results', 'error', 'ip_hash',
-        'price_cents', 'paid_at', 'payment_reference',
+        'price_cents', 'paid_at', 'payment_reference', 'payment_token', 'stripe_session_id',
         'pdf_price_cents', 'pdf_paid_at',
         'cwv_price_cents', 'cwv_paid_at', 'cwv_results',
         'followup_unsubscribed_at',
