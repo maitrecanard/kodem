@@ -3,13 +3,20 @@ import PublicLayout from '@/Layouts/PublicLayout';
 import { trackClick } from '@/lib/track';
 
 export default function AuditCheckout({ meta, audit, price, driver }) {
+    const isStripe = driver === 'stripe';
+
     const { data, setData, post, processing, errors } = useForm({
+        email: audit.email || '',
         confirm: false,
         card_number: '4242 4242 4242 4242',
         card_expiry: '12 / 34',
         card_cvc: '123',
         card_name: '',
     });
+
+    // L'envoi au paiement n'est autorisé que si une adresse email a été saisie.
+    const emailMissing = isStripe && data.email.trim() === '';
+    const canSubmit = data.confirm && !emailMissing;
 
     const submit = (e) => {
         e.preventDefault();
@@ -36,29 +43,60 @@ export default function AuditCheckout({ meta, audit, price, driver }) {
                         </div>
                     </div>
 
-                    {driver === 'stub' && (
+                    {!isStripe && (
                         <div className="mt-6 rounded-lg border border-amber-300 bg-amber-50 text-amber-900 px-4 py-3 text-sm">
                             <strong>Mode démo :</strong> aucun paiement réel n'est effectué. Cochez la case ci-dessous
                             pour simuler un checkout réussi et débloquer le rapport.
                         </div>
                     )}
 
+                    {isStripe && (
+                        <div className="mt-6 rounded-lg border border-indigo-200 bg-indigo-50 text-indigo-900 px-4 py-3 text-sm">
+                            Vous allez être redirigé vers la page de paiement sécurisée <strong>Stripe</strong>.
+                            Le rapport sera débloqué automatiquement dès la confirmation du paiement.
+                        </div>
+                    )}
+
                     <form onSubmit={submit} className="mt-8 space-y-5">
-                        <fieldset disabled className="opacity-60 pointer-events-none">
-                            <legend className="text-sm font-medium text-slate-700 mb-2">Carte bancaire (démo)</legend>
-                            <div className="space-y-3">
-                                <input
-                                    type="text"
-                                    value={data.card_number}
-                                    readOnly
-                                    className="w-full border border-slate-300 rounded-lg px-4 py-3 font-mono bg-slate-50"
-                                />
-                                <div className="grid grid-cols-2 gap-3">
-                                    <input type="text" value={data.card_expiry} readOnly className="border border-slate-300 rounded-lg px-4 py-3 font-mono bg-slate-50" />
-                                    <input type="text" value={data.card_cvc} readOnly className="border border-slate-300 rounded-lg px-4 py-3 font-mono bg-slate-50" />
+                        <div>
+                            <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-1">
+                                Adresse email {isStripe && <span className="text-rose-600">*</span>}
+                            </label>
+                            <input
+                                id="email"
+                                type="email"
+                                value={data.email}
+                                onChange={(e) => setData('email', e.target.value)}
+                                placeholder="vous@exemple.com"
+                                required={isStripe}
+                                className="w-full border border-slate-300 rounded-lg px-4 py-3 focus:ring-indigo-500 focus:border-indigo-500"
+                            />
+                            <p className="text-xs text-slate-500 mt-1">
+                                Le reçu et la confirmation de commande vous seront envoyés à cette adresse.
+                            </p>
+                            {errors.email && <div className="text-sm text-rose-600 mt-1">{errors.email}</div>}
+                            {emailMissing && !errors.email && (
+                                <div className="text-sm text-rose-600 mt-1">Veuillez saisir une adresse email pour continuer.</div>
+                            )}
+                        </div>
+
+                        {!isStripe && (
+                            <fieldset disabled className="opacity-60 pointer-events-none">
+                                <legend className="text-sm font-medium text-slate-700 mb-2">Carte bancaire (démo)</legend>
+                                <div className="space-y-3">
+                                    <input
+                                        type="text"
+                                        value={data.card_number}
+                                        readOnly
+                                        className="w-full border border-slate-300 rounded-lg px-4 py-3 font-mono bg-slate-50"
+                                    />
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <input type="text" value={data.card_expiry} readOnly className="border border-slate-300 rounded-lg px-4 py-3 font-mono bg-slate-50" />
+                                        <input type="text" value={data.card_cvc} readOnly className="border border-slate-300 rounded-lg px-4 py-3 font-mono bg-slate-50" />
+                                    </div>
                                 </div>
-                            </div>
-                        </fieldset>
+                            </fieldset>
+                        )}
 
                         <label className="flex items-start gap-3 cursor-pointer">
                             <input
@@ -75,10 +113,14 @@ export default function AuditCheckout({ meta, audit, price, driver }) {
 
                         <button
                             type="submit"
-                            disabled={processing || !data.confirm}
+                            disabled={processing || !canSubmit}
                             className="w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 disabled:opacity-60"
                         >
-                            {processing ? 'Traitement…' : `Payer ${price.label}`}
+                            {processing
+                                ? 'Traitement…'
+                                : isStripe
+                                    ? 'Continuer vers le paiement sécurisé'
+                                    : `Payer ${price.label}`}
                         </button>
                     </form>
                 </div>
