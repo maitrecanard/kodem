@@ -12,11 +12,8 @@ export default function Mentions({ meta }) {
                 </p>
                 <ul>
                     <li>Raison sociale : Kodem</li>
-                    <li>Siège social : à compléter</li>
-                    <li>SIREN / RCS : à compléter</li>
-                    <li>Numéro de TVA : à compléter</li>
+                    <li>SIREN / RCS : 922 818 547</li>
                     <li>Email : contact@kodem.fr</li>
-                    <li>Directeur de publication : à compléter</li>
                 </ul>
 
                 <h2>Hébergement</h2>
