@@ -4,21 +4,27 @@ namespace App\Http\Controllers;
 
 use App\Models\Audit;
 use App\Services\DiscordNotifier;
-use App\Services\StripeCheckoutService;
 use App\Services\TrackingService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
-use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
+use Stripe\StripeClient;
+use Symfony\Component\HttpFoundation\Response as HttpResponse;
 
 class AuditPaymentController extends Controller
 {
-    public function create(Audit $audit): Response|RedirectResponse
+    public function create(Audit $audit): Response|HttpResponse
     {
         if ($audit->isPaid()) {
             return redirect()->route('audit.show', $audit->uuid);
+        }
+
+        $driver = config('audit.payment_driver', 'stub');
+
+        if ($driver === 'stripe') {
+            return $this->redirectToStripeCheckout($audit);
         }
 
         return Inertia::render('Public/AuditCheckout', [
@@ -31,17 +37,16 @@ class AuditPaymentController extends Controller
                 'uuid' => $audit->uuid,
                 'url' => $audit->url,
                 'score_total' => $audit->score_total,
-                'email' => $audit->email,
             ],
             'price' => [
                 'cents' => $audit->price_cents,
                 'label' => number_format($audit->price_cents / 100, 2, ',', ' ').' €',
             ],
-            'driver' => config('audit.payment_driver', 'stub'),
+            'driver' => $driver,
         ]);
     }
 
-    public function store(Request $request, Audit $audit, TrackingService $tracking, DiscordNotifier $discord): SymfonyResponse
+    public function store(Request $request, Audit $audit, TrackingService $tracking, DiscordNotifier $discord): RedirectResponse|HttpResponse
     {
         if ($audit->isPaid()) {
             return redirect()->route('audit.show', $audit->uuid);
@@ -50,118 +55,125 @@ class AuditPaymentController extends Controller
         $driver = config('audit.payment_driver', 'stub');
 
         if ($driver === 'stripe') {
-            // Validation : on n'autorise la redirection vers Stripe que si le
-            // client a saisi une adresse email — sinon on la lui redemande.
-            $validated = $request->validate([
-                'email' => ['required', 'string', 'email:rfc', 'max:180'],
-                'confirm' => ['required', 'accepted'],
-            ]);
-
-            // Jeton privé transmis dans l'URL de confirmation.
-            $token = Str::random(64);
-
-            $audit->update([
-                'email' => $validated['email'],
-                'payment_token' => $token,
-            ]);
-
-            $session = app(StripeCheckoutService::class)
-                ->createAuditSession($audit, $validated['email'], $token);
-
-            $audit->update(['stripe_session_id' => $session->id]);
-
-            $tracking->record('audit.checkout.started', 'audit_'.substr($audit->uuid, 0, 8), [
-                'audit_uuid' => $audit->uuid,
-                'price_cents' => $audit->price_cents,
-                'driver' => 'stripe',
-            ], $request);
-
-            // Redirection externe vers la page de paiement hébergée par Stripe.
-            return Inertia::location($session->url);
+            return $this->redirectToStripeCheckout($audit);
         }
 
-        if ($driver === 'stub') {
-            $request->validate([
-                'confirm' => ['required', 'accepted'],
-            ]);
+        // Driver "stub" : simulation de paiement (environnement de dev).
+        $request->validate([
+            'confirm' => ['required', 'accepted'],
+        ]);
 
-            $audit->update([
-                'paid_at' => now(),
-                'payment_reference' => 'STUB-'.strtoupper(Str::random(12)),
-            ]);
+        $this->markPaid($audit, 'STUB-'.strtoupper(Str::random(12)), 'stub', $tracking, $discord, $request);
 
-            $tracking->record('audit.paid', 'audit_'.substr($audit->uuid, 0, 8), [
-                'audit_uuid' => $audit->uuid,
-                'price_cents' => $audit->price_cents,
-                'driver' => 'stub',
-            ], $request);
-
-            $discord->notifyAuditEvent(DiscordNotifier::EVENT_PAID, $audit->fresh(), [
-                'Montant' => number_format($audit->price_cents / 100, 2, ',', ' ').' €',
-                'Driver' => 'stub',
-            ]);
-
-            return redirect()
-                ->route('audit.show', $audit->uuid)
-                ->with('success', 'Paiement simulé — rapport complet débloqué.');
-        }
-
-        abort(501, 'Driver de paiement non supporté : '.$driver);
+        return redirect()
+            ->route('audit.show', $audit->uuid)
+            ->with('success', 'Paiement simulé — rapport complet débloqué.');
     }
 
     /**
-     * Retour depuis Stripe Checkout : on valide le jeton privé puis on
-     * re-vérifie le statut de la session côté API Stripe avant de marquer
-     * l'audit comme payé. Le success_url seul ne fait jamais foi.
+     * Retour depuis Stripe Checkout : on vérifie la session et on débloque le rapport.
      */
-    public function confirm(Request $request, Audit $audit, TrackingService $tracking, DiscordNotifier $discord): RedirectResponse
+    public function success(Request $request, Audit $audit, TrackingService $tracking, DiscordNotifier $discord): RedirectResponse
     {
         if ($audit->isPaid()) {
             return redirect()->route('audit.show', $audit->uuid);
         }
 
-        $token = (string) $request->query('token', '');
+        $sessionId = $request->query('session_id');
 
-        if ($audit->payment_token === null || ! hash_equals($audit->payment_token, $token)) {
-            abort(403, 'Lien de confirmation de paiement invalide.');
+        if (! is_string($sessionId) || $sessionId === '') {
+            return redirect()
+                ->route('audit.show', $audit->uuid)
+                ->with('error', 'Paiement non confirmé. Aucune session Stripe fournie.');
         }
 
-        if ($audit->stripe_session_id === null) {
-            return $this->backToCheckout($audit);
+        $session = $this->stripe()->checkout->sessions->retrieve($sessionId);
+
+        $belongsToAudit = ($session->metadata->audit_uuid ?? null) === $audit->uuid;
+
+        if (! $belongsToAudit || $session->payment_status !== 'paid') {
+            return redirect()
+                ->route('audit.show', $audit->uuid)
+                ->with('error', 'Paiement non confirmé par Stripe.');
         }
 
-        $session = app(StripeCheckoutService::class)->retrieveSession($audit->stripe_session_id);
+        $reference = is_string($session->payment_intent)
+            ? $session->payment_intent
+            : (string) $session->id;
 
-        if (($session->payment_status ?? null) !== 'paid') {
-            return $this->backToCheckout($audit);
-        }
-
-        $audit->update([
-            'paid_at' => now(),
-            'payment_reference' => (string) ($session->payment_intent ?? $session->id),
-            'payment_token' => null,
-        ]);
-
-        $tracking->record('audit.paid', 'audit_'.substr($audit->uuid, 0, 8), [
-            'audit_uuid' => $audit->uuid,
-            'price_cents' => $audit->price_cents,
-            'driver' => 'stripe',
-        ], $request);
-
-        $discord->notifyAuditEvent(DiscordNotifier::EVENT_PAID, $audit->fresh(), [
-            'Montant' => number_format($audit->price_cents / 100, 2, ',', ' ').' €',
-            'Driver' => 'stripe',
-        ]);
+        $this->markPaid($audit, $reference, 'stripe', $tracking, $discord, $request);
 
         return redirect()
             ->route('audit.show', $audit->uuid)
             ->with('success', 'Paiement confirmé — rapport complet débloqué.');
     }
 
-    private function backToCheckout(Audit $audit): RedirectResponse
+    private function redirectToStripeCheckout(Audit $audit): HttpResponse
     {
-        return redirect()
-            ->route('audit.pay', $audit->uuid)
-            ->with('error', 'Le paiement n\'a pas encore été confirmé. Réessayez si vous avez bien réglé.');
+        $session = $this->stripe()->checkout->sessions->create([
+            'mode' => 'payment',
+            'line_items' => [$this->lineItem($audit)],
+            'locale' => 'fr',
+            'customer_email' => $audit->email,
+            'metadata' => [
+                'audit_uuid' => $audit->uuid,
+            ],
+            'success_url' => route('audit.pay.success', $audit->uuid).'?session_id={CHECKOUT_SESSION_ID}',
+            'cancel_url' => route('audit.show', $audit->uuid),
+        ]);
+
+        // Inertia::location renvoie l'en-tête X-Inertia-Location (visite XHR)
+        // ou une redirection 302 classique pour une requête non-Inertia.
+        return Inertia::location($session->url);
+    }
+
+    /**
+     * Ligne de commande Stripe : prix dynamique aligné sur le montant affiché
+     * à l'audit (price_cents), pour garantir la cohérence page / facturation.
+     *
+     * @return array<string, mixed>
+     */
+    private function lineItem(Audit $audit): array
+    {
+        return [
+            'quantity' => 1,
+            'price_data' => [
+                'currency' => 'eur',
+                'unit_amount' => $audit->price_cents,
+                'product_data' => [
+                    'name' => 'Rapport d\'audit complet — '.$audit->url,
+                ],
+            ],
+        ];
+    }
+
+    private function markPaid(
+        Audit $audit,
+        string $reference,
+        string $driver,
+        TrackingService $tracking,
+        DiscordNotifier $discord,
+        Request $request
+    ): void {
+        $audit->update([
+            'paid_at' => now(),
+            'payment_reference' => $reference,
+        ]);
+
+        $tracking->record('audit.paid', 'audit_'.substr($audit->uuid, 0, 8), [
+            'audit_uuid' => $audit->uuid,
+            'price_cents' => $audit->price_cents,
+            'driver' => $driver,
+        ], $request);
+
+        $discord->notifyAuditEvent(DiscordNotifier::EVENT_PAID, $audit->fresh(), [
+            'Montant' => number_format($audit->price_cents / 100, 2, ',', ' ').' €',
+            'Driver' => $driver,
+        ]);
+    }
+
+    private function stripe(): StripeClient
+    {
+        return new StripeClient(config('services.stripe.secret'));
     }
 }
