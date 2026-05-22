@@ -47,6 +47,7 @@ Route::post('/audit', [AuditController::class, 'store'])
 Route::get('/audit/{audit:uuid}', [AuditController::class, 'show'])->name('audit.show');
 Route::get('/audit/{audit:uuid}/pay', [AuditPaymentController::class, 'create'])->name('audit.pay');
 Route::post('/audit/{audit:uuid}/pay', [AuditPaymentController::class, 'store'])->name('audit.pay.store');
+Route::get('/audit/{audit:uuid}/pay/success', [AuditPaymentController::class, 'success'])->name('audit.pay.success');
 
 // Add-on PDF
 Route::get('/audit/{audit:uuid}/pdf', [AuditPdfController::class, 'download'])->name('audit.pdf');
