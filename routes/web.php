@@ -1,5 +1,7 @@
 <?php
 
+use App\Modules\Audits\Http\Controllers\PremiumOrderController;
+use App\Modules\Audits\Http\Controllers\StripeWebhookController;
 use App\Http\Controllers\Admin\AdminAuditController;
 use App\Http\Controllers\Admin\AdminContactController;
 use App\Http\Controllers\Admin\AdminDashboardController;
@@ -108,5 +110,20 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::get('/events', [AdminEventController::class, 'index'])->name('events.index');
     });
 });
+
+// === Module Audits Premium — pages avec Inertia ===
+Route::prefix('audits')->name('audits.')->group(function () {
+    Route::get('/premium', [PremiumOrderController::class, 'show'])->name('premium');
+    Route::post('/premium/checkout', [PremiumOrderController::class, 'createCheckoutSession'])
+        ->middleware('throttle:5,1')
+        ->name('premium.checkout');
+    Route::get('/merci', [PremiumOrderController::class, 'merci'])->name('merci');
+    Route::get('/annule', [PremiumOrderController::class, 'annule'])->name('annule');
+});
+
+// === Webhook Stripe — HORS middleware web (pas de session, pas de CSRF) ===
+Route::post('/stripe/webhook', [StripeWebhookController::class, 'handle'])
+    ->withoutMiddleware(['web'])
+    ->name('stripe.webhook');
 
 require __DIR__.'/auth.php';
