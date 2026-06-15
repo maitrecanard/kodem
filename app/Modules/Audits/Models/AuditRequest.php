@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Audits\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
@@ -56,5 +57,22 @@ class AuditRequest extends Model
     public function getRouteKeyName(): string
     {
         return 'uuid';
+    }
+
+    public function scopeByAccessToken(Builder $query, string $token): Builder
+    {
+        return $query->where('access_token', $token);
+    }
+
+    public function isReportAccessible(): bool
+    {
+        if ($this->paid_at === null) {
+            return false;
+        }
+
+        $expiresAt = $this->paid_at->copy()
+            ->addDays((int) config('audits.report_token_ttl_days'));
+
+        return now()->lessThan($expiresAt);
     }
 }

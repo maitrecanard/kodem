@@ -1,5 +1,6 @@
 <?php
 
+use App\Modules\Audits\Http\Controllers\AuditReportController;
 use App\Modules\Audits\Http\Controllers\PremiumOrderController;
 use App\Modules\Audits\Http\Controllers\StripeWebhookController;
 use App\Http\Controllers\Admin\AdminAuditController;
@@ -120,6 +121,12 @@ Route::prefix('audits')->name('audits.')->group(function () {
     Route::get('/merci', [PremiumOrderController::class, 'merci'])->name('merci');
     Route::get('/annule', [PremiumOrderController::class, 'annule'])->name('annule');
 });
+
+// Lecture du rapport premium via capability URL (token = access_token, 64 chars)
+Route::get('/r/{token}', [AuditReportController::class, 'show'])
+    ->where('token', '[A-Za-z0-9]{64}')
+    ->middleware('throttle:30,1')
+    ->name('audits.report');
 
 // === Webhook Stripe — HORS middleware web (pas de session, pas de CSRF) ===
 Route::post('/stripe/webhook', [StripeWebhookController::class, 'handle'])
