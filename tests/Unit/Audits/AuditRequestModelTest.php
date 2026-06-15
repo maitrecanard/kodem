@@ -77,4 +77,64 @@ class AuditRequestModelTest extends TestCase
         $this->assertTrue($audit->fresh()->options['seo']);
         $this->assertFalse($audit->fresh()->options['security']);
     }
+
+    public function test_by_access_token_scope_finds_matching_record(): void
+    {
+        $token = str_repeat('c', 64);
+        $audit = $this->makeAudit(['access_token' => $token]);
+
+        $found = AuditRequest::byAccessToken($token)->first();
+
+        $this->assertNotNull($found);
+        $this->assertSame($audit->id, $found->id);
+    }
+
+    public function test_by_access_token_scope_returns_nothing_for_unknown_token(): void
+    {
+        $this->makeAudit(['access_token' => str_repeat('c', 64)]);
+
+        $this->assertNull(AuditRequest::byAccessToken(str_repeat('d', 64))->first());
+    }
+
+    public function test_report_is_not_accessible_when_unpaid(): void
+    {
+        $audit = $this->makeAudit(['paid_at' => null]);
+
+        $this->assertFalse($audit->isReportAccessible());
+    }
+
+    public function test_report_is_accessible_when_paid_within_ttl(): void
+    {
+        $audit = $this->makeAudit([
+            'status' => 'completed',
+            'paid_at' => now()->subDay(),
+        ]);
+
+        $this->assertTrue($audit->isReportAccessible());
+    }
+
+    public function test_report_is_not_accessible_after_ttl_expires(): void
+    {
+        $ttl = (int) config('audits.report_token_ttl_days');
+
+        $audit = $this->makeAudit([
+            'status' => 'completed',
+            'paid_at' => now()->subDays($ttl + 1),
+        ]);
+
+        $this->assertFalse($audit->isReportAccessible());
+    }
+
+    public function test_report_accessible_at_ttl_boundary(): void
+    {
+        $ttl = (int) config('audits.report_token_ttl_days');
+
+        // Juste avant l'expiration → encore accessible.
+        $audit = $this->makeAudit([
+            'status' => 'completed',
+            'paid_at' => now()->subDays($ttl)->addMinute(),
+        ]);
+
+        $this->assertTrue($audit->isReportAccessible());
+    }
 }

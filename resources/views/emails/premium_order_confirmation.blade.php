@@ -17,6 +17,9 @@
 
     <p>Votre rapport sera livré par email sous <strong>24 à 48 heures</strong>.</p>
 
+    <p>Vous pourrez consulter votre rapport ici dès qu'il est prêt :</p>
+    <p><a href="{{ route('audits.report', $auditRequest->access_token) }}">Accéder à mon rapport</a></p>
+
     <p style="margin-top: 32px; color: #666; font-size: 13px;">
         Référence : {{ $auditRequest->uuid }}
     </p>
