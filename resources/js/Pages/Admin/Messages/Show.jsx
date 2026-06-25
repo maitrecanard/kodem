@@ -7,17 +7,17 @@ export default function Show({ message }) {
 
     return (
         <AdminLayout title="Message">
-            <div className="bg-white rounded-lg border border-slate-200 p-6 shadow-sm max-w-3xl">
+            <div className="bg-white rounded-lg border border-brume p-6 shadow-sm max-w-3xl">
                 <h2 className="text-xl font-semibold">{message.subject}</h2>
-                <p className="text-sm text-slate-500 mt-1">De : {message.name} &lt;{message.email}&gt; {message.company ? `· ${message.company}` : ''}</p>
-                <p className="text-xs text-slate-400 mt-1">Reçu le {new Date(message.created_at).toLocaleString('fr-FR')}</p>
-                <div className="mt-6 whitespace-pre-wrap border-l-4 border-indigo-200 pl-4 text-slate-700">{message.message}</div>
+                <p className="text-sm text-acier mt-1">De : {message.name} &lt;{message.email}&gt; {message.company ? `· ${message.company}` : ''}</p>
+                <p className="text-xs text-acier mt-1">Reçu le {new Date(message.created_at).toLocaleString('fr-FR')}</p>
+                <div className="mt-6 whitespace-pre-wrap border-l-4 border-indigo-200 pl-4 text-encre">{message.message}</div>
                 <form onSubmit={submit} className="mt-6 flex items-center gap-3">
                     <label className="text-sm">Statut :</label>
                     <select
                         value={data.status}
                         onChange={(e) => setData('status', e.target.value)}
-                        className="border border-slate-300 rounded px-2 py-1"
+                        className="border border-cobalt-200 rounded px-2 py-1"
                     >
                         <option value="new">Nouveau</option>
                         <option value="read">Lu</option>

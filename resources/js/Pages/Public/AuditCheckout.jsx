@@ -22,17 +22,17 @@ export default function AuditCheckout({ meta, audit, price, driver }) {
             <section className="max-w-2xl mx-auto px-6 py-12">
                 <Link href={`/audit/${audit.uuid}`} className="text-indigo-600 text-sm hover:underline">← Retour au rapport</Link>
 
-                <div className="mt-6 bg-white rounded-xl border border-slate-200 shadow-sm p-8">
+                <div className="mt-6 bg-white rounded-xl border border-brume shadow-sm p-8">
                     <div className="flex items-center justify-between gap-4">
                         <div>
                             <h1 className="text-2xl font-bold">Finaliser le paiement</h1>
-                            <p className="text-sm text-slate-600 mt-1">
+                            <p className="text-sm text-acier mt-1">
                                 Rapport d'audit complet pour <span className="font-mono break-all">{audit.url}</span>
                             </p>
                         </div>
                         <div className="text-right">
                             <div className="text-3xl font-bold">{price.label}</div>
-                            <div className="text-xs text-slate-500">TTC, paiement unique</div>
+                            <div className="text-xs text-acier">TTC, paiement unique</div>
                         </div>
                     </div>
 
@@ -45,17 +45,17 @@ export default function AuditCheckout({ meta, audit, price, driver }) {
 
                     <form onSubmit={submit} className="mt-8 space-y-5">
                         <fieldset disabled className="opacity-60 pointer-events-none">
-                            <legend className="text-sm font-medium text-slate-700 mb-2">Carte bancaire (démo)</legend>
+                            <legend className="text-sm font-medium text-encre mb-2">Carte bancaire (démo)</legend>
                             <div className="space-y-3">
                                 <input
                                     type="text"
                                     value={data.card_number}
                                     readOnly
-                                    className="w-full border border-slate-300 rounded-lg px-4 py-3 font-mono bg-slate-50"
+                                    className="w-full border border-cobalt-200 rounded-lg px-4 py-3 font-mono bg-papier"
                                 />
                                 <div className="grid grid-cols-2 gap-3">
-                                    <input type="text" value={data.card_expiry} readOnly className="border border-slate-300 rounded-lg px-4 py-3 font-mono bg-slate-50" />
-                                    <input type="text" value={data.card_cvc} readOnly className="border border-slate-300 rounded-lg px-4 py-3 font-mono bg-slate-50" />
+                                    <input type="text" value={data.card_expiry} readOnly className="border border-cobalt-200 rounded-lg px-4 py-3 font-mono bg-papier" />
+                                    <input type="text" value={data.card_cvc} readOnly className="border border-cobalt-200 rounded-lg px-4 py-3 font-mono bg-papier" />
                                 </div>
                             </div>
                         </fieldset>
@@ -65,9 +65,9 @@ export default function AuditCheckout({ meta, audit, price, driver }) {
                                 type="checkbox"
                                 checked={data.confirm}
                                 onChange={(e) => setData('confirm', e.target.checked)}
-                                className="mt-1 h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                                className="mt-1 h-4 w-4 rounded border-cobalt-200 text-indigo-600 focus:ring-indigo-500"
                             />
-                            <span className="text-sm text-slate-700">
+                            <span className="text-sm text-encre">
                                 Je confirme vouloir débloquer le rapport complet pour {price.label} et j'accepte les <Link href="/cgv" className="text-indigo-600 hover:underline">conditions générales de vente</Link>.
                             </span>
                         </label>
