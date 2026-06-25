@@ -1,5 +1,8 @@
 <?php
 
+use App\Modules\Audits\Http\Controllers\AuditReportController;
+use App\Modules\Audits\Http\Controllers\PremiumOrderController;
+use App\Modules\Audits\Http\Controllers\StripeWebhookController;
 use App\Http\Controllers\Admin\AdminAuditController;
 use App\Http\Controllers\Admin\AdminContactController;
 use App\Http\Controllers\Admin\AdminDashboardController;
@@ -47,6 +50,7 @@ Route::post('/audit', [AuditController::class, 'store'])
 Route::get('/audit/{audit:uuid}', [AuditController::class, 'show'])->name('audit.show');
 Route::get('/audit/{audit:uuid}/pay', [AuditPaymentController::class, 'create'])->name('audit.pay');
 Route::post('/audit/{audit:uuid}/pay', [AuditPaymentController::class, 'store'])->name('audit.pay.store');
+Route::get('/audit/{audit:uuid}/pay/success', [AuditPaymentController::class, 'success'])->name('audit.pay.success');
 
 // Add-on PDF
 Route::get('/audit/{audit:uuid}/pdf', [AuditPdfController::class, 'download'])->name('audit.pdf');
@@ -107,5 +111,26 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::get('/events', [AdminEventController::class, 'index'])->name('events.index');
     });
 });
+
+// === Module Audits Premium — pages avec Inertia ===
+Route::prefix('audits')->name('audits.')->group(function () {
+    Route::get('/premium', [PremiumOrderController::class, 'show'])->name('premium');
+    Route::post('/premium/checkout', [PremiumOrderController::class, 'createCheckoutSession'])
+        ->middleware('throttle:5,1')
+        ->name('premium.checkout');
+    Route::get('/merci', [PremiumOrderController::class, 'merci'])->name('merci');
+    Route::get('/annule', [PremiumOrderController::class, 'annule'])->name('annule');
+});
+
+// Lecture du rapport premium via capability URL (token = access_token, 64 chars)
+Route::get('/r/{token}', [AuditReportController::class, 'show'])
+    ->where('token', '[A-Za-z0-9]{64}')
+    ->middleware('throttle:30,1')
+    ->name('audits.report');
+
+// === Webhook Stripe — HORS middleware web (pas de session, pas de CSRF) ===
+Route::post('/stripe/webhook', [StripeWebhookController::class, 'handle'])
+    ->withoutMiddleware(['web'])
+    ->name('stripe.webhook');
 
 require __DIR__.'/auth.php';
