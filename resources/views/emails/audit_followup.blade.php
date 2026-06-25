@@ -1,10 +1,10 @@
 <!doctype html>
 <html>
 <head><meta charset="utf-8"><title>Votre audit Kodem</title></head>
-<body style="font-family: -apple-system, Segoe UI, Helvetica, sans-serif; color:#1e293b; background:#f8fafc; padding:24px;">
-    <div style="max-width:560px; margin:auto; background:#fff; border:1px solid #e2e8f0; border-radius:12px; overflow:hidden;">
-        <div style="background:#1e3a8a; color:#fff; padding:20px;">
-            <div style="font-size:12px; letter-spacing:2px; text-transform:uppercase; opacity:.8;">Kodem</div>
+<body style="font-family: 'Space Grotesk', -apple-system, Segoe UI, Helvetica, sans-serif; color:#0B1B4D; background:#FBFCFE; padding:24px;">
+    <div style="max-width:560px; margin:auto; background:#fff; border:1px solid #E8ECFF; border-radius:12px; overflow:hidden;">
+        <div style="background:#0B1B4D; color:#fff; padding:20px;">
+            <div style="font-size:12px; letter-spacing:2px; text-transform:uppercase; opacity:.8;">[kodem]</div>
             <div style="font-size:20px; font-weight:bold; margin-top:4px;">
                 Votre site mérite mieux que {{ $audit->score_total }}/100
             </div>
@@ -32,12 +32,12 @@
 
             <p style="margin-top:24px;">
                 <a href="{{ url('/audit/'.$audit->uuid) }}"
-                   style="display:inline-block; background:#4f46e5; color:#fff; padding:10px 18px; border-radius:6px; text-decoration:none; font-weight:600;">
+                   style="display:inline-block; background:#2348E0; color:#fff; padding:10px 18px; border-radius:6px; text-decoration:none; font-weight:600;">
                     Revoir mon rapport
                 </a>
                 &nbsp;
                 <a href="{{ url('/contact') }}"
-                   style="display:inline-block; background:#0f172a; color:#fff; padding:10px 18px; border-radius:6px; text-decoration:none; font-weight:600;">
+                   style="display:inline-block; background:#0B1B4D; color:#fff; padding:10px 18px; border-radius:6px; text-decoration:none; font-weight:600;">
                     Demander un devis
                 </a>
             </p>

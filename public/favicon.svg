@@ -1,14 +1,10 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" role="img" aria-label="Kodem">
-  <!-- Solid indigo-600 rounded badge -->
-  <rect width="32" height="32" rx="7" fill="#4F46E5"/>
-  <g fill="none" stroke="#ffffff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
-    <!-- K spine -->
-    <path d="M9.5 6 V26"/>
-    <!-- K branches drawn as a curly brace { meeting the spine at the centre -->
-    <path d="M19 6.5
-             C14.5 6.5 15 11 14.5 13
-             C14.2 15 13 16 11 16
-             C13 16 14.2 17 14.5 19
-             C15 21 14.5 25.5 19 25.5"/>
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="kodem">
+  <rect width="64" height="64" rx="14" fill="#0B1B4D"/>
+  <g fill="#2348E0" font-family="'Space Grotesk', sans-serif">
+    <!-- crochets cobalt -->
+    <path d="M20 16h-4a2 2 0 0 0-2 2v28a2 2 0 0 0 2 2h4v-4h-2V20h2v-4z"/>
+    <path d="M44 16h4a2 2 0 0 1 2 2v28a2 2 0 0 1-2 2h-4v-4h2V20h-2v-4z"/>
   </g>
+  <!-- lettre k -->
+  <text x="32" y="43" fill="#FFFFFF" font-family="'Space Grotesk','Segoe UI',sans-serif" font-size="30" font-weight="600" text-anchor="middle">k</text>
 </svg>

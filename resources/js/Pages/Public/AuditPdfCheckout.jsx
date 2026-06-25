@@ -14,17 +14,17 @@ export default function AuditPdfCheckout({ meta, audit, price, driver }) {
         <PublicLayout meta={meta}>
             <section className="max-w-2xl mx-auto px-6 py-12">
                 <Link href={`/audit/${audit.uuid}`} className="text-indigo-600 text-sm hover:underline">← Retour au rapport</Link>
-                <div className="mt-6 bg-white rounded-xl border border-slate-200 shadow-sm p-8">
+                <div className="mt-6 bg-white rounded-xl border border-brume shadow-sm p-8">
                     <div className="flex items-center justify-between gap-4">
                         <div>
                             <h1 className="text-2xl font-bold">Add-on · Rapport PDF</h1>
-                            <p className="text-sm text-slate-600 mt-1">
+                            <p className="text-sm text-acier mt-1">
                                 Version PDF téléchargeable et imprimable du rapport d'audit pour <span className="font-mono break-all">{audit.url}</span>.
                             </p>
                         </div>
                         <div className="text-right">
                             <div className="text-3xl font-bold">+{price.label}</div>
-                            <div className="text-xs text-slate-500">add-on unique</div>
+                            <div className="text-xs text-acier">add-on unique</div>
                         </div>
                     </div>
 
@@ -34,7 +34,7 @@ export default function AuditPdfCheckout({ meta, audit, price, driver }) {
                         </div>
                     )}
 
-                    <ul className="mt-6 space-y-2 text-sm text-slate-700">
+                    <ul className="mt-6 space-y-2 text-sm text-encre">
                         <li>• PDF A4 prêt à imprimer</li>
                         <li>• Inclut les 20 contrôles détaillés</li>
                         <li>• Inclut les Core Web Vitals si vous avez cet add-on</li>
@@ -47,9 +47,9 @@ export default function AuditPdfCheckout({ meta, audit, price, driver }) {
                                 type="checkbox"
                                 checked={data.confirm}
                                 onChange={(e) => setData('confirm', e.target.checked)}
-                                className="mt-1 h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                                className="mt-1 h-4 w-4 rounded border-cobalt-200 text-indigo-600 focus:ring-indigo-500"
                             />
-                            <span className="text-sm text-slate-700">
+                            <span className="text-sm text-encre">
                                 Je confirme l'achat de l'add-on PDF pour {price.label}.
                             </span>
                         </label>

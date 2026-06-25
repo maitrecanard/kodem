@@ -4,28 +4,28 @@
 <meta charset="utf-8">
 <title>Rapport d'audit — {{ $audit->url }}</title>
 <style>
-    body { font-family: DejaVu Sans, sans-serif; color: #1e293b; font-size: 11px; line-height: 1.4; }
-    h1 { color: #1e3a8a; margin: 0 0 6px; font-size: 20px; }
-    h2 { color: #1e3a8a; border-bottom: 2px solid #e2e8f0; padding-bottom: 4px; margin-top: 22px; font-size: 14px; }
+    body { font-family: DejaVu Sans, sans-serif; color: #0B1B4D; font-size: 11px; line-height: 1.4; }
+    h1 { color: #0B1B4D; margin: 0 0 6px; font-size: 20px; }
+    h2 { color: #0B1B4D; border-bottom: 2px solid #E8ECFF; padding-bottom: 4px; margin-top: 22px; font-size: 14px; }
     .meta { color: #64748b; font-size: 10px; margin-bottom: 16px; }
     .scores { width: 100%; margin-top: 10px; border-collapse: collapse; }
-    .scores td { width: 33%; text-align: center; padding: 12px; border: 1px solid #e2e8f0; }
-    .scores .big { font-size: 26px; font-weight: bold; color: #1e3a8a; }
-    .scores .global td { background: #0f172a; color: #fff; border-color: #0f172a; }
+    .scores td { width: 33%; text-align: center; padding: 12px; border: 1px solid #E8ECFF; }
+    .scores .big { font-size: 26px; font-weight: bold; color: #0B1B4D; }
+    .scores .global td { background: #0B1B4D; color: #fff; border-color: #0B1B4D; }
     .scores .global .big { color: #fff; }
     table.checks { width: 100%; border-collapse: collapse; margin-top: 8px; }
-    table.checks th, table.checks td { text-align: left; padding: 5px 6px; border-bottom: 1px solid #e2e8f0; vertical-align: top; }
-    table.checks th { background: #f1f5f9; }
+    table.checks th, table.checks td { text-align: left; padding: 5px 6px; border-bottom: 1px solid #E8ECFF; vertical-align: top; }
+    table.checks th { background: #E8ECFF; }
     .pass { color: #047857; font-weight: bold; }
     .warn { color: #b45309; font-weight: bold; }
     .fail { color: #be123c; font-weight: bold; }
     .footer { margin-top: 30px; color: #64748b; font-size: 9px; text-align: center; }
     .kv { margin: 4px 0; }
     .kv strong { display: inline-block; min-width: 120px; }
-    .action { background: #f8fafc; border: 1px solid #e2e8f0; border-left: 4px solid #4f46e5; padding: 10px 12px; margin: 10px 0; }
+    .action { background: #FBFCFE; border: 1px solid #E8ECFF; border-left: 4px solid #2348E0; padding: 10px 12px; margin: 10px 0; }
     .action .title { font-weight: bold; font-size: 12px; }
     .action .gain { color: #047857; font-weight: bold; }
-    .action .snippet { background: #0f172a; color: #f8fafc; padding: 8px; font-family: DejaVu Sans Mono, monospace; font-size: 9px; white-space: pre-wrap; word-break: break-all; margin-top: 6px; }
+    .action .snippet { background: #0B1B4D; color: #FBFCFE; padding: 8px; font-family: DejaVu Sans Mono, monospace; font-size: 9px; white-space: pre-wrap; word-break: break-all; margin-top: 6px; }
     .tag { display: inline-block; border-radius: 10px; padding: 1px 8px; font-size: 9px; font-weight: bold; margin-right: 4px; }
     .tag.fail { background: #fee2e2; color: #991b1b; }
     .tag.warn { background: #fef3c7; color: #92400e; }

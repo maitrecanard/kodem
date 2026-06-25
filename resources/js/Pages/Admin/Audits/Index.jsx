@@ -4,9 +4,9 @@ import AdminLayout from '@/Layouts/AdminLayout';
 export default function Index({ audits }) {
     return (
         <AdminLayout title="Audits">
-            <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
+            <div className="bg-white rounded-lg border border-brume shadow-sm overflow-hidden">
                 <table className="w-full text-sm">
-                    <thead className="bg-slate-50 text-left text-slate-600">
+                    <thead className="bg-papier text-left text-acier">
                         <tr>
                             <th className="px-4 py-3">URL</th>
                             <th className="px-4 py-3">Statut</th>
@@ -26,11 +26,11 @@ export default function Index({ audits }) {
                                 <td className="px-4 py-2">{a.score_seo ?? '—'}</td>
                                 <td className="px-4 py-2">{a.score_security ?? '—'}</td>
                                 <td className="px-4 py-2 font-semibold">{a.score_total ?? '—'}</td>
-                                <td className="px-4 py-2 text-slate-500">{a.created_at?.slice(0, 10)}</td>
+                                <td className="px-4 py-2 text-acier">{a.created_at?.slice(0, 10)}</td>
                             </tr>
                         ))}
                         {audits.data.length === 0 && (
-                            <tr><td colSpan={6} className="px-4 py-6 text-center text-slate-400">Aucun audit.</td></tr>
+                            <tr><td colSpan={6} className="px-4 py-6 text-center text-acier">Aucun audit.</td></tr>
                         )}
                     </tbody>
                 </table>

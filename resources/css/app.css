@@ -1,3 +1,44 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/**
+ * Base de marque — Charte graphique KODEM
+ * Papier domine pour la clarté ; l'encre structure les fonds et la typographie.
+ */
+@layer base {
+    body {
+        @apply bg-papier text-encre;
+        line-height: 1.65; /* interligne du corps de texte — charte p.08 */
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        @apply font-sans font-semibold tracking-tight text-encre;
+    }
+}
+
+@layer components {
+    /**
+     * Motif diagonal — texture de marque (charte p.09)
+     * Pour fonds, séparateurs et réserves d'image.
+     */
+    .kodem-diagonal {
+        background-image: repeating-linear-gradient(
+            -45deg,
+            theme('colors.brume') 0,
+            theme('colors.brume') 1px,
+            transparent 1px,
+            transparent 11px
+        );
+    }
+
+    /* Libellé technique mono — étiquettes / métadonnées (// SECTION) */
+    .kodem-eyebrow {
+        @apply font-mono text-xs uppercase tracking-widest text-cobalt-600;
+    }
+}

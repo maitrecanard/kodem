@@ -34,7 +34,7 @@ export default function MonitoringSubscribe({ meta, price, period_days, driver }
             </section>
 
             <section className="max-w-2xl mx-auto px-6 py-12">
-                <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-8">
+                <div className="bg-white rounded-xl border border-brume shadow-sm p-8">
                     <h2 className="text-xl font-semibold">Activer l'abonnement</h2>
                     {driver === 'stub' && (
                         <div className="mt-4 rounded-lg border border-amber-300 bg-amber-50 text-amber-900 px-4 py-3 text-sm">
@@ -44,25 +44,25 @@ export default function MonitoringSubscribe({ meta, price, period_days, driver }
 
                     <form onSubmit={submit} className="mt-6 space-y-4">
                         <label className="block">
-                            <span className="block text-sm font-medium text-slate-700 mb-1">URL à surveiller</span>
+                            <span className="block text-sm font-medium text-encre mb-1">URL à surveiller</span>
                             <input
                                 type="text"
                                 value={data.url}
                                 onChange={(e) => setData('url', e.target.value)}
                                 placeholder="https://monsite.fr"
                                 required
-                                className="w-full border border-slate-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                className="w-full border border-cobalt-200 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                             />
                             {errors.url && <span className="block mt-1 text-sm text-rose-600">{errors.url}</span>}
                         </label>
                         <label className="block">
-                            <span className="block text-sm font-medium text-slate-700 mb-1">Email de réception des rapports</span>
+                            <span className="block text-sm font-medium text-encre mb-1">Email de réception des rapports</span>
                             <input
                                 type="email"
                                 value={data.email}
                                 onChange={(e) => setData('email', e.target.value)}
                                 required
-                                className="w-full border border-slate-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                className="w-full border border-cobalt-200 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                             />
                             {errors.email && <span className="block mt-1 text-sm text-rose-600">{errors.email}</span>}
                         </label>
@@ -71,9 +71,9 @@ export default function MonitoringSubscribe({ meta, price, period_days, driver }
                                 type="checkbox"
                                 checked={data.confirm}
                                 onChange={(e) => setData('confirm', e.target.checked)}
-                                className="mt-1 h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                                className="mt-1 h-4 w-4 rounded border-cobalt-200 text-indigo-600 focus:ring-indigo-500"
                             />
-                            <span className="text-sm text-slate-700">
+                            <span className="text-sm text-encre">
                                 Je confirme l'abonnement à {price.label}/mois et j'accepte les <Link href="/cgv" className="text-indigo-600 hover:underline">CGV</Link>.
                             </span>
                         </label>

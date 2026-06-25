@@ -23,6 +23,6 @@ createInertiaApp({
         createRoot(el).render(<App {...props} />);
     },
     progress: {
-        color: '#4B5563',
+        color: '#2348E0', // Cobalt — couleur primaire de la marque
     },
 });

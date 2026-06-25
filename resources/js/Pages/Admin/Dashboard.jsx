@@ -3,8 +3,8 @@ import AdminLayout from '@/Layouts/AdminLayout';
 
 function Stat({ label, value }) {
     return (
-        <div className="bg-white rounded-lg border border-slate-200 p-5 shadow-sm">
-            <div className="text-xs uppercase tracking-wide text-slate-500">{label}</div>
+        <div className="bg-white rounded-lg border border-brume p-5 shadow-sm">
+            <div className="text-xs uppercase tracking-wide text-acier">{label}</div>
             <div className="mt-1 text-2xl font-bold">{value}</div>
         </div>
     );
@@ -24,10 +24,10 @@ export default function Dashboard({ stats, topPages = [], recentAudits = [], rec
             </div>
 
             <div className="grid gap-6 md:grid-cols-2 mt-8">
-                <div className="bg-white rounded-lg border border-slate-200 p-5 shadow-sm">
+                <div className="bg-white rounded-lg border border-brume p-5 shadow-sm">
                     <h2 className="font-semibold">Pages les plus vues (30j)</h2>
                     <table className="w-full mt-3 text-sm">
-                        <thead className="text-left text-slate-500">
+                        <thead className="text-left text-acier">
                             <tr><th className="py-2">URL</th><th>Visites</th></tr>
                         </thead>
                         <tbody>
@@ -37,23 +37,23 @@ export default function Dashboard({ stats, topPages = [], recentAudits = [], rec
                                     <td>{p.total}</td>
                                 </tr>
                             ))}
-                            {topPages.length === 0 && (<tr><td colSpan={2} className="py-4 text-slate-400">Pas encore de trafic.</td></tr>)}
+                            {topPages.length === 0 && (<tr><td colSpan={2} className="py-4 text-acier">Pas encore de trafic.</td></tr>)}
                         </tbody>
                     </table>
                 </div>
-                <div className="bg-white rounded-lg border border-slate-200 p-5 shadow-sm">
+                <div className="bg-white rounded-lg border border-brume p-5 shadow-sm">
                     <h2 className="font-semibold">Audits récents</h2>
                     <ul className="mt-3 divide-y divide-slate-100 text-sm">
                         {recentAudits.map((a) => (
                             <li key={a.uuid} className="py-2 flex justify-between gap-4">
                                 <Link href={`/admin/audits/${a.uuid}`} className="truncate text-indigo-700 hover:underline">{a.url}</Link>
-                                <span className="text-slate-500">{a.score_total ?? '—'}/100</span>
+                                <span className="text-acier">{a.score_total ?? '—'}/100</span>
                             </li>
                         ))}
-                        {recentAudits.length === 0 && <li className="py-2 text-slate-400">Aucun audit.</li>}
+                        {recentAudits.length === 0 && <li className="py-2 text-acier">Aucun audit.</li>}
                     </ul>
                 </div>
-                <div className="bg-white rounded-lg border border-slate-200 p-5 shadow-sm md:col-span-2">
+                <div className="bg-white rounded-lg border border-brume p-5 shadow-sm md:col-span-2">
                     <h2 className="font-semibold">Messages récents</h2>
                     <ul className="mt-3 divide-y divide-slate-100 text-sm">
                         {recentMessages.map((m) => (
@@ -61,10 +61,10 @@ export default function Dashboard({ stats, topPages = [], recentAudits = [], rec
                                 <Link href={`/admin/messages/${m.id}`} className="truncate text-indigo-700 hover:underline">
                                     {m.subject} — {m.name} &lt;{m.email}&gt;
                                 </Link>
-                                <span className="text-xs rounded-full bg-slate-100 px-2 py-0.5">{m.status}</span>
+                                <span className="text-xs rounded-full bg-brume px-2 py-0.5">{m.status}</span>
                             </li>
                         ))}
-                        {recentMessages.length === 0 && <li className="py-2 text-slate-400">Aucun message.</li>}
+                        {recentMessages.length === 0 && <li className="py-2 text-acier">Aucun message.</li>}
                     </ul>
                 </div>
             </div>
