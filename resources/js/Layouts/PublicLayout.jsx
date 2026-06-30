@@ -1,6 +1,7 @@
 import { Head, Link, usePage } from '@inertiajs/react';
 import { trackClick } from '@/lib/track';
 import BrandWordmark from '@/Components/BrandWordmark';
+import ContactBlockMono from '@/Components/ContactBlockMono';
 
 export default function PublicLayout({ meta, children }) {
     const title = meta?.title || 'Kodem — Développement web, hébergement et audits SEO/sécurité';
@@ -49,19 +50,25 @@ export default function PublicLayout({ meta, children }) {
                     <Link href="/" className="flex items-center">
                         <BrandWordmark className="text-2xl text-encre" />
                     </Link>
-                    <nav className="hidden md:flex items-center gap-6 text-sm text-acier">
-                        <Link href="/" onClick={() => trackClick('nav_home')} className="hover:text-cobalt-600">Accueil</Link>
-                        <Link href="/prestations" onClick={() => trackClick('nav_services')} className="hover:text-cobalt-600">Prestations</Link>
-                        <Link href="/audit" onClick={() => trackClick('nav_audit')} className="hover:text-cobalt-600">Audit en ligne</Link>
-                        <Link href="/contact" onClick={() => trackClick('nav_contact')} className="hover:text-cobalt-600">Contact</Link>
-                    </nav>
-                    <Link
-                        href="/audit"
-                        onClick={() => trackClick('header_cta_audit')}
-                        className="hidden md:inline-flex items-center rounded-md bg-cobalt-600 px-4 py-2 text-white text-sm font-medium hover:bg-cobalt-700"
-                    >
-                        Lancer un audit
-                    </Link>
+                    <div className="flex items-center gap-6">
+                        <nav className="hidden md:flex items-center gap-6 text-sm text-acier">
+                            <Link href="/" onClick={() => trackClick('nav_home')} className="hover:text-cobalt-600">Accueil</Link>
+                            <Link href="/prestations" onClick={() => trackClick('nav_services')} className="hover:text-cobalt-600">Prestations</Link>
+                            <Link href="/audit" onClick={() => trackClick('nav_audit')} className="hover:text-cobalt-600">Audit en ligne</Link>
+                            <Link href="/contact" onClick={() => trackClick('nav_contact')} className="hover:text-cobalt-600">Contact</Link>
+                        </nav>
+                        {/* Signature de marque (charte p.10) — tags métiers en mono */}
+                        <span className="hidden lg:inline font-mono text-legende uppercase tracking-widest text-acier">
+                            dev · host · seo · sec
+                        </span>
+                        <Link
+                            href="/audit"
+                            onClick={() => trackClick('header_cta_audit')}
+                            className="hidden md:inline-flex items-center rounded-md bg-cobalt-600 px-4 py-2 text-white text-sm font-medium hover:bg-cobalt-700"
+                        >
+                            Lancer un audit
+                        </Link>
+                    </div>
                 </div>
             </header>
 
@@ -82,7 +89,7 @@ export default function PublicLayout({ meta, children }) {
                         <ul className="space-y-2 text-sm">
                             <li><Link href="/prestations" className="hover:text-white">Développement web</Link></li>
                             <li><Link href="/prestations" className="hover:text-white">Création de SaaS</Link></li>
-                            <li><Link href="/prestations" className="hover:text-white">Hébergement web</Link></li>
+                            <li><Link href="/hebergement-web" className="hover:text-white">Hébergement web</Link></li>
                             <li><Link href="/audit" className="hover:text-white">Audit SEO</Link></li>
                             <li><Link href="/audit" className="hover:text-white">Audit de sécurité</Link></li>
                         </ul>
@@ -95,11 +102,7 @@ export default function PublicLayout({ meta, children }) {
                             <li><Link href="/cgv" className="hover:text-white">CGV</Link></li>
                         </ul>
                     </div>
-                    <div>
-                        <h3 className="text-white font-semibold mb-3">Contact</h3>
-                        <p className="text-sm">contact@kodem.fr</p>
-                        <p className="text-sm text-acier mt-2">Réponse sous 24h ouvrées.</p>
-                    </div>
+                    <ContactBlockMono className="bg-transparent p-0" />
                 </div>
                 <div className="border-t border-cobalt-900">
                     <div className="max-w-6xl mx-auto px-6 py-4 text-xs text-acier flex items-center justify-between">

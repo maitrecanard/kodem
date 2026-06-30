@@ -1,6 +1,8 @@
 import { useForm, Link } from '@inertiajs/react';
 import PublicLayout from '@/Layouts/PublicLayout';
 import { trackClick } from '@/lib/track';
+import Banner from '@/Components/Banner';
+import SectionLabel from '@/Components/SectionLabel';
 
 export default function Audit({ meta, price, paidPrestations = [] }) {
     const { data, setData, post, processing, errors } = useForm({
@@ -17,74 +19,84 @@ export default function Audit({ meta, price, paidPrestations = [] }) {
 
     return (
         <PublicLayout meta={meta}>
-            <section className="bg-gradient-to-b from-indigo-600 to-indigo-800 text-white">
-                <div className="max-w-3xl mx-auto px-6 py-20 text-center">
-                    <p className="uppercase tracking-widest text-xs text-indigo-200">Audit automatisé</p>
-                    <h1 className="mt-2 text-4xl md:text-5xl font-bold">Audit SEO et de sécurité en ligne</h1>
-                    <p className="mt-4 text-indigo-100">
-                        Saisissez une URL. Aperçu du score global <strong>gratuit</strong>, rapport complet et recommandations à <strong>{price?.label ?? '29,00 €'}</strong>.
-                    </p>
+            <Banner
+                title="Audit SEO & sécurité en ligne"
+                cta={
+                    <a
+                        href="#audit-form"
+                        className="inline-flex items-center rounded-kodem bg-cobalt-600 px-5 py-3 text-white font-medium hover:bg-cobalt-700 transition"
+                    >
+                        Lancer mon audit
+                    </a>
+                }
+            />
 
-                    <form onSubmit={submit} className="mt-10 bg-white text-encre rounded-xl shadow-xl p-6 md:p-8 text-left">
-                        <label className="block mb-4">
-                            <span className="block text-sm font-medium mb-1">URL du site à auditer</span>
+            <section id="audit-form" className="max-w-3xl mx-auto px-6 py-16">
+                <SectionLabel className="mb-4">AUDIT AUTOMATISÉ</SectionLabel>
+                <p className="text-acier mb-6">
+                    Saisissez une URL. Aperçu du score global gratuit, rapport complet et
+                    recommandations à {price?.label ?? '29,00 €'}.
+                </p>
+                <form onSubmit={submit} className="bg-white text-encre rounded-kodem shadow-xl border border-brume p-6 md:p-8">
+                    <label className="block mb-4">
+                        <span className="block text-sm font-medium mb-1">URL du site à auditer</span>
+                        <input
+                            type="text"
+                            value={data.url}
+                            onChange={(e) => setData('url', e.target.value)}
+                            placeholder="https://www.exemple.fr"
+                            required
+                            className="w-full border border-cobalt-200 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-cobalt-500"
+                        />
+                        {errors.url && <span className="block mt-1 text-sm text-rose-600">{errors.url}</span>}
+                    </label>
+
+                    <div className="grid md:grid-cols-2 gap-4">
+                        <label className="block">
+                            <span className="block text-sm font-medium mb-1">Email (facultatif)</span>
                             <input
-                                type="text"
-                                value={data.url}
-                                onChange={(e) => setData('url', e.target.value)}
-                                placeholder="https://www.exemple.fr"
-                                required
-                                className="w-full border border-cobalt-200 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                type="email"
+                                value={data.email}
+                                onChange={(e) => setData('email', e.target.value)}
+                                placeholder="vous@exemple.fr"
+                                className="w-full border border-cobalt-200 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-cobalt-500"
                             />
-                            {errors.url && <span className="block mt-1 text-sm text-rose-600">{errors.url}</span>}
+                            {errors.email && <span className="block mt-1 text-sm text-rose-600">{errors.email}</span>}
                         </label>
+                        <label className="block">
+                            <span className="block text-sm font-medium mb-1">Type d'audit</span>
+                            <select
+                                value={data.type}
+                                onChange={(e) => setData('type', e.target.value)}
+                                className="w-full border border-cobalt-200 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-cobalt-500"
+                            >
+                                <option value="full">SEO + Sécurité</option>
+                                <option value="seo">SEO uniquement</option>
+                                <option value="security">Sécurité uniquement</option>
+                            </select>
+                        </label>
+                    </div>
 
-                        <div className="grid md:grid-cols-2 gap-4">
-                            <label className="block">
-                                <span className="block text-sm font-medium mb-1">Email (facultatif)</span>
-                                <input
-                                    type="email"
-                                    value={data.email}
-                                    onChange={(e) => setData('email', e.target.value)}
-                                    placeholder="vous@exemple.fr"
-                                    className="w-full border border-cobalt-200 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                                />
-                                {errors.email && <span className="block mt-1 text-sm text-rose-600">{errors.email}</span>}
-                            </label>
-                            <label className="block">
-                                <span className="block text-sm font-medium mb-1">Type d'audit</span>
-                                <select
-                                    value={data.type}
-                                    onChange={(e) => setData('type', e.target.value)}
-                                    className="w-full border border-cobalt-200 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                                >
-                                    <option value="full">SEO + Sécurité</option>
-                                    <option value="seo">SEO uniquement</option>
-                                    <option value="security">Sécurité uniquement</option>
-                                </select>
-                            </label>
-                        </div>
-
-                        <button
-                            type="submit"
-                            disabled={processing}
-                            className="mt-6 w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 disabled:opacity-60"
-                        >
-                            {processing ? 'Audit en cours…' : 'Lancer l\'audit'}
-                        </button>
-                        <p className="mt-3 text-xs text-acier text-center">
-                            Aperçu gratuit immédiat. Rapport complet à {price?.label ?? '29,00 €'} après paiement.
-                            Vos données sont anonymisées. 3 audits/h maximum.
-                        </p>
-                    </form>
-                </div>
+                    <button
+                        type="submit"
+                        disabled={processing}
+                        className="mt-6 w-full bg-cobalt-600 text-white py-3 rounded-kodem font-semibold hover:bg-cobalt-700 disabled:opacity-60"
+                    >
+                        {processing ? 'Audit en cours…' : 'Lancer l\'audit'}
+                    </button>
+                    <p className="mt-3 text-xs text-acier text-center">
+                        Aperçu gratuit immédiat. Rapport complet à {price?.label ?? '29,00 €'} après paiement.
+                        Vos données sont anonymisées. 3 audits/h maximum.
+                    </p>
+                </form>
             </section>
 
             <section className="max-w-5xl mx-auto px-6 py-16">
-                <h2 className="text-2xl font-bold text-center">Ce que nous vérifions</h2>
+                <SectionLabel number="01" className="justify-center mb-4">CE QUE NOUS VÉRIFIONS</SectionLabel>
+                <h2 className="text-kodem-h1 font-bold text-center">Ce que nous vérifions</h2>
                 <div className="grid md:grid-cols-2 gap-8 mt-10">
                     <div>
-                        <h3 className="font-semibold text-lg">SEO</h3>
+                        <h3 className="text-kodem-h2 font-semibold">SEO</h3>
                         <ul className="mt-3 space-y-2 text-encre">
                             <li>• Balises title, meta description, H1</li>
                             <li>• Open Graph et Twitter Cards</li>
@@ -94,7 +106,7 @@ export default function Audit({ meta, price, paidPrestations = [] }) {
                         </ul>
                     </div>
                     <div>
-                        <h3 className="font-semibold text-lg">Sécurité</h3>
+                        <h3 className="text-kodem-h2 font-semibold">Sécurité</h3>
                         <ul className="mt-3 space-y-2 text-encre">
                             <li>• HTTPS, HSTS, certificat TLS</li>
                             <li>• Content-Security-Policy</li>
@@ -109,17 +121,18 @@ export default function Audit({ meta, price, paidPrestations = [] }) {
 
             <section className="bg-brume border-y border-brume">
                 <div className="max-w-5xl mx-auto px-6 py-16">
-                    <h2 className="text-2xl font-bold text-center">Besoin d'aller plus loin ?</h2>
+                    <SectionLabel number="02" className="justify-center mb-4">ALLER PLUS LOIN</SectionLabel>
+                    <h2 className="text-kodem-h1 font-bold text-center">Besoin d'aller plus loin ?</h2>
                     <p className="text-acier text-center mt-2 max-w-2xl mx-auto">
                         Prolongez l'audit avec nos prestations automatiques : monitoring, remédiation, hébergement managé.
                     </p>
                     <div className="grid md:grid-cols-3 gap-6 mt-8">
                         {paidPrestations.filter((p) => p.price_from !== 0).slice(0, 3).map((p) => (
-                            <article key={p.slug} className="bg-white rounded-xl border border-brume p-6 shadow-sm">
-                                <h3 className="font-semibold">{p.title}</h3>
-                                <p className="text-xs text-indigo-700 mt-1 font-medium">{p.price_label}</p>
+                            <article key={p.slug} className="bg-white rounded-kodem border border-brume p-6 shadow-sm">
+                                <h3 className="text-kodem-h2 font-semibold">{p.title}</h3>
+                                <p className="text-xs text-cobalt-600 mt-1 font-mono">{p.price_label}</p>
                                 <p className="text-sm mt-3 text-acier">{p.tagline}</p>
-                                <Link href="/prestations" className="mt-4 inline-block text-sm text-indigo-600 font-medium hover:underline">
+                                <Link href="/prestations" className="mt-4 inline-block text-sm text-cobalt-600 font-medium hover:underline">
                                     En savoir plus →
                                 </Link>
                             </article>

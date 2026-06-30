@@ -21,32 +21,53 @@
         @php
             $appName = config('app.name', 'Kodem');
             $appUrl = rtrim(config('app.url', ''), '/');
-            $structuredData = [
-                '@context' => 'https://schema.org',
-                '@graph' => [
-                    [
-                        '@type' => 'Organization',
-                        '@id' => $appUrl.'/#organization',
-                        'name' => $appName,
-                        'url' => $appUrl,
-                        'logo' => $appUrl.'/favicon.svg',
-                        'image' => $appUrl.'/og-image.png',
-                        'description' => 'Société de développement web, création de SaaS, hébergement web et audits SEO / sécurité automatisés.',
-                        'email' => 'contact@kodem.fr',
-                        'areaServed' => 'FR',
-                    ],
-                    [
-                        '@type' => 'WebSite',
-                        '@id' => $appUrl.'/#website',
-                        'name' => $appName,
-                        'url' => $appUrl,
-                        'inLanguage' => 'fr-FR',
-                        'publisher' => ['@id' => $appUrl.'/#organization'],
-                    ],
+            $graph = [
+                [
+                    '@type' => 'Organization',
+                    '@id' => $appUrl.'/#organization',
+                    'name' => $appName,
+                    'url' => $appUrl,
+                    'logo' => $appUrl.'/favicon.svg',
+                    'image' => $appUrl.'/og-image.png',
+                    'description' => 'Société de développement web, création de SaaS, hébergement web et audits SEO / sécurité automatisés.',
+                    'email' => 'contact@kodem.fr',
+                    'areaServed' => 'FR',
+                ],
+                [
+                    '@type' => 'WebSite',
+                    '@id' => $appUrl.'/#website',
+                    'name' => $appName,
+                    'url' => $appUrl,
+                    'inLanguage' => 'fr-FR',
+                    'publisher' => ['@id' => $appUrl.'/#organization'],
                 ],
             ];
+            foreach (\App\Services\PrestationCatalog::all() as $p) {
+                $node = [
+                    '@type' => 'Service',
+                    '@id' => $appUrl.'/#service-'.$p['slug'],
+                    'name' => $p['title'],
+                    'description' => $p['description'],
+                    'serviceType' => $p['title'],
+                    'provider' => ['@id' => $appUrl.'/#organization'],
+                    'areaServed' => 'FR',
+                ];
+                if (isset($p['price_from']) && is_numeric($p['price_from'])) {
+                    $node['offers'] = [
+                        '@type' => 'Offer',
+                        'price' => (string) $p['price_from'],
+                        'priceCurrency' => 'EUR',
+                        'url' => $appUrl,
+                    ];
+                }
+                $graph[] = $node;
+            }
+            $structuredData = [
+                '@context' => 'https://schema.org',
+                '@graph' => $graph,
+            ];
         @endphp
-        <script type="application/ld+json">{!! json_encode($structuredData, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}</script>
+        <script type="application/ld+json">{!! json_encode($structuredData, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) !!}</script>
 
         <!-- Scripts -->
         @routes

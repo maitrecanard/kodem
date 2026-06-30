@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from '@inertiajs/react';
 import PublicLayout from '@/Layouts/PublicLayout';
 import { trackClick } from '@/lib/track';
+import SectionLabel from '@/Components/SectionLabel';
 
 function CodeSnippet({ code, lang }) {
     const [copied, setCopied] = useState(false);
@@ -21,7 +22,7 @@ function CodeSnippet({ code, lang }) {
             >
                 {copied ? 'copié' : 'copier'}
             </button>
-            <pre className="bg-encre text-slate-100 text-xs p-3 pr-16 rounded-md overflow-x-auto whitespace-pre"><code>{code}</code></pre>
+            <pre className="bg-encre text-slate-100 text-xs p-3 pr-16 rounded-kodem overflow-x-auto whitespace-pre"><code>{code}</code></pre>
             {lang && <div className="text-[10px] uppercase tracking-wide text-acier mt-1">{lang}</div>}
         </div>
     );
@@ -38,7 +39,7 @@ function ActionPlanItem({ item, index }) {
     }[item.recommendation?.effort] ?? 'Effort modéré';
 
     return (
-        <div className="bg-white rounded-xl border border-brume p-5 shadow-sm">
+        <div className="bg-white rounded-kodem border border-brume p-5 shadow-sm">
             <div className="flex items-start gap-4">
                 <div className="flex-none rounded-full bg-encre text-white w-7 h-7 flex items-center justify-center text-xs font-semibold">
                     {index + 1}
@@ -71,7 +72,7 @@ function ActionPlanItem({ item, index }) {
                                     href={item.recommendation.reference}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="mt-2 inline-block text-xs text-indigo-600 hover:underline"
+                                    className="mt-2 inline-block text-xs text-cobalt-600 hover:underline"
                                 >
                                     Documentation de référence →
                                 </a>
@@ -131,11 +132,11 @@ export default function AuditResult({ meta, audit, paid, price, paidPrestations 
     return (
         <PublicLayout meta={meta}>
             <section className="max-w-5xl mx-auto px-6 py-12">
-                <Link href="/audit" className="text-indigo-600 text-sm hover:underline">← Nouvel audit</Link>
-                <div className="mt-4 bg-white rounded-xl border border-brume p-8 shadow-sm">
+                <Link href="/audit" className="text-cobalt-600 text-sm hover:underline">← Nouvel audit</Link>
+                <div className="mt-4 bg-white rounded-kodem border border-brume p-8 shadow-sm">
                     <div className="flex items-start justify-between gap-4 flex-wrap">
                         <div>
-                            <h1 className="text-2xl font-bold break-all">Audit de {audit.url}</h1>
+                            <h1 className="text-kodem-h2 font-bold break-all">Audit de {audit.url}</h1>
                             <p className="text-acier text-sm mt-1">Référence : {audit.uuid}</p>
                         </div>
                         {paid ? (
@@ -150,12 +151,12 @@ export default function AuditResult({ meta, audit, paid, price, paidPrestations 
                     </div>
 
                     {audit.status === 'failed' ? (
-                        <div className="mt-6 rounded-lg border border-rose-200 bg-rose-50 p-4 text-rose-800">
+                        <div className="mt-6 rounded-kodem border border-rose-200 bg-rose-50 p-4 text-rose-800">
                             <strong>Audit impossible.</strong> {audit.error}
                         </div>
                     ) : (
                         <div className="mt-8 grid md:grid-cols-3 gap-6">
-                            <div className="rounded-lg border border-brume p-6 text-center">
+                            <div className="rounded-kodem border border-brume p-6 text-center">
                                 <div className="text-xs uppercase tracking-wide text-acier">Score SEO</div>
                                 <div className="mt-2">
                                     {paid
@@ -164,7 +165,7 @@ export default function AuditResult({ meta, audit, paid, price, paidPrestations 
                                     }
                                 </div>
                             </div>
-                            <div className="rounded-lg border border-brume p-6 text-center">
+                            <div className="rounded-kodem border border-brume p-6 text-center">
                                 <div className="text-xs uppercase tracking-wide text-acier">Score sécurité</div>
                                 <div className="mt-2">
                                     {paid
@@ -173,7 +174,7 @@ export default function AuditResult({ meta, audit, paid, price, paidPrestations 
                                     }
                                 </div>
                             </div>
-                            <div className="rounded-lg bg-encre text-white p-6 text-center">
+                            <div className="rounded-kodem bg-encre text-white p-6 text-center">
                                 <div className="text-xs uppercase tracking-wide text-acier">Score global</div>
                                 <div className="mt-2 text-4xl font-bold">
                                     {audit.score_total ?? '—'}
@@ -185,27 +186,27 @@ export default function AuditResult({ meta, audit, paid, price, paidPrestations 
                 </div>
 
                 {!paid && audit.status !== 'failed' && (
-                    <div className="mt-8 bg-gradient-to-br from-indigo-600 to-indigo-800 text-white rounded-xl p-8 shadow-lg">
+                    <div className="mt-8 bg-gradient-to-br from-cobalt-600 to-cobalt-900 text-white rounded-kodem p-8 shadow-lg">
                         <div className="flex items-start justify-between gap-6 flex-wrap">
                             <div className="max-w-xl">
-                                <h2 className="text-2xl font-bold">Débloquez le rapport complet</h2>
-                                <p className="mt-2 text-indigo-100">
+                                <h2 className="text-kodem-h2 font-bold">Débloquez le rapport complet</h2>
+                                <p className="mt-2 text-cobalt-100">
                                     Détail des 20 contrôles SEO + sécurité, <strong>plan d'action priorisé pour atteindre 100/100</strong>
                                     (snippets nginx/HTML à copier-coller, gain de points estimé par correction)
                                     et lien partageable pendant 90 jours.
                                 </p>
                                 {audit.teaser && (
-                                    <div className="mt-6 bg-white/10 rounded-lg p-4">
+                                    <div className="mt-6 bg-white/10 rounded-kodem p-4">
                                         <TeaserCounts label="SEO" counts={audit.teaser.seo_counts} />
                                         <TeaserCounts label="Sécurité" counts={audit.teaser.security_counts} />
                                         {audit.teaser.sample_check && (
                                             <div className="mt-3 pt-3 border-t border-white/20">
-                                                <div className="text-xs uppercase tracking-wide text-indigo-200">Exemple de contrôle</div>
+                                                <div className="text-xs uppercase tracking-wide text-cobalt-200">Exemple de contrôle</div>
                                                 <div className="mt-1 text-sm">
                                                     {audit.teaser.sample_check.status === 'pass' ? '✅' : audit.teaser.sample_check.status === 'warn' ? '⚠️' : '❌'}
                                                     {' '}{audit.teaser.sample_check.label}
                                                 </div>
-                                                <div className="text-xs text-indigo-200 mt-0.5">{audit.teaser.sample_check.detail}</div>
+                                                <div className="text-xs text-cobalt-200 mt-0.5">{audit.teaser.sample_check.detail}</div>
                                             </div>
                                         )}
                                     </div>
@@ -213,11 +214,11 @@ export default function AuditResult({ meta, audit, paid, price, paidPrestations 
                             </div>
                             <div className="text-right">
                                 <div className="text-5xl font-bold">{price?.label}</div>
-                                <div className="text-sm text-indigo-200 mt-1">paiement unique, TTC</div>
+                                <div className="text-sm text-cobalt-200 mt-1">paiement unique, TTC</div>
                                 <Link
                                     href={`/audit/${audit.uuid}/pay`}
                                     onClick={() => trackClick('audit_unlock_cta', { audit_uuid: audit.uuid, score_total: audit.score_total })}
-                                    className="mt-6 inline-flex items-center rounded-md bg-white text-indigo-700 px-6 py-3 font-semibold shadow hover:bg-indigo-50"
+                                    className="mt-6 inline-flex items-center rounded-kodem bg-white text-cobalt-700 px-6 py-3 font-semibold shadow hover:bg-cobalt-50"
                                 >
                                     Débloquer maintenant
                                 </Link>
@@ -230,10 +231,11 @@ export default function AuditResult({ meta, audit, paid, price, paidPrestations 
                     <>
                         {audit.results?.action_plan?.items?.length > 0 && (
                             <section className="mt-8">
-                                <div className="bg-gradient-to-br from-encre to-cobalt-900 text-white rounded-xl p-6">
+                                <div className="bg-gradient-to-br from-encre to-cobalt-900 text-white rounded-kodem p-6">
                                     <div className="flex items-start justify-between gap-4 flex-wrap">
                                         <div>
-                                            <h2 className="text-xl font-bold">Plan d'action vers 100/100</h2>
+                                            <SectionLabel className="text-cobalt-200 mb-2">PLAN D'ACTION</SectionLabel>
+                                            <h2 className="text-kodem-h2 font-bold">Plan d'action vers 100/100</h2>
                                             <p className="text-slate-300 text-sm mt-1">
                                                 {audit.results.action_plan.items.length} action{audit.results.action_plan.items.length > 1 ? 's' : ''} triée{audit.results.action_plan.items.length > 1 ? 's' : ''} par gain potentiel et gravité.
                                             </p>
@@ -256,8 +258,8 @@ export default function AuditResult({ meta, audit, paid, price, paidPrestations 
                         )}
 
                         {audit.results?.action_plan?.items?.length === 0 && (
-                            <section className="mt-8 bg-emerald-50 border border-emerald-200 text-emerald-900 rounded-xl p-6 text-center">
-                                <h2 className="text-xl font-bold">🎉 Score 100/100 atteint</h2>
+                            <section className="mt-8 bg-emerald-50 border border-emerald-200 text-emerald-900 rounded-kodem p-6 text-center">
+                                <h2 className="text-kodem-h2 font-bold">🎉 Score 100/100 atteint</h2>
                                 <p className="mt-2 text-sm">
                                     Tous les contrôles sont au vert. Pensez à lancer un nouvel audit régulièrement
                                     pour détecter d'éventuelles régressions — ou souscrivez au{' '}
@@ -267,14 +269,14 @@ export default function AuditResult({ meta, audit, paid, price, paidPrestations 
                         )}
 
                         <div className="mt-8 grid md:grid-cols-2 gap-6">
-                            <div className="bg-white rounded-xl border border-brume p-6 shadow-sm">
-                                <h2 className="font-semibold">Contrôles SEO</h2>
+                            <div className="bg-white rounded-kodem border border-brume p-6 shadow-sm">
+                                <h2 className="text-kodem-h2 font-semibold">Contrôles SEO</h2>
                                 <div className="mt-3">
                                     {seo?.checks?.map((c) => <CheckRow key={c.key} check={c} />)}
                                 </div>
                             </div>
-                            <div className="bg-white rounded-xl border border-brume p-6 shadow-sm">
-                                <h2 className="font-semibold">Contrôles de sécurité</h2>
+                            <div className="bg-white rounded-kodem border border-brume p-6 shadow-sm">
+                                <h2 className="text-kodem-h2 font-semibold">Contrôles de sécurité</h2>
                                 <div className="mt-3">
                                     {sec?.checks?.map((c) => <CheckRow key={c.key} check={c} />)}
                                 </div>
@@ -282,10 +284,10 @@ export default function AuditResult({ meta, audit, paid, price, paidPrestations 
                         </div>
 
                         <div className="mt-8 grid md:grid-cols-2 gap-6">
-                            <div className="bg-white rounded-xl border border-brume p-6 shadow-sm">
+                            <div className="bg-white rounded-kodem border border-brume p-6 shadow-sm">
                                 <div className="flex items-start justify-between gap-3">
                                     <div>
-                                        <h3 className="font-semibold">Rapport PDF</h3>
+                                        <h3 className="text-kodem-h2 font-semibold">Rapport PDF</h3>
                                         <p className="text-sm text-acier mt-1">Version imprimable et archivable du rapport.</p>
                                     </div>
                                     <span className="text-lg font-bold whitespace-nowrap">+{audit.pdf_price_label}</span>
@@ -293,15 +295,15 @@ export default function AuditResult({ meta, audit, paid, price, paidPrestations 
                                 <Link
                                     href={audit.pdf_paid ? `/audit/${audit.uuid}/pdf` : `/audit/${audit.uuid}/pdf/pay`}
                                     onClick={() => trackClick(audit.pdf_paid ? 'pdf_download_cta' : 'pdf_unlock_cta', { audit_uuid: audit.uuid })}
-                                    className="mt-4 inline-flex rounded-md bg-indigo-600 text-white px-4 py-2 text-sm font-medium hover:bg-indigo-700"
+                                    className="mt-4 inline-flex rounded-kodem bg-cobalt-600 text-white px-4 py-2 text-sm font-medium hover:bg-cobalt-700"
                                 >
                                     {audit.pdf_paid ? 'Télécharger le PDF' : 'Débloquer le PDF'}
                                 </Link>
                             </div>
-                            <div className="bg-white rounded-xl border border-brume p-6 shadow-sm">
+                            <div className="bg-white rounded-kodem border border-brume p-6 shadow-sm">
                                 <div className="flex items-start justify-between gap-3">
                                     <div>
-                                        <h3 className="font-semibold">Core Web Vitals</h3>
+                                        <h3 className="text-kodem-h2 font-semibold">Core Web Vitals</h3>
                                         <p className="text-sm text-acier mt-1">Score de performance Google (LCP, CLS, INP, FCP, TBT).</p>
                                     </div>
                                     <span className="text-lg font-bold whitespace-nowrap">+{audit.cwv_price_label}</span>
@@ -309,7 +311,7 @@ export default function AuditResult({ meta, audit, paid, price, paidPrestations 
                                 <Link
                                     href={audit.cwv_paid ? `/audit/${audit.uuid}/performance` : `/audit/${audit.uuid}/performance/pay`}
                                     onClick={() => trackClick(audit.cwv_paid ? 'cwv_view_cta' : 'cwv_unlock_cta', { audit_uuid: audit.uuid })}
-                                    className="mt-4 inline-flex rounded-md bg-indigo-600 text-white px-4 py-2 text-sm font-medium hover:bg-indigo-700"
+                                    className="mt-4 inline-flex rounded-kodem bg-cobalt-600 text-white px-4 py-2 text-sm font-medium hover:bg-cobalt-700"
                                 >
                                     {audit.cwv_paid ? 'Voir les Core Web Vitals' : 'Débloquer les Core Web Vitals'}
                                 </Link>
@@ -318,21 +320,22 @@ export default function AuditResult({ meta, audit, paid, price, paidPrestations 
                     </>
                 )}
 
-                <section className="mt-12 bg-encre text-white rounded-xl p-8">
-                    <h2 className="text-xl font-semibold">Besoin d'aller plus loin ?</h2>
+                <section className="mt-12 bg-encre text-white rounded-kodem p-8">
+                    <SectionLabel className="text-cobalt-200 mb-3">ALLER PLUS LOIN</SectionLabel>
+                    <h2 className="text-kodem-h2 font-semibold">Besoin d'aller plus loin ?</h2>
                     <p className="mt-2 text-slate-300 text-sm">
                         Monitoring mensuel, remédiation assistée, hébergement managé : toutes nos prestations sont tarifées et disponibles en ligne.
                     </p>
                     <div className="mt-6 grid md:grid-cols-3 gap-4">
                         {paidPrestations.filter((p) => p.slug !== 'audit-seo' && p.slug !== 'audit-securite').slice(0, 3).map((p) => (
-                            <div key={p.slug} className="rounded-lg bg-cobalt-900 p-5">
+                            <div key={p.slug} className="rounded-kodem bg-cobalt-900 p-5">
                                 <div className="font-medium">{p.title}</div>
-                                <div className="text-xs text-indigo-300 mt-1">{p.price_label}</div>
+                                <div className="text-xs text-cobalt-300 mt-1 font-mono">{p.price_label}</div>
                                 <div className="text-sm text-slate-300 mt-2">{p.tagline}</div>
                             </div>
                         ))}
                     </div>
-                    <Link href="/prestations" className="mt-6 inline-block bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2.5 rounded-lg font-medium">
+                    <Link href="/prestations" className="mt-6 inline-block bg-cobalt-600 hover:bg-cobalt-500 text-white px-5 py-2.5 rounded-kodem font-medium">
                         Voir toutes les prestations
                     </Link>
                 </section>

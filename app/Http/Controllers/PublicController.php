@@ -13,9 +13,9 @@ class PublicController extends Controller
     {
         return Inertia::render('Public/Home', [
             'meta' => [
-                'title' => 'Kodem — Développement web, hébergement web, audit SEO et audit de sécurité',
-                'description' => 'Kodem, société de développement web, création de SaaS, hébergement web et audit SEO / audit de sécurité automatisé. Lancez votre audit en ligne gratuitement.',
-                'keywords' => 'audit SEO, audit de sécurité, développement web, hébergement web, création de saas',
+                'title' => 'Kodem — Création de site internet, logiciel et application web | Hébergement & audits',
+                'description' => 'Kodem conçoit votre site internet, application web ou logiciel sur-mesure, avec hébergement web managé et audits SEO et de sécurité automatisés. Testez votre site gratuitement en ligne.',
+                'keywords' => 'création site internet, création application web, création logiciel, hébergement web, développement web',
             ],
             'prestations' => PrestationCatalog::teaser(),
         ]);
@@ -25,11 +25,25 @@ class PublicController extends Controller
     {
         return Inertia::render('Public/Services', [
             'meta' => [
-                'title' => 'Prestations — Développement web, création SaaS, hébergement et audits | Kodem',
-                'description' => 'Toutes les prestations Kodem : développement web sur-mesure, création de SaaS, hébergement web managé, audit SEO et audit de sécurité automatisés.',
-                'keywords' => 'développement web, création de saas, hébergement web, audit SEO, audit de sécurité',
+                'title' => 'Prestations — Création de site internet, logiciel, application web & hébergement | Kodem',
+                'description' => 'Toutes les prestations Kodem : création de site internet, d\'application web et de logiciel sur-mesure, hébergement web managé, audit SEO et audit de sécurité automatisés.',
+                'keywords' => 'création site internet, application web, création logiciel, hébergement web, audit SEO, audit de sécurité',
             ],
             'prestations' => PrestationCatalog::all(),
+        ]);
+    }
+
+    public function hebergement(): Response
+    {
+        $prestation = collect(PrestationCatalog::all())->firstWhere('slug', 'hebergement-web');
+
+        return Inertia::render('Public/Hebergement', [
+            'meta' => [
+                'title' => 'Hébergement web managé — sécurisé, sauvegardé, monitoré | Kodem',
+                'description' => 'Hébergement web managé pour vos sites et applications : TLS automatique, sauvegardes chiffrées, WAF et monitoring 24/7.',
+                'keywords' => 'hébergement web, hébergement web managé, hébergement sécurisé, hébergement application web',
+            ],
+            'prestation' => $prestation,
         ]);
     }
 

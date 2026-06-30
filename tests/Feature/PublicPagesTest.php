@@ -17,11 +17,11 @@ class PublicPagesTest extends TestCase
             ->assertInertia(fn (AssertableInertia $page) => $page
                 ->component('Public/Home')
                 ->where('meta.title', fn ($t) => str_contains(strtolower($t), 'kodem'))
-                ->where('meta.keywords', fn ($k) => str_contains($k, 'audit SEO')
-                    && str_contains($k, 'audit de sécurité')
-                    && str_contains($k, 'développement web')
+                ->where('meta.keywords', fn ($k) => str_contains($k, 'création site internet')
+                    && str_contains($k, 'création application web')
+                    && str_contains($k, 'création logiciel')
                     && str_contains($k, 'hébergement web')
-                    && str_contains($k, 'création de saas'))
+                    && str_contains($k, 'développement web'))
                 ->has('prestations', 4)
             );
     }

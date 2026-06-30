@@ -18,6 +18,7 @@ use App\Http\Controllers\MonitoringController;
 use App\Http\Controllers\TrackingController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicController;
+use App\Http\Controllers\SitemapController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -25,9 +26,11 @@ use Illuminate\Support\Facades\Route;
  */
 Route::get('/', [PublicController::class, 'home'])->name('home');
 Route::get('/prestations', [PublicController::class, 'services'])->name('services');
+Route::get('/hebergement-web', [PublicController::class, 'hebergement'])->name('hebergement');
 Route::get('/contact', [PublicController::class, 'contact'])->name('contact');
 Route::get('/mentions-legales', [PublicController::class, 'mentions'])->name('mentions');
 Route::get('/cgv', [PublicController::class, 'cgv'])->name('cgv');
+Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 
 Route::post('/contact', [ContactController::class, 'store'])
     ->middleware('throttle:contact')
