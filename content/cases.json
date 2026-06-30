@@ -1,0 +1,38 @@
+[
+    {
+        "slug": "photomaton",
+        "titre": "Photomaton événementiel connecté",
+        "secteur": "événementiel",
+        "resume": "Borne photo pilotée par logiciel custom, déployée sur événement — impression immédiate, zéro intervention manuelle pendant la session.",
+        "probleme": "Le client avait besoin d'une borne photo autonome pour ses événements : impression immédiate, partage numérique et collecte de données opt-in, sans dépendre d'une solution propriétaire verrouillée.",
+        "contrainte": "La borne devait fonctionner hors ligne pendant l'événement (réseau non garanti sur site), imprimer en moins de 10 secondes et ne nécessiter aucune intervention humaine entre les sessions.",
+        "choix": "Développement d'un logiciel embarqué sur Linux léger avec file d'impression locale et synchronisation différée des données. Stack choisie pour sa fiabilité sur matériel bas de gamme et son contrôle total du cycle de vie — sans abonnement tiers.",
+        "resultats": [
+            { "label": "Tirages sur l'événement", "valeur": "// TODO: nombre réel de tirages" },
+            { "label": "Temps d'impression moyen", "valeur": "// TODO: secondes réelles mesurées" },
+            { "label": "Pannes pendant la session", "valeur": "// TODO: 0 ou chiffre réel constaté" },
+            { "label": "Durée du déploiement", "valeur": "// TODO: jours réels de l'événement" }
+        ],
+        "image": "// TODO: visuel WebP <300ko — borne en situation sur événement",
+        "cas_date": "// TODO: mois/année de l'événement",
+        "testimonial_slug": "photomaton-client"
+    },
+    {
+        "slug": "ecran-raspberry",
+        "titre": "Écran piloté par Raspberry Pi",
+        "secteur": "signalétique dynamique",
+        "resume": "Affichage dynamique géré depuis un back-office web, déployé sur Raspberry Pi existants — contenu mis à jour à distance, zéro déplacement sur site.",
+        "probleme": "Le client gérait plusieurs écrans d'affichage en point de vente via des clés USB. Chaque mise à jour nécessitait un déplacement physique et il ne pouvait pas modifier le contenu en urgence.",
+        "contrainte": "Le parc comprenait des Raspberry Pi 3 existants à conserver. La solution devait fonctionner sur ce matériel sans remplacement, avec une connexion réseau variable selon les sites.",
+        "choix": "Back-office Laravel avec API de diffusion de contenu et lecteur léger Python/Chromium sur les Pi. Mise à jour automatique au prochain redémarrage ou en push si le réseau est disponible — zéro dépendance cloud externe.",
+        "resultats": [
+            { "label": "Écrans gérés depuis un seul back-office", "valeur": "// TODO: nombre d'écrans réels" },
+            { "label": "Temps de mise à jour du contenu", "valeur": "// TODO: minutes ou secondes réelles" },
+            { "label": "Déplacements évités sur 12 mois", "valeur": "// TODO: nombre de déplacements évités" },
+            { "label": "Uptime moyen par écran", "valeur": "// TODO: % uptime réel mesuré" }
+        ],
+        "image": "// TODO: visuel WebP <300ko — Raspberry Pi et écran en situation réelle",
+        "cas_date": "// TODO: mois/année du déploiement",
+        "testimonial_slug": "ecran-raspberry-client"
+    }
+]

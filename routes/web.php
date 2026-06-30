@@ -30,6 +30,11 @@ Route::get('/hebergement-web', [PublicController::class, 'hebergement'])->name('
 Route::get('/contact', [PublicController::class, 'contact'])->name('contact');
 Route::get('/mentions-legales', [PublicController::class, 'mentions'])->name('mentions');
 Route::get('/cgv', [PublicController::class, 'cgv'])->name('cgv');
+Route::get('/realisations', [PublicController::class, 'realisations'])->name('realisations.index');
+Route::get('/realisations/{slug}', [PublicController::class, 'realisationShow'])->name('realisations.show');
+Route::get('/expertises', [PublicController::class, 'expertises'])->name('expertises');
+Route::get('/zone-intervention', [PublicController::class, 'zoneIntervention'])->name('zone-intervention');
+Route::get('/notes', [PublicController::class, 'notes'])->name('notes');
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 
 Route::post('/contact', [ContactController::class, 'store'])

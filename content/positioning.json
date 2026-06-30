@@ -1,0 +1,40 @@
+{
+    "hero_title": "Dispositifs connectés sur site — conçus, déployés, sécurisés.",
+    "hero_baseline": "KODEM développe le logiciel qui pilote vos bornes, écrans et installations interactives. Intervention physique en Nouvelle-Aquitaine, exploitation dans la durée.",
+    "value_prop": "Un logiciel embarqué tient la nuit d'un événement ou l'année d'un espace culturel. KODEM conçoit le système complet : l'interface sur l'écran, la remontée des données, le déploiement sur place et la supervision après la livraison.",
+    "proof_points": [
+        { "valeur": "// TODO: nombre de dispositifs déployés", "label": "dispositifs actifs" },
+        { "valeur": "// TODO: uptime moyen sur événements (%)", "label": "uptime moyen" },
+        { "valeur": "// TODO: délai moyen de déploiement", "label": "de la commande au site" },
+        { "valeur": "// TODO: ancienneté en années", "label": "ans d'expérience terrain" }
+    ],
+    "capabilities": [
+        {
+            "titre": "Développement",
+            "role_support": "Logiciel embarqué et interfaces pilotant les dispositifs physiques — du prototype à la mise en production."
+        },
+        {
+            "titre": "Hébergement",
+            "role_support": "Back-office et flux de données hébergés, sauvegardés quotidiennement, supervisés 24/7."
+        },
+        {
+            "titre": "SEO",
+            "role_support": "Visibilité locale sur les requêtes de décision et de comparaison — pas du volume générique."
+        },
+        {
+            "titre": "Sécurité",
+            "role_support": "Hardening des dispositifs exposés au public : TLS, WAF, mises à jour maîtrisées, aucune surface inutile."
+        }
+    ],
+    "secteurs": [
+        "événementiel",
+        "retail / PLV",
+        "hôtellerie-restauration",
+        "musées & lieux culturels",
+        "collectivités",
+        "signalétique dynamique"
+    ],
+    "ancrage_local": "Nouvelle-Aquitaine — Poitiers",
+    "cta_primary": { "label": "Parler de votre projet", "href": "/contact" },
+    "cta_secondary": { "label": "Voir les réalisations", "href": "/realisations" }
+}

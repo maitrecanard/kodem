@@ -1,0 +1,54 @@
+{
+  "endpoints": [
+    {
+      "route": "GET /realisations",
+      "handler": "App\\Http\\Controllers\\PublicController@realisations",
+      "version": 1,
+      "handler_hash": "new-2026-06-30",
+      "last_modified": "2026-06-30",
+      "last_tested": "2026-06-30",
+      "last_status": "PASS",
+      "test_file": "tests/Feature/VitrineTest.php"
+    },
+    {
+      "route": "GET /realisations/{slug}",
+      "handler": "App\\Http\\Controllers\\PublicController@realisationShow",
+      "version": 1,
+      "handler_hash": "new-2026-06-30",
+      "last_modified": "2026-06-30",
+      "last_tested": "2026-06-30",
+      "last_status": "PASS",
+      "test_file": "tests/Feature/VitrineTest.php"
+    },
+    {
+      "route": "GET /expertises",
+      "handler": "App\\Http\\Controllers\\PublicController@expertises",
+      "version": 1,
+      "handler_hash": "new-2026-06-30",
+      "last_modified": "2026-06-30",
+      "last_tested": "2026-06-30",
+      "last_status": "PASS",
+      "test_file": "tests/Feature/VitrineTest.php"
+    },
+    {
+      "route": "GET /zone-intervention",
+      "handler": "App\\Http\\Controllers\\PublicController@zoneIntervention",
+      "version": 1,
+      "handler_hash": "new-2026-06-30",
+      "last_modified": "2026-06-30",
+      "last_tested": "2026-06-30",
+      "last_status": "PASS",
+      "test_file": "tests/Feature/VitrineTest.php"
+    },
+    {
+      "route": "GET /notes",
+      "handler": "App\\Http\\Controllers\\PublicController@notes",
+      "version": 1,
+      "handler_hash": "new-2026-06-30",
+      "last_modified": "2026-06-30",
+      "last_tested": "2026-06-30",
+      "last_status": "PASS",
+      "test_file": "tests/Feature/VitrineTest.php"
+    }
+  ]
+}
