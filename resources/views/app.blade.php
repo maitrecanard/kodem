@@ -41,6 +41,27 @@
                     'inLanguage' => 'fr-FR',
                     'publisher' => ['@id' => $appUrl.'/#organization'],
                 ],
+                [
+                    '@type' => 'LocalBusiness',
+                    '@id' => $appUrl.'/#localbusiness',
+                    'name' => $appName,
+                    'url' => $appUrl,
+                    'image' => $appUrl.'/og-image.png',
+                    'address' => [
+                        '@type' => 'PostalAddress',
+                        'streetAddress' => '', // TODO NAP: adresse réelle
+                        'postalCode' => '', // TODO NAP: code postal réel
+                        'addressLocality' => 'Poitiers', // TODO NAP: ville réelle
+                        'addressCountry' => 'FR',
+                    ],
+                    'geo' => [
+                        '@type' => 'GeoCoordinates',
+                        'latitude' => '', // TODO NAP: latitude réelle (ex: 46.5802)
+                        'longitude' => '', // TODO NAP: longitude réelle (ex: 0.3404)
+                    ],
+                    'telephone' => '', // TODO NAP: téléphone réel
+                    'areaServed' => 'Nouvelle-Aquitaine',
+                ],
             ];
             foreach (\App\Services\PrestationCatalog::all() as $p) {
                 $node = [
@@ -60,6 +81,9 @@
                         'url' => $appUrl,
                     ];
                 }
+                $graph[] = $node;
+            }
+            foreach (\Illuminate\Support\Arr::wrap(data_get($page, 'props.jsonLd', [])) as $node) {
                 $graph[] = $node;
             }
             $structuredData = [

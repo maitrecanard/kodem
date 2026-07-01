@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\VitrineContent;
 use Illuminate\Http\Response;
 
 class SitemapController extends Controller
@@ -17,7 +18,15 @@ class SitemapController extends Controller
             ['loc' => url('/contact'), 'changefreq' => 'monthly', 'priority' => '0.6'],
             ['loc' => url('/mentions-legales'), 'changefreq' => 'yearly', 'priority' => '0.3'],
             ['loc' => url('/cgv'), 'changefreq' => 'yearly', 'priority' => '0.3'],
+            ['loc' => url('/realisations'), 'changefreq' => 'monthly', 'priority' => '0.8'],
+            ['loc' => url('/expertises'), 'changefreq' => 'monthly', 'priority' => '0.6'],
+            ['loc' => url('/zone-intervention'), 'changefreq' => 'monthly', 'priority' => '0.6'],
+            ['loc' => url('/notes'), 'changefreq' => 'monthly', 'priority' => '0.6'],
         ];
+
+        foreach (VitrineContent::cases() as $cas) {
+            $urls[] = ['loc' => url('/realisations/'.$cas['slug']), 'changefreq' => 'monthly', 'priority' => '0.7'];
+        }
 
         $lastmod = now()->toDateString();
 

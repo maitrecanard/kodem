@@ -54,6 +54,9 @@ export default function PublicLayout({ meta, children }) {
                         <nav className="hidden md:flex items-center gap-6 text-sm text-acier">
                             <Link href="/" onClick={() => trackClick('nav_home')} className="hover:text-cobalt-600">Accueil</Link>
                             <Link href="/prestations" onClick={() => trackClick('nav_services')} className="hover:text-cobalt-600">Prestations</Link>
+                            <Link href="/realisations" onClick={() => trackClick('nav_realisations')} className="hover:text-cobalt-600">Réalisations</Link>
+                            <Link href="/expertises" onClick={() => trackClick('nav_expertises')} className="hover:text-cobalt-600">Expertises</Link>
+                            <Link href="/zone-intervention" onClick={() => trackClick('nav_zone_intervention')} className="hover:text-cobalt-600">Zone d'intervention</Link>
                             <Link href="/audit" onClick={() => trackClick('nav_audit')} className="hover:text-cobalt-600">Audit en ligne</Link>
                             <Link href="/contact" onClick={() => trackClick('nav_contact')} className="hover:text-cobalt-600">Contact</Link>
                         </nav>
@@ -75,7 +78,7 @@ export default function PublicLayout({ meta, children }) {
             <main className="flex-1">{children}</main>
 
             <footer className="bg-encre text-brume mt-16">
-                <div className="max-w-6xl mx-auto px-6 py-12 grid gap-8 md:grid-cols-4">
+                <div className="max-w-6xl mx-auto px-6 py-12 grid gap-8 md:grid-cols-5">
                     <div>
                         <div className="mb-3">
                             <BrandWordmark className="text-xl text-white" bracketClassName="text-cobalt-400" />
@@ -92,6 +95,14 @@ export default function PublicLayout({ meta, children }) {
                             <li><Link href="/hebergement-web" className="hover:text-white">Hébergement web</Link></li>
                             <li><Link href="/audit" className="hover:text-white">Audit SEO</Link></li>
                             <li><Link href="/audit" className="hover:text-white">Audit de sécurité</Link></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 className="text-white font-semibold mb-3">Découvrir</h3>
+                        <ul className="space-y-2 text-sm">
+                            <li><Link href="/realisations" className="hover:text-white">Réalisations</Link></li>
+                            <li><Link href="/expertises" className="hover:text-white">Expertises</Link></li>
+                            <li><Link href="/zone-intervention" className="hover:text-white">Zone d'intervention</Link></li>
                         </ul>
                     </div>
                     <div>
