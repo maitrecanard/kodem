@@ -28,7 +28,14 @@ class StripeCheckoutService
                     'currency' => config('audits.premium.currency'),
                     'product_data' => [
                         'name' => config('audits.premium.product_name'),
-                        'description' => "Audit SEO + Sécurité pour {$auditRequest->domain} — livraison sous 24-48h",
+                        // Le délai et le régime de TVA doivent apparaître partout où le
+                        // prix est affiché, y compris sur la page de paiement Stripe.
+                        'description' => sprintf(
+                            'Rapport SEO & sécurité pour %s — rédigé manuellement, livré sous %s. %s',
+                            $auditRequest->domain,
+                            config('audits.premium.delivery_hours'),
+                            config('audits.vat.applicable') ? '' : config('audits.vat.legal_mention')
+                        ),
                     ],
                     'unit_amount' => config('audits.premium.price_cents'),
                 ],

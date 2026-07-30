@@ -4,7 +4,7 @@ import { trackClick } from '@/lib/track';
 import Banner from '@/Components/Banner';
 import SectionLabel from '@/Components/SectionLabel';
 
-export default function Audit({ meta, price, paidPrestations = [] }) {
+export default function Audit({ meta, premium, paidPrestations = [], flash }) {
     const { data, setData, post, processing, errors } = useForm({
         url: '',
         email: '',
@@ -20,6 +20,11 @@ export default function Audit({ meta, price, paidPrestations = [] }) {
     return (
         <PublicLayout meta={meta}>
             <Banner
+                image="/images/banniere-kodem.webp"
+                imageSources={[
+                    { src: '/images/banniere-kodem.webp', width: 1006 },
+                    { src: '/images/banniere-kodem-2x.webp', width: 2012 },
+                ]}
                 title="Audit SEO & sécurité en ligne"
                 cta={
                     <a
@@ -33,10 +38,23 @@ export default function Audit({ meta, price, paidPrestations = [] }) {
 
             <section id="audit-form" className="max-w-3xl mx-auto px-6 py-16">
                 <SectionLabel className="mb-4">AUDIT AUTOMATISÉ</SectionLabel>
-                <p className="text-acier mb-6">
-                    Saisissez une URL. Aperçu du score global gratuit, rapport complet et
-                    recommandations à {price?.label ?? '29,00 €'}.
+                <p className="animate-kodem-fade text-acier mb-6">
+                    Saisissez une URL et obtenez gratuitement le score global de votre site,
+                    en quelques secondes. Pour une analyse détaillée avec des recommandations
+                    rédigées pour votre cas, commandez le{' '}
+                    <Link href="/audits/premium" className="text-cobalt-600 underline">
+                        rapport complet
+                    </Link>
+                    .
                 </p>
+                {flash?.error && (
+                    <div
+                        role="alert"
+                        className="mb-6 rounded-kodem border border-rose-200 bg-rose-50 text-rose-800 px-4 py-3"
+                    >
+                        {flash.error}
+                    </div>
+                )}
                 <form onSubmit={submit} className="bg-white text-encre rounded-kodem shadow-xl border border-brume p-6 md:p-8">
                     <label className="block mb-4">
                         <span className="block text-sm font-medium mb-1">URL du site à auditer</span>
@@ -85,13 +103,12 @@ export default function Audit({ meta, price, paidPrestations = [] }) {
                         {processing ? 'Audit en cours…' : 'Lancer l\'audit'}
                     </button>
                     <p className="mt-3 text-xs text-acier text-center">
-                        Aperçu gratuit immédiat. Rapport complet à {price?.label ?? '29,00 €'} après paiement.
-                        Vos données sont anonymisées. 3 audits/h maximum.
+                        Gratuit et immédiat. Vos données sont anonymisées. 3 audits/h maximum.
                     </p>
                 </form>
             </section>
 
-            <section className="max-w-5xl mx-auto px-6 py-16">
+            <section className="kodem-reveal max-w-5xl mx-auto px-6 py-16">
                 <SectionLabel number="01" className="justify-center mb-4">CE QUE NOUS VÉRIFIONS</SectionLabel>
                 <h2 className="text-kodem-h1 font-bold text-center">Ce que nous vérifions</h2>
                 <div className="grid md:grid-cols-2 gap-8 mt-10">
@@ -126,9 +143,9 @@ export default function Audit({ meta, price, paidPrestations = [] }) {
                     <p className="text-acier text-center mt-2 max-w-2xl mx-auto">
                         Prolongez l'audit avec nos prestations automatiques : monitoring, remédiation, hébergement managé.
                     </p>
-                    <div className="grid md:grid-cols-3 gap-6 mt-8">
+                    <div className="kodem-reveal-grid kodem-reveal-grid--3 grid md:grid-cols-3 gap-6 mt-8">
                         {paidPrestations.filter((p) => p.price_from !== 0).slice(0, 3).map((p) => (
-                            <article key={p.slug} className="bg-white rounded-kodem border border-brume p-6 shadow-sm">
+                            <article key={p.slug} className="kodem-card bg-white rounded-kodem border border-brume p-6 shadow-sm">
                                 <h3 className="text-kodem-h2 font-semibold">{p.title}</h3>
                                 <p className="text-xs text-cobalt-600 mt-1 font-mono">{p.price_label}</p>
                                 <p className="text-sm mt-3 text-acier">{p.tagline}</p>

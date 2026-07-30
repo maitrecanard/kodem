@@ -18,7 +18,7 @@ export default function AuditPdfCheckout({ meta, audit, price, driver }) {
                     <div className="flex items-center justify-between gap-4">
                         <div>
                             <h1 className="text-2xl font-bold">Add-on · Rapport PDF</h1>
-                            <p className="text-sm text-acier mt-1">
+                            <p className="animate-kodem-slide text-sm text-acier mt-1">
                                 Version PDF téléchargeable et imprimable du rapport d'audit pour <span className="font-mono break-all">{audit.url}</span>.
                             </p>
                         </div>

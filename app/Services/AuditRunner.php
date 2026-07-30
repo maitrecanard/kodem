@@ -2,11 +2,14 @@
 
 namespace App\Services;
 
-use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Facades\Http;
 
 class AuditRunner
 {
+    protected const MAX_REDIRECTS = 5;
+
+    protected const USER_AGENT = 'KodemAuditBot/1.0 (+https://kodem.fr)';
+
     /**
      * Exécute un audit complet (SEO + sécurité) sur une URL.
      *
@@ -26,24 +29,21 @@ class AuditRunner
             return $this->failure('URL invalide.');
         }
 
-        try {
-            $response = Http::timeout(15)
-                ->connectTimeout(10)
-                ->withUserAgent('KodemAuditBot/1.0 (+https://kodem.fr)')
-                ->withHeaders(['Accept' => 'text/html,*/*'])
-                ->withOptions(['allow_redirects' => ['max' => 5, 'track_redirects' => true]])
-                ->get($normalized);
-        } catch (\Throwable $e) {
-            return $this->failure('Le site est injoignable : '.$e->getMessage());
+        $fetched = $this->fetch($normalized);
+        if (is_string($fetched)) {
+            return $this->failure($fetched);
         }
+
+        $response = $fetched['response'];
+        $finalUrl = $fetched['url'];
 
         $headers = $this->normalizeHeaders($response->headers());
         $body = (string) $response->body();
 
-        $seo = $this->analyseSeo($normalized, $body, $headers, $response->status());
-        $sec = $this->analyseSecurity($normalized, $headers, $response->status());
+        $companions = $this->probeCompanions($finalUrl);
 
-        $companions = $this->probeCompanions($normalized);
+        $seo = $this->analyseSeo($finalUrl, $body, $headers, $response->status(), $companions);
+        $sec = $this->analyseSecurity($finalUrl, $headers, $response->status());
 
         $seo['checks'] = $this->attachRecommendations($seo['checks']);
         $sec['checks'] = $this->attachRecommendations($sec['checks']);
@@ -60,9 +60,10 @@ class AuditRunner
             'score_security' => $scoreSec,
             'score_total' => $scoreTotal,
             'results' => [
-                'url' => $normalized,
+                'url' => $finalUrl,
+                'requested_url' => $normalized,
                 'http_status' => $response->status(),
-                'response_time_ms' => (int) round($response->handlerStats()['total_time'] ?? 0 * 1000),
+                'response_time_ms' => $fetched['elapsed_ms'],
                 'seo' => $seo,
                 'security' => $sec,
                 'companions' => $companions,
@@ -71,6 +72,93 @@ class AuditRunner
             ],
             'error' => null,
         ];
+    }
+
+    /**
+     * Récupère l'URL en suivant les redirections MANUELLEMENT.
+     *
+     * Le client HTTP suivrait les redirections tout seul, mais sans repasser par
+     * le garde-fou : une URL publique pourrait alors rediriger vers une adresse
+     * interne et contourner le contrôle SSRF. Chaque saut est donc revalidé par
+     * normalizeUrl(). Mesure aussi le temps réel de la requête.
+     *
+     * @return array{response: \Illuminate\Http\Client\Response, url: string, elapsed_ms: int}|string
+     *         Une chaîne signale l'échec et porte le message destiné à l'utilisateur.
+     */
+    protected function fetch(string $url): array|string
+    {
+        $current = $url;
+        $start = microtime(true);
+
+        for ($hop = 0; $hop <= self::MAX_REDIRECTS; $hop++) {
+            try {
+                $response = Http::timeout(15)
+                    ->connectTimeout(10)
+                    ->withUserAgent(self::USER_AGENT)
+                    ->withHeaders(['Accept' => 'text/html,*/*'])
+                    ->withOptions(['allow_redirects' => false])
+                    ->get($current);
+            } catch (\Throwable $e) {
+                return 'Le site est injoignable : '.$e->getMessage();
+            }
+
+            $status = $response->status();
+
+            if ($status < 300 || $status >= 400) {
+                return [
+                    'response' => $response,
+                    'url' => $current,
+                    'elapsed_ms' => (int) round((microtime(true) - $start) * 1000),
+                ];
+            }
+
+            $location = trim((string) $response->header('Location'));
+            if ($location === '') {
+                return 'Redirection HTTP '.$status.' sans en-tête Location.';
+            }
+
+            $next = $this->absolutize($current, $location);
+            $validated = $next === null ? null : $this->normalizeUrl($next);
+
+            if ($validated === null) {
+                return 'Redirection vers une URL non autorisée ou interne : '.$location;
+            }
+
+            $current = $validated;
+        }
+
+        return 'Trop de redirections (plus de '.self::MAX_REDIRECTS.').';
+    }
+
+    /**
+     * Résout un en-tête Location relatif en URL absolue.
+     */
+    protected function absolutize(string $base, string $location): ?string
+    {
+        if (preg_match('~^https?://~i', $location)) {
+            return $location;
+        }
+
+        $parts = parse_url($base);
+        if (! isset($parts['scheme'], $parts['host'])) {
+            return null;
+        }
+
+        $origin = $parts['scheme'].'://'.$parts['host'].(isset($parts['port']) ? ':'.$parts['port'] : '');
+
+        // Protocole-relatif : //exemple.fr/page
+        if (str_starts_with($location, '//')) {
+            return $parts['scheme'].':'.$location;
+        }
+
+        if (str_starts_with($location, '/')) {
+            return $origin.$location;
+        }
+
+        $path = $parts['path'] ?? '/';
+        $dir = rtrim(substr($path, 0, (int) strrpos($path, '/') + 1), '/');
+
+        return $origin.$dir.'/'.$location;
     }
 
     /**
@@ -178,16 +266,32 @@ class AuditRunner
      * @param array<string,string> $headers
      * @return array{checks: array<int, array<string,mixed>>}
      */
-    protected function analyseSeo(string $url, string $body, array $headers, int $status): array
+    protected function analyseSeo(string $url, string $body, array $headers, int $status, array $companions = []): array
     {
-        $title = $this->regexFirst('~<title[^>]*>(.*?)</title>~is', $body);
-        $metaDesc = $this->regexFirst('~<meta[^>]+name=["\']description["\'][^>]+content=["\']([^"\']+)["\'][^>]*>~i', $body);
-        $h1 = $this->regexFirst('~<h1[^>]*>(.*?)</h1>~is', $body);
-        $og = $this->regexAll('~<meta[^>]+property=["\']og:(\w+)["\'][^>]+content=["\']([^"\']*)["\'][^>]*>~i', $body);
-        $twitter = $this->regexAll('~<meta[^>]+name=["\']twitter:(\w+)["\'][^>]+content=["\']([^"\']*)["\'][^>]*>~i', $body);
-        $lang = $this->regexFirst('~<html[^>]*lang=["\']([^"\']+)["\']~i', $body);
-        $canonical = $this->regexFirst('~<link[^>]+rel=["\']canonical["\'][^>]+href=["\']([^"\']+)["\'][^>]*>~i', $body);
-        $viewport = (bool) preg_match('~<meta[^>]+name=["\']viewport["\']~i', $body);
+        $dom = $this->parseHtml($body);
+
+        $title = $this->firstText($dom, '//title');
+        $h1 = $this->firstText($dom, '//h1');
+        $lang = $this->firstAttr($dom, '//html/@lang');
+        $metas = $this->metaTags($dom);
+
+        $metaDesc = $metas['name']['description'] ?? null;
+        $viewport = isset($metas['name']['viewport']);
+        $canonical = $this->linkHref($dom, 'canonical');
+
+        $og = [];
+        foreach ($metas['property'] ?? [] as $key => $value) {
+            if (str_starts_with($key, 'og:')) {
+                $og[substr($key, 3)] = $value;
+            }
+        }
+
+        $twitter = [];
+        foreach ($metas['name'] ?? [] as $key => $value) {
+            if (str_starts_with($key, 'twitter:')) {
+                $twitter[substr($key, 8)] = $value;
+            }
+        }
 
         $checks = [
             [
@@ -260,13 +364,32 @@ class AuditRunner
                 'weight' => 1,
                 'detail' => $headers['content-encoding'] ?? 'aucune',
             ],
+            [
+                'key' => 'robots_txt',
+                'label' => 'Fichier robots.txt accessible',
+                'status' => ($companions['robots.txt']['found'] ?? false) ? 'pass' : 'warn',
+                'weight' => 1,
+                'detail' => ($companions['robots.txt']['found'] ?? false)
+                    ? 'présent'
+                    : 'introuvable (HTTP '.($companions['robots.txt']['status'] ?? 0).')',
+            ],
+            [
+                'key' => 'sitemap_xml',
+                'label' => 'Sitemap XML accessible',
+                'status' => ($companions['sitemap.xml']['found'] ?? false) ? 'pass' : 'warn',
+                'weight' => 1,
+                'detail' => ($companions['sitemap.xml']['found'] ?? false)
+                    ? 'présent'
+                    : 'introuvable (HTTP '.($companions['sitemap.xml']['status'] ?? 0).')',
+            ],
         ];
 
         return [
             'summary' => [
-                'title' => $title ? trim(strip_tags($title)) : null,
+                // Le DOM renvoie déjà du texte : plus de strip_tags à faire ici.
+                'title' => $title,
                 'description' => $metaDesc,
-                'h1' => $h1 ? trim(strip_tags($h1)) : null,
+                'h1' => $h1,
                 'lang' => $lang,
                 'canonical' => $canonical,
             ],
@@ -410,23 +533,99 @@ class AuditRunner
         if (! isset($parts['host'])) {
             return null;
         }
-        $host = strtolower($parts['host']);
+        // Seuls http/https sont audités : file://, gopher://, dict:// etc. sont
+        // des vecteurs SSRF classiques une fois passés à un client HTTP.
+        if (! in_array(strtolower($parts['scheme'] ?? ''), ['http', 'https'], true)) {
+            return null;
+        }
+        $host = strtolower(trim($parts['host'], '[]'));
         if ($this->isBlockedHost($host)) {
             return null;
         }
         return $url;
     }
 
+    /**
+     * Garde-fou SSRF.
+     *
+     * L'URL est fournie par un visiteur anonyme : on doit garantir que le
+     * serveur n'ira pas interroger une ressource interne pour son compte.
+     * Le filtrage se fait sur les ADRESSES IP réellement résolues, pas sur la
+     * chaîne du nom d'hôte — un domaine public peut pointer vers 127.0.0.1 ou
+     * vers 169.254.169.254 (métadonnées d'instance cloud, qui exposent des
+     * identifiants), et une IP peut s'écrire en décimal ou en hexadécimal.
+     */
     protected function isBlockedHost(string $host): bool
     {
-        $blocked = ['localhost', '127.0.0.1', '0.0.0.0', '::1'];
-        if (in_array($host, $blocked, true)) {
+        if (in_array($host, ['localhost', 'localhost.localdomain'], true)) {
             return true;
         }
-        if (preg_match('~^(10|192\.168|172\.(1[6-9]|2\d|3[01]))\.~', $host)) {
-            return true;
+        // TLD réservés à un usage interne (RFC 6762 / 8375 / usage courant).
+        foreach (['.localhost', '.local', '.internal', '.intranet', '.home.arpa'] as $suffix) {
+            if (str_ends_with($host, $suffix)) {
+                return true;
+            }
         }
+
+        if (filter_var($host, FILTER_VALIDATE_IP)) {
+            return ! $this->isPublicIp($host);
+        }
+
+        $ips = $this->resolveHost($host);
+
+        // Nom non résolu : on laisse le client HTTP échouer de lui-même plutôt
+        // que de refuser un domaine valide dont la résolution a momentanément
+        // échoué. Aucune requête interne n'est possible dans ce cas.
+        if ($ips === []) {
+            return false;
+        }
+
+        foreach ($ips as $ip) {
+            if (! $this->isPublicIp($ip)) {
+                return true;
+            }
+        }
+
         return false;
+    }
+
+    /**
+     * FILTER_FLAG_NO_PRIV_RANGE couvre 10/8, 172.16/12, 192.168/16, fc00::/7 ;
+     * FILTER_FLAG_NO_RES_RANGE couvre 0/8, 127/8, 169.254/16, 240/4, ::1, fe80::/10.
+     */
+    protected function isPublicIp(string $ip): bool
+    {
+        return filter_var(
+            $ip,
+            FILTER_VALIDATE_IP,
+            FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE
+        ) !== false;
+    }
+
+    /**
+     * @return array<int, string> IPv4 et IPv6 résolues pour cet hôte
+     */
+    protected function resolveHost(string $host): array
+    {
+        $ips = [];
+
+        $v4 = gethostbynamel($host); // false si non résolu, sans warning
+        if (is_array($v4)) {
+            $ips = $v4;
+        }
+
+        // checkdnsrr d'abord : dns_get_record émettrait un warning sur un
+        // domaine sans enregistrement AAAA.
+        if (checkdnsrr($host, 'AAAA')) {
+            $records = dns_get_record($host, DNS_AAAA);
+            foreach (is_array($records) ? $records : [] as $record) {
+                if (isset($record['ipv6'])) {
+                    $ips[] = $record['ipv6'];
+                }
+            }
+        }
+
+        return $ips;
     }
 
     /**
@@ -442,25 +641,115 @@ class AuditRunner
         return $out;
     }
 
-    protected function regexFirst(string $re, string $h): ?string
+    /**
+     * Analyse le HTML avec un vrai parseur DOM.
+     *
+     * Les expressions régulières utilisées auparavant imposaient un ordre
+     * d'attributs (`name` avant `content`) et un type de guillemets : un
+     * `<meta content="…" name="description">`, pourtant valide et courant,
+     * était vu comme absent. Le DOM est indifférent à l'ordre, aux guillemets
+     * et aux espaces.
+     *
+     * Retourne null si le corps est vide ou totalement illisible — les
+     * contrôles retombent alors sur "absent", ce qui est le verdict correct.
+     */
+    protected function parseHtml(string $body): ?\DOMXPath
     {
-        if (! preg_match($re, $h, $m)) {
+        if (trim($body) === '') {
             return null;
         }
-        return $m[1] ?? $m[0] ?? null;
+
+        // libxml signale des « erreurs » sur tout HTML5 valide (balises qu'il ne
+        // connaît pas). On bascule sur son buffer interne le temps du parsing —
+        // le succès reste vérifié par la valeur de retour de loadHTML().
+        $previous = libxml_use_internal_errors(true);
+        $doc = new \DOMDocument;
+
+        // LIBXML_NONET : interdit toute résolution d'entité externe par le
+        // parseur (XXE / SSRF de second niveau sur un document hostile).
+        $loaded = $doc->loadHTML(
+            '<?xml encoding="utf-8" ?>'.$body,
+            LIBXML_NONET | LIBXML_NOERROR | LIBXML_NOWARNING
+        );
+
+        libxml_clear_errors();
+        libxml_use_internal_errors($previous);
+
+        return $loaded ? new \DOMXPath($doc) : null;
+    }
+
+    protected function firstText(?\DOMXPath $dom, string $query): ?string
+    {
+        $node = $dom?->query($query)?->item(0);
+        if ($node === null) {
+            return null;
+        }
+        $text = trim($node->textContent);
+
+        return $text === '' ? null : $text;
+    }
+
+    protected function firstAttr(?\DOMXPath $dom, string $query): ?string
+    {
+        $node = $dom?->query($query)?->item(0);
+        $value = $node === null ? '' : trim($node->nodeValue ?? '');
+
+        return $value === '' ? null : $value;
     }
 
     /**
-     * @return array<string,string>
+     * Indexe toutes les balises meta par attribut porteur (name / property),
+     * en minuscules, pour un accès insensible à la casse.
+     *
+     * @return array{name: array<string,string>, property: array<string,string>}
      */
-    protected function regexAll(string $re, string $h): array
+    protected function metaTags(?\DOMXPath $dom): array
     {
-        preg_match_all($re, $h, $m, PREG_SET_ORDER);
-        $out = [];
-        foreach ($m as $row) {
-            $out[strtolower($row[1])] = $row[2];
+        $out = ['name' => [], 'property' => []];
+        if ($dom === null) {
+            return $out;
         }
+
+        foreach ($dom->query('//meta') ?: [] as $meta) {
+            if (! $meta instanceof \DOMElement) {
+                continue;
+            }
+            $content = trim($meta->getAttribute('content'));
+            foreach (['name', 'property'] as $carrier) {
+                $key = strtolower(trim($meta->getAttribute($carrier)));
+                if ($key !== '' && ! isset($out[$carrier][$key])) {
+                    $out[$carrier][$key] = $content;
+                }
+            }
+        }
+
         return $out;
+    }
+
+    /**
+     * `rel` peut porter plusieurs valeurs séparées par des espaces
+     * (rel="alternate canonical") : on teste chaque jeton, pas la chaîne entière.
+     */
+    protected function linkHref(?\DOMXPath $dom, string $rel): ?string
+    {
+        if ($dom === null) {
+            return null;
+        }
+
+        foreach ($dom->query('//link') ?: [] as $link) {
+            if (! $link instanceof \DOMElement) {
+                continue;
+            }
+            $tokens = preg_split('~\s+~', strtolower(trim($link->getAttribute('rel')))) ?: [];
+            if (in_array($rel, $tokens, true)) {
+                $href = trim($link->getAttribute('href'));
+                if ($href !== '') {
+                    return $href;
+                }
+            }
+        }
+
+        return null;
     }
 
     protected function lenScore(?string $s, int $min, int $max): string

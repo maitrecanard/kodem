@@ -2,6 +2,7 @@ import { Link } from '@inertiajs/react';
 import PublicLayout from '@/Layouts/PublicLayout';
 import { trackClick } from '@/lib/track';
 import CaseStudy from '@/Components/CaseStudy';
+import CaseImage from '@/Components/CaseImage';
 import { TestimonialSection } from '@/Components/Testimonial';
 import ContactBlockMono from '@/Components/ContactBlockMono';
 
@@ -24,33 +25,26 @@ export default function RealisationShow({ meta, cas, testimonials = [] }) {
                 </h1>
 
                 {cas?.resume && (
-                    <p className="text-lg text-acier max-w-2xl mb-12">{cas.resume}</p>
+                    <p className="animate-kodem-slide text-lg text-acier max-w-2xl mb-12">{cas.resume}</p>
                 )}
             </div>
 
-            {/* Case image placeholder */}
-            {cas?.image && !cas.image.startsWith('// TODO') ? (
-                <div className="max-w-6xl mx-auto px-6 mb-12">
-                    <img
-                        src={cas.image}
-                        alt={cas.titre}
-                        loading="lazy"
-                        width={900}
-                        height={500}
-                        className="rounded-kodem w-full object-cover max-h-[500px]"
-                    />
-                </div>
-            ) : null}
+            {/* Encart visuel du cas — image réelle ou réserve d'image charte */}
+            <div className="max-w-6xl mx-auto px-6 mb-12">
+                <CaseImage cas={cas} variant="hero" />
+            </div>
 
             {/* Case study content */}
             <div className="max-w-6xl mx-auto px-6 pb-16">
-                <CaseStudy cas={cas} />
+                <div className="kodem-reveal">
+                    <CaseStudy cas={cas} />
+                </div>
 
-                {/* Testimonials for this case */}
+                {/* Testimonials for this case — se révèle carte par carte (cf. Testimonial.jsx) */}
                 <TestimonialSection items={testimonials} />
 
                 {/* CTA */}
-                <div className="mt-16 grid md:grid-cols-2 gap-8 items-start">
+                <div className="kodem-reveal mt-16 grid md:grid-cols-2 gap-8 items-start">
                     <div>
                         <p className="text-lg font-medium text-encre mb-2">
                             Un projet similaire à déployer ?

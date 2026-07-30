@@ -1,0 +1,24 @@
+[
+    {
+        "slug": "borne-evenement-sans-internet",
+        "titre": "Pourquoi une borne d'événement doit tenir sans internet",
+        "resume": "Sur un événement, le réseau n'est jamais garanti. Un dispositif qui dépend du cloud tombe avec la connexion. Le choix d'architecture qui l'évite : un réseau local autonome.",
+        "date": "juillet 2026",
+        "date_iso": "2026-07",
+        "cas_lie": "photomaton",
+        "sections": [
+            {
+                "titre": "Le constat",
+                "corps": "Sur un lieu d'événement, la connexion internet n'est pas fiable : wifi saturé par le public, couverture mobile faible, coupures. Un dispositif qui a besoin du cloud pour fonctionner s'arrête avec la connexion. Et le pire moment pour tomber en panne, c'est en pleine session, devant les visiteurs."
+            },
+            {
+                "titre": "Le choix : un réseau local autonome",
+                "corps": "Pour le photomaton déployé sur événement, l'architecture ne dépend d'aucun accès internet. Deux Raspberry Pi communiquent via un routeur dédié, en réseau local. Le premier pilote l'appareil photo et le flash ; le second sert une application web (Laravel) où les visiteurs récupèrent leurs photos en se connectant directement au routeur. Aucune donnée ne transite par un service tiers pendant la session."
+            },
+            {
+                "titre": "Ce que ça change",
+                "corps": "Le dispositif fonctionne même sans couverture réseau sur le site. Pas de dépendance à un service externe, pas d'abonnement, contrôle total du cycle de vie. La donnée reste locale, une synchronisation différée restant possible après l'événement si le besoin existe. C'est précisément ce qu'une solution cloud générique ne garantit pas."
+            }
+        ]
+    }
+]

@@ -3,8 +3,9 @@ import SectionLabel from '@/Components/SectionLabel';
 /**
  * CaseStudy — template §4 charte KODEM.
  * Renders a case study in order: problème → contrainte → choix → résultats.
- * A valeur starting with "// TODO" renders as a visible blocker in font-mono text-cobalt-600.
- * A real figure renders bold text-encre.
+ * Figures still marked "// TODO" (real §6 data not provided) are NEVER shown to
+ * visitors: they are filtered out, and the Résultat section is hidden until at
+ * least one real figure exists. Real figures render bold text-encre.
  * AA contrast guaranteed on papier background.
  *
  * @param {{ cas: object }} props
@@ -13,6 +14,7 @@ export default function CaseStudy({ cas }) {
     if (!cas) return null;
 
     const isTodo = (val) => typeof val === 'string' && val.startsWith('// TODO');
+    const resultats = (cas.resultats || []).filter((r) => !isTodo(r.valeur));
 
     return (
         <article className="max-w-3xl">
@@ -52,26 +54,20 @@ export default function CaseStudy({ cas }) {
                 </section>
             )}
 
-            {/* Résultats */}
-            {cas.resultats?.length > 0 && (
+            {/* Résultats — masqués tant qu'aucun chiffre réel n'est fourni (§6) */}
+            {resultats.length > 0 && (
                 <section className="mb-10">
                     <SectionLabel number="04">RÉSULTAT</SectionLabel>
                     <dl className="mt-6 grid grid-cols-2 gap-8 sm:grid-cols-4">
-                        {cas.resultats.map((r, i) => (
+                        {resultats.map((r, i) => (
                             <div key={i} className="flex flex-col gap-1">
                                 <dt className="text-legende uppercase tracking-widest text-acier font-mono">
                                     {r.label}
                                 </dt>
                                 <dd>
-                                    {isTodo(r.valeur) ? (
-                                        <span className="font-mono text-cobalt-600 text-sm" title="Donnée réelle manquante">
-                                            {r.valeur}
-                                        </span>
-                                    ) : (
-                                        <span className="font-bold text-encre text-kodem-h2">
-                                            {r.valeur}
-                                        </span>
-                                    )}
+                                    <span className="font-bold text-encre text-kodem-h2">
+                                        {r.valeur}
+                                    </span>
                                 </dd>
                             </div>
                         ))}

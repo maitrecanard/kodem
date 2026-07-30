@@ -17,7 +17,7 @@ export default function MonitoringDashboard({ meta, subscription }) {
                     <div className="flex items-center justify-between gap-4 flex-wrap">
                         <div>
                             <h1 className="text-2xl font-bold">Abonnement monitoring</h1>
-                            <p className="text-sm text-acier mt-1 break-all">{subscription.url}</p>
+                            <p className="animate-kodem-slide text-sm text-acier mt-1 break-all">{subscription.url}</p>
                         </div>
                         <span className={
                             'inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium ' +

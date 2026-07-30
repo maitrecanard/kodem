@@ -7,6 +7,24 @@
  * Papier domine pour la clarté ; l'encre structure les fonds et la typographie.
  */
 @layer base {
+    /**
+     * Budget de mouvement KODEM — source de vérité UNIQUE.
+     * Toute durée / distance / courbe utilisée dans le site vient d'ici.
+     * Aucune valeur magique ailleurs (ni en JSX, ni en config Tailwind).
+     */
+    :root {
+        --kodem-dur-2: 220ms;  /* interaction : élévation, filet, décalage */
+        --kodem-dur-3: 420ms;  /* entrée de contenu */
+
+        --kodem-ease: cubic-bezier(0.22, 1, 0.36, 1);   /* entrées — sortie douce */
+        --kodem-ease-io: cubic-bezier(0.4, 0, 0.2, 1);  /* hover — symétrique */
+
+        --kodem-rise: 14px;     /* amplitude verticale au chargement — net mais sobre */
+        --kodem-reveal-rise: 32px; /* amplitude au scroll — sous le pli, jamais candidat LCP */
+
+        --kodem-stagger: 70ms;  /* décalage entre enfants d'une cascade d'entrée */
+    }
+
     body {
         @apply bg-papier text-encre;
         line-height: 1.65; /* interligne du corps de texte — charte p.08 */
@@ -40,5 +58,213 @@
     /* Libellé technique mono — étiquettes / métadonnées (// SECTION) */
     .kodem-eyebrow {
         @apply font-mono text-xs uppercase tracking-widest text-cobalt-600;
+    }
+
+    /**
+     * Carte interactive — élévation de 2 px + bordure accentuée.
+     * transform + box-shadow + border-color : paint uniquement, aucun layout.
+     */
+    .kodem-card {
+        transition-property: transform, box-shadow, border-color;
+        transition-duration: var(--kodem-dur-2);
+        transition-timing-function: var(--kodem-ease-io);
+    }
+    .kodem-card:hover,
+    .kodem-card:focus-within {
+        transform: translateY(-2px);
+        border-color: theme('colors.cobalt.300');
+    }
+
+    /**
+     * Lien à filet révélé. Le filet est un ::after en position absolute :
+     * il n'occupe aucune place dans le flux → aucun décalage au survol.
+     * L'anneau de focus natif reste prioritaire et n'est jamais animé.
+     */
+    .kodem-link {
+        position: relative;
+    }
+    .kodem-link::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: -2px;
+        height: 1px;
+        background-color: currentColor;
+        transform: scaleX(0);
+        transform-origin: left center;
+        transition: transform var(--kodem-dur-2) var(--kodem-ease-io);
+    }
+    .kodem-link:hover::after,
+    .kodem-link:focus-visible::after {
+        transform: scaleX(1);
+    }
+
+    /**
+     * Cascade d'entrée — applique `kodem-rise` aux enfants directs avec un
+     * décalage progressif. Plafonné au 6e enfant : au-delà, l'utilisateur
+     * perçoit un retard, pas un rythme.
+     * NOTE : cette cascade s'appuie sur `animation-delay`, qui n'a de sens que
+     * sur la timeline du document. NE PAS combiner avec `.kodem-reveal`, dont
+     * la timeline `view()` ignore `animation-delay` — voir §4.
+     */
+    .kodem-stagger > * {
+        animation: kodem-rise var(--kodem-dur-3) var(--kodem-ease) both;
+    }
+    .kodem-stagger > *:nth-child(2) { animation-delay: calc(1 * var(--kodem-stagger)); }
+    .kodem-stagger > *:nth-child(3) { animation-delay: calc(2 * var(--kodem-stagger)); }
+    .kodem-stagger > *:nth-child(4) { animation-delay: calc(3 * var(--kodem-stagger)); }
+    .kodem-stagger > *:nth-child(5) { animation-delay: calc(4 * var(--kodem-stagger)); }
+    .kodem-stagger > *:nth-child(n + 6) { animation-delay: calc(5 * var(--kodem-stagger)); }
+}
+
+/**
+ * Révélation au scroll — 100 % CSS, sans observateur JavaScript.
+ *
+ * ENCAPSULATION OBLIGATOIRE dans @supports : hors de ce bloc, `.kodem-reveal`
+ * n'a AUCUNE règle, donc aucun état masqué. Un navigateur sans support de
+ * cette timeline pilotée par le scroll affiche simplement le contenu, sans
+ * animation : la lisibilité du site ne dépend jamais de cette fonctionnalité.
+ * Support vérifié sur Chrome 150 (view() + animation-range = true).
+ *
+ * Double garde avec `prefers-reduced-motion: no-preference` : en mode réduit,
+ * la règle n'existe pas du tout — plus sûr qu'une neutralisation a posteriori.
+ *
+ * RÉGLAGE DE LA PLAGE — mesuré au navigateur, pas estimé. Avec la plage
+ * initiale `entry 0% cover 25%`, la révélation était intégralement terminée
+ * dans les 250 px du BAS du viewport (opacité 0,99 alors que le haut de la
+ * section était encore à 550 px du haut de l'écran) : une bande qu'on ne
+ * regarde jamais en défilant, donc un mouvement invisible en pratique.
+ * `cover 40%` étend la course pour qu'elle se poursuive jusqu'au milieu de
+ * l'écran, là où l'œil se trouve réellement. Toute valeur restant bien en
+ * deçà de 100 %, aucun élément ne peut rester bloqué à opacité nulle.
+ *
+ * COURBE — `animation-duration` est SANS EFFET sur une timeline `view()`
+ * (c'est la progression du scroll qui pilote, pas le temps) ; la durée n'est
+ * conservée que comme repli si la timeline venait à être ignorée. La courbe
+ * est volontairement `linear` : sur une timeline de scroll, c'est le geste de
+ * l'utilisateur qui porte l'accélération. Une courbe ease-out y est doublement
+ * amortie et écrase toute la fin de course — c'est ce qui rendait le mouvement
+ * encore moins lisible.
+ *
+ * AMPLITUDE — `--kodem-rise` est surchargée localement par une valeur plus
+ * franche que celle du premier écran : le contenu sous la ligne de flottaison
+ * n'est jamais candidat LCP, on peut donc y bouger davantage sans coût CWV.
+ */
+@supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+        .kodem-reveal {
+            --kodem-rise: var(--kodem-reveal-rise);
+            animation: kodem-rise var(--kodem-dur-3) linear both;
+            animation-timeline: view();
+            animation-range: entry 0% cover 40%;
+        }
+
+        /**
+         * Cascade de cartes — chaque enfant direct a sa PROPRE timeline `view()`,
+         * donc se révèle à sa propre position dans le défilement. Les cartes d'une
+         * même RANGÉE entrant à la même hauteur se révéleraient simultanément :
+         * on les décale en allongeant la plage colonne par colonne, ce qui produit
+         * une vague en diagonale.
+         *
+         * Le décalage passe par `animation-range` et NON par `animation-delay` :
+         * ce dernier est ignoré sur une timeline de scroll.
+         */
+        .kodem-reveal-grid > * {
+            --kodem-rise: var(--kodem-reveal-rise);
+            animation: kodem-rise var(--kodem-dur-3) linear both;
+            animation-timeline: view();
+            animation-range: entry 0% cover 40%;
+        }
+
+        /**
+         * Décalages par colonne — modificateurs explicites plutôt qu'un modulo
+         * unique : les grilles converties n'ont pas toutes le même nombre de
+         * colonnes (2, 3 ou 4 selon la page), et un modulo unique produirait une
+         * cascade fausse sur la moitié d'entre elles.
+         *
+         * ENCADREMENT RESPONSIVE — toutes les grilles converties sont en
+         * `grid-cols-1` (Tailwind mobile-first) en dessous du point de rupture
+         * où leur nombre de colonnes réel est déclaré (`md:grid-cols-N` ou
+         * `lg:grid-cols-N`) — seule exception : la grille des points de preuve
+         * de Home.jsx, qui est déjà à 2 colonnes sous ce point de rupture (cf.
+         * rapport d'exécution). Décaler par colonne n'a de sens que là où des
+         * colonnes existent visuellement : sous ce seuil, chaque carte est déjà
+         * empilée verticalement et dispose déjà de sa propre position de scroll
+         * via la règle de base ci-dessus — lui appliquer un modulo de colonne y
+         * introduirait une irrégularité de vitesse sans aucun bénéfice visuel
+         * (rangée d'une seule carte = pas de vague à créer). D'où le choix
+         * d'encadrer CHAQUE modificateur dans le `@media` correspondant au
+         * point de rupture Tailwind où la grille visée devient réellement
+         * multi-colonnes, plutôt que de le laisser actif en permanence.
+         *
+         * Pas de valeur au-delà de +36 % (colonne 4 → cover 76%) : on reste
+         * bien en deçà de `cover 100%`, garantissant qu'aucune carte ne peut
+         * rester bloquée à opacité nulle en bas de page (cf. test #16).
+         */
+        @media (min-width: 768px) {
+            .kodem-reveal-grid--2 > *:nth-child(2n) {
+                animation-range: entry 0% cover 52%;
+            }
+
+            .kodem-reveal-grid--3 > *:nth-child(3n + 2) {
+                animation-range: entry 0% cover 52%;
+            }
+            .kodem-reveal-grid--3 > *:nth-child(3n) {
+                animation-range: entry 0% cover 64%;
+            }
+        }
+
+        /**
+         * Grilles à 4 colonnes — déclarées `lg:grid-cols-4` dans le JSX : le
+         * palier de décalage à 4 colonnes n'a de sens qu'à partir du point de
+         * rupture `lg`, PAS `md` (où ces mêmes grilles n'affichent que 2
+         * colonnes, cf. `.kodem-reveal-grid--2` ci-dessus qui reste actif entre
+         * `md` et `lg`). Déclaré APRÈS le bloc `md` ci-dessus afin que, à partir
+         * de `lg`, ces règles (même spécificité) l'emportent en cascade sur les
+         * règles `--2` toujours vraies à cette largeur.
+         */
+        @media (min-width: 1024px) {
+            .kodem-reveal-grid--4 > *:nth-child(4n + 2) {
+                animation-range: entry 0% cover 52%;
+            }
+            .kodem-reveal-grid--4 > *:nth-child(4n + 3) {
+                animation-range: entry 0% cover 64%;
+            }
+            .kodem-reveal-grid--4 > *:nth-child(4n) {
+                animation-range: entry 0% cover 76%;
+            }
+        }
+    }
+}
+
+/**
+ * WCAG 2.1 AA — critère 2.3.3 « Animation from Interactions ».
+ * Deux barrières :
+ *  1. ciblée — neutralise explicitement les primitives KODEM ;
+ *  2. globale — filet couvrant ce qu'on n'a pas écrit (Headless UI, barre de
+ *     progression Inertia, toute dépendance future).
+ * `0.01ms` et non `0s` : une durée strictement positive garantit que
+ * l'événement `transitionend` est toujours émis — Headless UI en dépend pour
+ * démonter ses panneaux. Aucune exception n'est prévue.
+ */
+@media (prefers-reduced-motion: reduce) {
+    .animate-kodem-fade,
+    .animate-kodem-rise,
+    .kodem-stagger > *,
+    .kodem-reveal,
+    .kodem-reveal-grid > * {
+        animation: none !important;
+    }
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        animation-delay: 0ms !important;
+        transition-duration: 0.01ms !important;
+        transition-delay: 0ms !important;
+        scroll-behavior: auto !important;
     }
 }

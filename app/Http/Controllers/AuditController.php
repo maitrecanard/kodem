@@ -19,10 +19,9 @@ class AuditController extends Controller
         return Inertia::render('Public/Audit', [
             'meta' => [
                 'title' => 'Audit SEO et audit de sécurité en ligne — Kodem',
-                'description' => 'Lancez un audit SEO et un audit de sécurité automatisés en 30 secondes. Aperçu gratuit, rapport détaillé à 29 €.',
-                'keywords' => 'audit SEO en ligne, audit de sécurité payant, rapport audit',
+                'description' => 'Obtenez gratuitement le score SEO et sécurité de votre site en 30 secondes. Rapport complet rédigé à la main sur commande.',
             ],
-            'price' => $this->priceLabel(),
+            'premium' => $this->premiumOffer(),
             'paidPrestations' => PrestationCatalog::all(),
         ]);
     }
@@ -99,7 +98,7 @@ class AuditController extends Controller
             ],
             'audit' => $this->serializeAudit($audit, $paid),
             'paid' => $paid,
-            'price' => $this->priceLabel($audit->price_cents),
+            'premium' => $this->premiumOffer(),
             'paidPrestations' => PrestationCatalog::all(),
         ]);
     }
@@ -170,6 +169,30 @@ class AuditController extends Controller
         return [
             'cents' => $cents,
             'label' => number_format($cents / 100, 2, ',', ' ').' €',
+        ];
+    }
+
+    /**
+     * Conditions commerciales du rapport complet — la seule offre payante.
+     *
+     * Le rapport est rédigé à la main : le prix ne va jamais sans le délai de
+     * livraison, et le régime de franchise en base impose d'afficher la mention
+     * de l'article 293 B (sans jamais écrire « HT », puisque rien ne s'ajoute).
+     *
+     * @return array<string, mixed>
+     */
+    protected function premiumOffer(): array
+    {
+        $cents = (int) config('audits.premium.price_cents');
+
+        return [
+            'price_cents' => $cents,
+            'price_label' => number_format($cents / 100, 0, ',', ' ').' €',
+            'delivery_hours' => config('audits.premium.delivery_hours'),
+            'manual' => (bool) config('audits.premium.manual'),
+            'audience' => config('audits.premium.audience'),
+            'vat_mention' => config('audits.vat.applicable') ? null : config('audits.vat.legal_mention'),
+            'url' => '/audits/premium',
         ];
     }
 }

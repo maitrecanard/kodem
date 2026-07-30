@@ -1,42 +1,62 @@
 {
   "endpoints": [
     {
+      "route": "GET /",
+      "handler": "App\\Http\\Controllers\\PublicController@home",
+      "version": 4,
+      "handler_hash": "zone-nationale-2026-07-28",
+      "last_modified": "2026-07-28",
+      "last_tested": "2026-07-28",
+      "last_status": "PASS",
+      "test_file": "tests/Feature/PublicPagesTest.php"
+    },
+    {
+      "route": "GET /contact",
+      "handler": "App\\Http\\Controllers\\PublicController@contact",
+      "version": 1,
+      "handler_hash": "zone-nationale-2026-07-28",
+      "last_modified": "2026-07-28",
+      "last_tested": "2026-07-28",
+      "last_status": "PASS",
+      "test_file": "tests/Feature/VitrineTest.php"
+    },
+    {
       "route": "GET /realisations",
       "handler": "App\\Http\\Controllers\\PublicController@realisations",
-      "version": 1,
-      "handler_hash": "new-2026-06-30",
-      "last_modified": "2026-06-30",
-      "last_tested": "2026-06-30",
+      "version": 2,
+      "handler_hash": "case-images-2026-07-27",
+      "last_modified": "2026-07-27",
+      "last_tested": "2026-07-27",
       "last_status": "PASS",
       "test_file": "tests/Feature/VitrineTest.php"
     },
     {
       "route": "GET /realisations/{slug}",
       "handler": "App\\Http\\Controllers\\PublicController@realisationShow",
-      "version": 1,
-      "handler_hash": "new-2026-06-30",
-      "last_modified": "2026-06-30",
-      "last_tested": "2026-06-30",
+      "version": 2,
+      "handler_hash": "case-images-2026-07-27",
+      "last_modified": "2026-07-27",
+      "last_tested": "2026-07-27",
       "last_status": "PASS",
       "test_file": "tests/Feature/VitrineTest.php"
     },
     {
       "route": "GET /expertises",
       "handler": "App\\Http\\Controllers\\PublicController@expertises",
-      "version": 1,
-      "handler_hash": "new-2026-06-30",
-      "last_modified": "2026-06-30",
-      "last_tested": "2026-06-30",
+      "version": 2,
+      "handler_hash": "zone-nationale-2026-07-28",
+      "last_modified": "2026-07-28",
+      "last_tested": "2026-07-28",
       "last_status": "PASS",
       "test_file": "tests/Feature/VitrineTest.php"
     },
     {
       "route": "GET /zone-intervention",
       "handler": "App\\Http\\Controllers\\PublicController@zoneIntervention",
-      "version": 1,
-      "handler_hash": "new-2026-06-30",
-      "last_modified": "2026-06-30",
-      "last_tested": "2026-06-30",
+      "version": 2,
+      "handler_hash": "zone-nationale-2026-07-28",
+      "last_modified": "2026-07-28",
+      "last_tested": "2026-07-28",
       "last_status": "PASS",
       "test_file": "tests/Feature/VitrineTest.php"
     },
@@ -46,7 +66,7 @@
       "version": 1,
       "handler_hash": "new-2026-06-30",
       "last_modified": "2026-06-30",
-      "last_tested": "2026-06-30",
+      "last_tested": "2026-07-27",
       "last_status": "PASS",
       "test_file": "tests/Feature/VitrineTest.php"
     }

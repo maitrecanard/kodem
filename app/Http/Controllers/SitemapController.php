@@ -21,11 +21,19 @@ class SitemapController extends Controller
             ['loc' => url('/realisations'), 'changefreq' => 'monthly', 'priority' => '0.8'],
             ['loc' => url('/expertises'), 'changefreq' => 'monthly', 'priority' => '0.6'],
             ['loc' => url('/zone-intervention'), 'changefreq' => 'monthly', 'priority' => '0.6'],
-            ['loc' => url('/notes'), 'changefreq' => 'monthly', 'priority' => '0.6'],
         ];
 
         foreach (VitrineContent::cases() as $cas) {
             $urls[] = ['loc' => url('/realisations/'.$cas['slug']), 'changefreq' => 'monthly', 'priority' => '0.7'];
+        }
+
+        // /notes : index + notes publiées (contenu de fond, cible de citation IA).
+        if (VitrineContent::notes() !== []) {
+            $urls[] = ['loc' => url('/notes'), 'changefreq' => 'monthly', 'priority' => '0.6'];
+
+            foreach (VitrineContent::notes() as $note) {
+                $urls[] = ['loc' => url('/notes/'.$note['slug']), 'changefreq' => 'monthly', 'priority' => '0.6'];
+            }
         }
 
         $lastmod = now()->toDateString();

@@ -13,12 +13,22 @@ use Inertia\Inertia;
 
 class PremiumOrderController extends Controller
 {
-    /** Page de vente du premium. */
+    /** Page de vente du rapport complet. */
     public function show()
     {
         return Inertia::render('Audits/Premium', [
+            'meta' => [
+                'title' => 'Rapport SEO & sécurité complet — 150 € — Kodem',
+                'description' => 'Rapport SEO et sécurité rédigé manuellement pour votre site, livré sous 24 à 48 h. 150 €, réservé aux professionnels.',
+            ],
             'price_cents' => config('audits.premium.price_cents'),
-            'currency'    => config('audits.premium.currency'),
+            'currency' => config('audits.premium.currency'),
+            // Conditions commerciales affichées à côté du prix : le rapport est
+            // rédigé à la main, ce n'est pas la sortie automatique de l'outil.
+            'delivery_hours' => config('audits.premium.delivery_hours'),
+            'manual' => config('audits.premium.manual'),
+            'audience' => config('audits.premium.audience'),
+            'vat_mention' => config('audits.vat.applicable') ? null : config('audits.vat.legal_mention'),
         ]);
     }
 
@@ -72,7 +82,17 @@ class PremiumOrderController extends Controller
 
     public function merci()
     {
-        return Inertia::render('Audits/Merci');
+        return Inertia::render('Audits/Merci', [
+            'meta' => [
+                'title' => 'Commande confirmée — Kodem',
+                // Page de retour de paiement : sans intérêt pour un moteur, et on
+                // évite qu'elle remonte dans les résultats de recherche.
+                'description' => 'Confirmation de votre commande de rapport SEO & sécurité.',
+                'robots' => 'noindex, nofollow',
+            ],
+            'delivery_hours' => config('audits.premium.delivery_hours'),
+            'contact_email' => config('audits.admin_email'),
+        ]);
     }
 
     public function annule()

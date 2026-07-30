@@ -1,6 +1,6 @@
 {
     "hero_title": "Dispositifs connectés sur site — conçus, déployés, sécurisés.",
-    "hero_baseline": "KODEM développe le logiciel qui pilote vos bornes, écrans et installations interactives. Intervention physique en Nouvelle-Aquitaine, exploitation dans la durée.",
+    "hero_baseline": "KODEM développe le logiciel qui pilote vos bornes, écrans et installations interactives. Intervention physique partout en France, exploitation dans la durée.",
     "value_prop": "Un logiciel embarqué tient la nuit d'un événement ou l'année d'un espace culturel. KODEM conçoit le système complet : l'interface sur l'écran, la remontée des données, le déploiement sur place et la supervision après la livraison.",
     "proof_points": [
         { "valeur": "// TODO: nombre de dispositifs déployés", "label": "dispositifs actifs" },
@@ -11,21 +11,34 @@
     "capabilities": [
         {
             "titre": "Développement",
-            "role_support": "Logiciel embarqué et interfaces pilotant les dispositifs physiques — du prototype à la mise en production."
+            "role_support": "Logiciel embarqué (Raspberry Pi, Python) et back-office web (Laravel, PHP) : le code qui pilote le matériel sur site et remonte les données, du prototype à la mise en production."
         },
         {
             "titre": "Hébergement",
             "role_support": "Back-office et flux de données hébergés, sauvegardés quotidiennement, supervisés 24/7."
         },
         {
-            "titre": "SEO",
-            "role_support": "Visibilité locale sur les requêtes de décision et de comparaison — pas du volume générique."
+            "titre": "Visibilité locale",
+            "role_support": "Être trouvé sur les requêtes de décision et de comparaison locales — pas du volume générique."
         },
         {
             "titre": "Sécurité",
-            "role_support": "Hardening des dispositifs exposés au public : TLS, WAF, mises à jour maîtrisées, aucune surface inutile."
+            "role_support": "Dispositifs exposés au public durcis : TLS, mises à jour maîtrisées, aucune surface inutile, chiffrement des données remontées."
         }
     ],
+    "socle_technique": {
+        "intro": "Derrière les dispositifs sur site, un socle backend éprouvé en production sur d'autres projets. Ce n'est pas le produit — c'est ce qui le rend fiable.",
+        "elements": [
+            {
+                "titre": "Backend web & SaaS",
+                "detail": "Conception et exploitation d'un SaaS Laravel/React en production — authentification, abonnements, API, chiffrement des données. La même rigueur backend appliquée au pilotage et à la remontée de données des dispositifs."
+            },
+            {
+                "titre": "Réseau & provisioning",
+                "detail": "Attribution d'adressage automatique et génération de configurations VPN pour des parcs d'équipements. L'expérience réseau qui sécurise le fonctionnement autonome d'un dispositif sur site."
+            }
+        ]
+    },
     "secteurs": [
         "événementiel",
         "retail / PLV",
@@ -34,7 +47,7 @@
         "collectivités",
         "signalétique dynamique"
     ],
-    "ancrage_local": "Nouvelle-Aquitaine — Poitiers",
+    "ancrage_local": "Basé à Poitiers — intervention partout en France",
     "cta_primary": { "label": "Parler de votre projet", "href": "/contact" },
     "cta_secondary": { "label": "Voir les réalisations", "href": "/realisations" }
 }

@@ -3,36 +3,75 @@
         "slug": "photomaton",
         "titre": "Photomaton événementiel connecté",
         "secteur": "événementiel",
-        "resume": "Borne photo pilotée par logiciel custom, déployée sur événement — impression immédiate, zéro intervention manuelle pendant la session.",
-        "probleme": "Le client avait besoin d'une borne photo autonome pour ses événements : impression immédiate, partage numérique et collecte de données opt-in, sans dépendre d'une solution propriétaire verrouillée.",
-        "contrainte": "La borne devait fonctionner hors ligne pendant l'événement (réseau non garanti sur site), imprimer en moins de 10 secondes et ne nécessiter aucune intervention humaine entre les sessions.",
-        "choix": "Développement d'un logiciel embarqué sur Linux léger avec file d'impression locale et synchronisation différée des données. Stack choisie pour sa fiabilité sur matériel bas de gamme et son contrôle total du cycle de vie — sans abonnement tiers.",
+        "resume": "Borne photo autonome pilotée par un logiciel sur mesure : le visiteur récupère sa photo depuis une application web servie sur place, sans dépendre d'internet ni d'une solution propriétaire.",
+        "probleme": "Le client voulait une borne photo pour ses événements, capable de distribuer les photos aux visiteurs et de collecter des contacts opt-in, sans dépendre d'une solution propriétaire verrouillée ni d'une connexion internet garantie sur site.",
+        "contrainte": "Le dispositif devait fonctionner en autonomie complète — réseau externe non garanti sur le lieu de l'événement — et distribuer les photos aux visiteurs pendant la session sans intervention humaine entre les prises.",
+        "choix": "Deux Raspberry Pi reliés par un routeur en réseau local autonome. Le premier pilote l'appareil photo en Python et commande le flash via un circuit imprimé, puis transmet l'image par API. Le second, sous back-office Laravel, réceptionne les photos et les met à disposition sur une page web ; les visiteurs s'y connectent via le routeur pour télécharger leurs images, un formulaire de contact recueillant les personnes intéressées. Contrôle total du cycle de vie, aucune dépendance cloud, aucun abonnement tiers.",
         "resultats": [
-            { "label": "Tirages sur l'événement", "valeur": "// TODO: nombre réel de tirages" },
-            { "label": "Temps d'impression moyen", "valeur": "// TODO: secondes réelles mesurées" },
-            { "label": "Pannes pendant la session", "valeur": "// TODO: 0 ou chiffre réel constaté" },
-            { "label": "Durée du déploiement", "valeur": "// TODO: jours réels de l'événement" }
+            { "label": "Visiteurs servis sur l'événement", "valeur": "6" },
+            { "label": "Photos distribuées", "valeur": "3 000" },
+            { "label": "Pannes pendant la session", "valeur": "2" },
+            { "label": "Contacts opt-in collectés", "valeur": "10" }
         ],
-        "image": "// TODO: visuel WebP <300ko — borne en situation sur événement",
+        "image": "/images/realisations/photomaton.webp",
+        "image_focus": "top",
         "cas_date": "// TODO: mois/année de l'événement",
-        "testimonial_slug": "photomaton-client"
+        "testimonial_slug": ""
     },
     {
         "slug": "ecran-raspberry",
         "titre": "Écran piloté par Raspberry Pi",
         "secteur": "signalétique dynamique",
-        "resume": "Affichage dynamique géré depuis un back-office web, déployé sur Raspberry Pi existants — contenu mis à jour à distance, zéro déplacement sur site.",
+        "resume": "Affichage dynamique piloté depuis un back-office que le client met à jour lui-même, déployé sur Raspberry Pi existants — en service depuis 5 ans, contenu changé à distance, zéro déplacement sur site.",
         "probleme": "Le client gérait plusieurs écrans d'affichage en point de vente via des clés USB. Chaque mise à jour nécessitait un déplacement physique et il ne pouvait pas modifier le contenu en urgence.",
-        "contrainte": "Le parc comprenait des Raspberry Pi 3 existants à conserver. La solution devait fonctionner sur ce matériel sans remplacement, avec une connexion réseau variable selon les sites.",
-        "choix": "Back-office Laravel avec API de diffusion de contenu et lecteur léger Python/Chromium sur les Pi. Mise à jour automatique au prochain redémarrage ou en push si le réseau est disponible — zéro dépendance cloud externe.",
+        "contrainte": "Le parc comprenait des Raspberry Pi existants à conserver. La solution devait fonctionner sur ce matériel sans remplacement, et rester administrable par le client sans compétence technique, avec une connexion réseau variable selon les sites.",
+        "choix": "Back-office Symfony administré directement par le client : il met à jour le contenu lui-même, sans intervention technique. Le contenu est diffusé vers un lecteur léger sur les Raspberry Pi, avec mise à jour automatique au prochain redémarrage ou en push si le réseau est disponible — zéro dépendance cloud externe.",
         "resultats": [
-            { "label": "Écrans gérés depuis un seul back-office", "valeur": "// TODO: nombre d'écrans réels" },
-            { "label": "Temps de mise à jour du contenu", "valeur": "// TODO: minutes ou secondes réelles" },
-            { "label": "Déplacements évités sur 12 mois", "valeur": "// TODO: nombre de déplacements évités" },
-            { "label": "Uptime moyen par écran", "valeur": "// TODO: % uptime réel mesuré" }
+            { "label": "En service", "valeur": "depuis 5 ans" },
+            { "label": "Publications par an", "valeur": "~20" },
+            { "label": "Déplacement sur site pour une mise à jour", "valeur": "0" },
+            { "label": "Gestion du contenu", "valeur": "en autonomie par le client" }
         ],
-        "image": "// TODO: visuel WebP <300ko — Raspberry Pi et écran en situation réelle",
-        "cas_date": "// TODO: mois/année du déploiement",
-        "testimonial_slug": "ecran-raspberry-client"
+        "image": "/images/realisations/ecran-raspberry.webp",
+        "image_focus": "bottom",
+        "cas_date": "// TODO: année de mise en service (~2021)",
+        "testimonial_slug": ""
+    },
+    {
+        "slug": "controle-acces-billetterie",
+        "titre": "Contrôle d'accès par QR code — billetterie",
+        "secteur": "événementiel",
+        "resume": "Démonstrateur de contrôle d'accès pour la billetterie : vente de billets en ligne et validation à l'entrée par scan de QR code, chaque billet vérifié selon ses conditions de génération. Construit pour valider le besoin d'un client.",
+        "probleme": "Le client voulait éprouver une chaîne complète — vendre des billets en ligne puis contrôler les entrées — en garantissant qu'un billet ne franchisse l'accès que s'il respecte ses conditions de validité, avant d'engager un déploiement réel.",
+        "contrainte": "La validation devait se faire à l'entrée, à la volée, avec un verdict fiable : un QR accepté ou refusé selon les règles de génération du billet, sans faille laissant passer un billet non conforme.",
+        "choix": "Un site de vente en ligne génère les billets et leurs QR codes. Une application Android de scan lit le QR à l'entrée et confronte chaque billet à ses conditions de génération avant d'autoriser ou de refuser l'accès. Chaîne complète maîtrisée, de la vente au point de contrôle, éprouvée en démonstrateur avant tout déploiement.",
+        "resultats": [
+            { "label": "Scénarios de validation testés", "valeur": "~20" },
+            { "label": "Taux de réussite des tests", "valeur": "100 %" },
+            { "label": "Chaîne couverte", "valeur": "vente → scan → accès" },
+            { "label": "Statut", "valeur": "démonstrateur client" }
+        ],
+        "image": "/images/realisations/controle-acces-billetterie.webp",
+        "cas_date": "// TODO: mois/année (ou retirer — démonstrateur)",
+        "testimonial_slug": ""
+    },
+    {
+        "slug": "carte-qr-manhattan-cafe",
+        "titre": "Carte numérique accessible par QR code",
+        "secteur": "hôtellerie-restauration",
+        "resume": "Carte des vins numérique consultable par QR code sur place, avec back-office pour le restaurateur — plus de 10 000 scans.",
+        "probleme": "Le restaurateur voulait donner accès à sa carte des vins directement en salle, sans support papier à réimprimer à chaque changement, et pouvoir la mettre à jour lui-même.",
+        "contrainte": "L'accès devait être immédiat pour le client à table (un simple scan de QR code), et la mise à jour autonome côté restaurateur, sans intervention technique.",
+        "choix": "Une application web avec back-office pour le restaurateur et un accès client par QR code depuis la table. Le restaurateur gère sa carte lui-même ; le client la consulte en un scan, sans installation.",
+        "resultats": [
+            { "label": "Scans de la carte", "valeur": "10 000+" },
+            { "label": "PDF de carte générés", "valeur": "~100" },
+            { "label": "Mise à jour de la carte par le restaurateur", "valeur": "en autonomie" },
+            { "label": "Année de mise en ligne", "valeur": "2022" }
+        ],
+        "image": "/images/realisations/carte-qr-manhattan-cafe.webp",
+        "image_focus": "bottom",
+        "cas_date": "2022",
+        "testimonial_slug": ""
     }
 ]

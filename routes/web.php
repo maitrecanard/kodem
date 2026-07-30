@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\AdminAuditController;
 use App\Http\Controllers\Admin\AdminContactController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminEventController;
+use App\Http\Controllers\Admin\AdminStatsController;
 use App\Http\Controllers\Admin\TwoFactorController;
 use App\Http\Controllers\AuditController;
 use App\Http\Controllers\AuditCwvController;
@@ -35,6 +36,7 @@ Route::get('/realisations/{slug}', [PublicController::class, 'realisationShow'])
 Route::get('/expertises', [PublicController::class, 'expertises'])->name('expertises');
 Route::get('/zone-intervention', [PublicController::class, 'zoneIntervention'])->name('zone-intervention');
 Route::get('/notes', [PublicController::class, 'notes'])->name('notes');
+Route::get('/notes/{slug}', [PublicController::class, 'noteShow'])->name('notes.show');
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 
 Route::post('/contact', [ContactController::class, 'store'])
@@ -117,6 +119,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::get('/messages/{message}', [AdminContactController::class, 'show'])->name('messages.show');
         Route::patch('/messages/{message}', [AdminContactController::class, 'update'])->name('messages.update');
         Route::get('/events', [AdminEventController::class, 'index'])->name('events.index');
+        Route::get('/stats', [AdminStatsController::class, 'index'])->name('stats.index');
     });
 });
 

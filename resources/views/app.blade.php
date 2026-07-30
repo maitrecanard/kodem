@@ -21,6 +21,9 @@
         @php
             $appName = config('app.name', 'Kodem');
             $appUrl = rtrim(config('app.url', ''), '/');
+            // Zone desservie : la France dans son ensemble. L'adresse et la geo ci-dessous restent
+            // celles de la base physique (Poitiers) — siège, pas périmètre commercial.
+            $areaServedFrance = ['@type' => 'Country', 'name' => 'France'];
             $graph = [
                 [
                     '@type' => 'Organization',
@@ -31,7 +34,7 @@
                     'image' => $appUrl.'/og-image.png',
                     'description' => 'Société de développement web, création de SaaS, hébergement web et audits SEO / sécurité automatisés.',
                     'email' => 'contact@kodem.fr',
-                    'areaServed' => 'FR',
+                    'areaServed' => $areaServedFrance,
                 ],
                 [
                     '@type' => 'WebSite',
@@ -47,20 +50,22 @@
                     'name' => $appName,
                     'url' => $appUrl,
                     'image' => $appUrl.'/og-image.png',
+                    // Base physique : ville + région du siège. La zone desservie est nationale (areaServed).
                     'address' => [
                         '@type' => 'PostalAddress',
-                        'streetAddress' => '', // TODO NAP: adresse réelle
-                        'postalCode' => '', // TODO NAP: code postal réel
-                        'addressLocality' => 'Poitiers', // TODO NAP: ville réelle
+                        'postalCode' => '86000',
+                        'addressLocality' => 'Poitiers',
+                        'addressRegion' => 'Nouvelle-Aquitaine',
                         'addressCountry' => 'FR',
                     ],
+                    // Coordonnées au niveau ville (centre de Poitiers), pas le domicile.
                     'geo' => [
                         '@type' => 'GeoCoordinates',
-                        'latitude' => '', // TODO NAP: latitude réelle (ex: 46.5802)
-                        'longitude' => '', // TODO NAP: longitude réelle (ex: 0.3404)
+                        'latitude' => '46.5802',
+                        'longitude' => '0.3404',
                     ],
-                    'telephone' => '', // TODO NAP: téléphone réel
-                    'areaServed' => 'Nouvelle-Aquitaine',
+                    'telephone' => '+33 7 62 61 26 46',
+                    'areaServed' => $areaServedFrance,
                 ],
             ];
             foreach (\App\Services\PrestationCatalog::all() as $p) {
@@ -71,7 +76,7 @@
                     'description' => $p['description'],
                     'serviceType' => $p['title'],
                     'provider' => ['@id' => $appUrl.'/#organization'],
-                    'areaServed' => 'FR',
+                    'areaServed' => $areaServedFrance,
                 ];
                 if (isset($p['price_from']) && is_numeric($p['price_from'])) {
                     $node['offers'] = [

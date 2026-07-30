@@ -125,7 +125,7 @@ function TeaserCounts({ label, counts }) {
     );
 }
 
-export default function AuditResult({ meta, audit, paid, price, paidPrestations = [] }) {
+export default function AuditResult({ meta, audit, paid, premium, paidPrestations = [] }) {
     const seo = audit?.results?.seo;
     const sec = audit?.results?.security;
 
@@ -189,11 +189,14 @@ export default function AuditResult({ meta, audit, paid, price, paidPrestations 
                     <div className="mt-8 bg-gradient-to-br from-cobalt-600 to-cobalt-900 text-white rounded-kodem p-8 shadow-lg">
                         <div className="flex items-start justify-between gap-6 flex-wrap">
                             <div className="max-w-xl">
-                                <h2 className="text-kodem-h2 font-bold">Débloquez le rapport complet</h2>
+                                <h2 className="text-kodem-h2 font-bold">Le rapport complet, écrit pour votre site</h2>
                                 <p className="mt-2 text-cobalt-100">
-                                    Détail des 20 contrôles SEO + sécurité, <strong>plan d'action priorisé pour atteindre 100/100</strong>
-                                    (snippets nginx/HTML à copier-coller, gain de points estimé par correction)
-                                    et lien partageable pendant 90 jours.
+                                    Ce score est automatique. Le rapport complet est{' '}
+                                    <strong>rédigé manuellement</strong> : détail des contrôles SEO et
+                                    sécurité, correctifs priorisés par impact, et recommandations
+                                    adaptées à votre site plutôt qu'une liste générique.
+                                    Livré sous {premium?.delivery_hours}, accessible par lien privé
+                                    pendant 90 jours.
                                 </p>
                                 {audit.teaser && (
                                     <div className="mt-6 bg-white/10 rounded-kodem p-4">
@@ -213,14 +216,19 @@ export default function AuditResult({ meta, audit, paid, price, paidPrestations 
                                 )}
                             </div>
                             <div className="text-right">
-                                <div className="text-5xl font-bold">{price?.label}</div>
-                                <div className="text-sm text-cobalt-200 mt-1">paiement unique, TTC</div>
+                                <div className="text-5xl font-bold">{premium?.price_label}</div>
+                                {premium?.vat_mention && (
+                                    <div className="text-xs text-cobalt-200 mt-1">{premium.vat_mention}</div>
+                                )}
+                                <div className="text-sm text-cobalt-200 mt-1">
+                                    rédigé à la main, livré sous {premium?.delivery_hours}
+                                </div>
                                 <Link
-                                    href={`/audit/${audit.uuid}/pay`}
-                                    onClick={() => trackClick('audit_unlock_cta', { audit_uuid: audit.uuid, score_total: audit.score_total })}
+                                    href="/audits/premium"
+                                    onClick={() => trackClick('audit_premium_cta', { audit_uuid: audit.uuid, score_total: audit.score_total })}
                                     className="mt-6 inline-flex items-center rounded-kodem bg-white text-cobalt-700 px-6 py-3 font-semibold shadow hover:bg-cobalt-50"
                                 >
-                                    Débloquer maintenant
+                                    Commander le rapport
                                 </Link>
                             </div>
                         </div>
@@ -283,40 +291,48 @@ export default function AuditResult({ meta, audit, paid, price, paidPrestations 
                             </div>
                         </div>
 
+                        {/* Le PDF et les Core Web Vitals ne sont plus vendus : le rapport
+                            complet rédigé manuellement est la seule offre payante. Ces cartes
+                            ne restent affichées que pour les clients qui les ont DÉJÀ achetées,
+                            afin de ne pas leur retirer un accès dû. */}
+                        {(audit.pdf_paid || audit.cwv_paid) && (
                         <div className="mt-8 grid md:grid-cols-2 gap-6">
+                            {audit.pdf_paid && (
                             <div className="bg-white rounded-kodem border border-brume p-6 shadow-sm">
                                 <div className="flex items-start justify-between gap-3">
                                     <div>
                                         <h3 className="text-kodem-h2 font-semibold">Rapport PDF</h3>
                                         <p className="text-sm text-acier mt-1">Version imprimable et archivable du rapport.</p>
                                     </div>
-                                    <span className="text-lg font-bold whitespace-nowrap">+{audit.pdf_price_label}</span>
                                 </div>
                                 <Link
-                                    href={audit.pdf_paid ? `/audit/${audit.uuid}/pdf` : `/audit/${audit.uuid}/pdf/pay`}
-                                    onClick={() => trackClick(audit.pdf_paid ? 'pdf_download_cta' : 'pdf_unlock_cta', { audit_uuid: audit.uuid })}
+                                    href={`/audit/${audit.uuid}/pdf`}
+                                    onClick={() => trackClick('pdf_download_cta', { audit_uuid: audit.uuid })}
                                     className="mt-4 inline-flex rounded-kodem bg-cobalt-600 text-white px-4 py-2 text-sm font-medium hover:bg-cobalt-700"
                                 >
-                                    {audit.pdf_paid ? 'Télécharger le PDF' : 'Débloquer le PDF'}
+                                    Télécharger le PDF
                                 </Link>
                             </div>
+                            )}
+                            {audit.cwv_paid && (
                             <div className="bg-white rounded-kodem border border-brume p-6 shadow-sm">
                                 <div className="flex items-start justify-between gap-3">
                                     <div>
                                         <h3 className="text-kodem-h2 font-semibold">Core Web Vitals</h3>
                                         <p className="text-sm text-acier mt-1">Score de performance Google (LCP, CLS, INP, FCP, TBT).</p>
                                     </div>
-                                    <span className="text-lg font-bold whitespace-nowrap">+{audit.cwv_price_label}</span>
                                 </div>
                                 <Link
-                                    href={audit.cwv_paid ? `/audit/${audit.uuid}/performance` : `/audit/${audit.uuid}/performance/pay`}
-                                    onClick={() => trackClick(audit.cwv_paid ? 'cwv_view_cta' : 'cwv_unlock_cta', { audit_uuid: audit.uuid })}
+                                    href={`/audit/${audit.uuid}/performance`}
+                                    onClick={() => trackClick('cwv_view_cta', { audit_uuid: audit.uuid })}
                                     className="mt-4 inline-flex rounded-kodem bg-cobalt-600 text-white px-4 py-2 text-sm font-medium hover:bg-cobalt-700"
                                 >
-                                    {audit.cwv_paid ? 'Voir les Core Web Vitals' : 'Débloquer les Core Web Vitals'}
+                                    Voir les Core Web Vitals
                                 </Link>
                             </div>
+                            )}
                         </div>
+                        )}
                     </>
                 )}
 

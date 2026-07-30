@@ -26,6 +26,11 @@ export default function Expertises({ meta, positioning = {} }) {
     return (
         <PublicLayout meta={meta}>
             <Banner
+                image="/images/banniere-kodem.webp"
+                imageSources={[
+                    { src: '/images/banniere-kodem.webp', width: 1006 },
+                    { src: '/images/banniere-kodem-2x.webp', width: 2012 },
+                ]}
                 title="Capacités techniques — au service des dispositifs connectés"
                 cta={
                     <Link
@@ -41,9 +46,9 @@ export default function Expertises({ meta, positioning = {} }) {
             {/* Answer-first intro */}
             <section className="max-w-6xl mx-auto px-6 pt-16 pb-8">
                 <SectionLabel>CAPACITÉS</SectionLabel>
-                <p className="mt-4 max-w-2xl text-lg text-acier">
+                <p className="animate-kodem-fade mt-4 max-w-2xl text-lg text-acier">
                     KODEM conçoit et déploie des dispositifs logiciels sur site.
-                    Le développement, l'hébergement, le SEO et la sécurité sont des moyens — pas le produit.
+                    Le développement, l'hébergement, la visibilité et la sécurité sont des moyens — pas le produit.
                     Ils entrent en jeu là où le projet l'exige.
                 </p>
             </section>
@@ -51,7 +56,7 @@ export default function Expertises({ meta, positioning = {} }) {
             {/* Capabilities grid */}
             {capabilities.length > 0 && (
                 <section className="max-w-6xl mx-auto px-6 pb-20">
-                    <div className="grid gap-6 md:grid-cols-2">
+                    <div className="kodem-reveal-grid kodem-reveal-grid--2 grid gap-6 md:grid-cols-2">
                         {capabilities.map((cap, i) => (
                             <div
                                 key={i}
@@ -67,9 +72,31 @@ export default function Expertises({ meta, positioning = {} }) {
                 </section>
             )}
 
+            {/* Socle technique — profondeur backend/réseau en support (jamais présenté comme dispositif sur site) */}
+            {positioning.socle_technique?.elements?.length > 0 && (
+                <section className="max-w-6xl mx-auto px-6 pb-20">
+                    <SectionLabel>SOCLE TECHNIQUE</SectionLabel>
+                    {positioning.socle_technique.intro && (
+                        <p className="mt-4 max-w-2xl text-acier leading-relaxed">
+                            {positioning.socle_technique.intro}
+                        </p>
+                    )}
+                    <div className="kodem-reveal-grid kodem-reveal-grid--2 mt-8 grid gap-6 md:grid-cols-2">
+                        {positioning.socle_technique.elements.map((el, i) => (
+                            <div key={i} className="border-l-2 border-cobalt-600 pl-5">
+                                <h3 className="font-mono text-sm uppercase tracking-widest text-encre">
+                                    {el.titre}
+                                </h3>
+                                <p className="mt-2 text-acier leading-relaxed">{el.detail}</p>
+                            </div>
+                        ))}
+                    </div>
+                </section>
+            )}
+
             {/* Secteurs */}
             {positioning.secteurs?.length > 0 && (
-                <section className="bg-white border-y border-brume">
+                <section className="kodem-reveal bg-white border-y border-brume">
                     <div className="max-w-6xl mx-auto px-6 py-16">
                         <SectionLabel>SECTEURS</SectionLabel>
                         <h2 className="mt-3 text-kodem-h1 font-bold max-w-2xl">
@@ -93,7 +120,7 @@ export default function Expertises({ meta, positioning = {} }) {
             )}
 
             {/* FAQ */}
-            <section className="max-w-6xl mx-auto px-6 py-20">
+            <section className="kodem-reveal max-w-6xl mx-auto px-6 py-20">
                 <SectionLabel>FAQ</SectionLabel>
                 <h2 className="mt-3 text-kodem-h1 font-bold max-w-2xl">Questions fréquentes</h2>
                 <dl className="mt-8 space-y-8 max-w-3xl">
@@ -107,7 +134,7 @@ export default function Expertises({ meta, positioning = {} }) {
             </section>
 
             {/* CTA */}
-            <section className="max-w-6xl mx-auto px-6 pb-20 text-center">
+            <section className="kodem-reveal max-w-6xl mx-auto px-6 pb-20 text-center">
                 <SectionLabel className="justify-center">PROJET</SectionLabel>
                 <h2 className="mt-3 text-kodem-h1 font-bold">Un dispositif à concevoir ou à reprendre ?</h2>
                 <p className="mt-4 text-acier max-w-xl mx-auto">
