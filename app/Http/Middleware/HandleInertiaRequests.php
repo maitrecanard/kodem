@@ -39,6 +39,13 @@ class HandleInertiaRequests extends Middleware
                 ...(new Ziggy)->toArray(),
                 'location' => $request->url(),
             ],
+            // Messages one-shot de session, consommés par les pages (bandeau de
+            // succès/erreur). Sans ce partage, un `back()->with('error', …)`
+            // n'atteindrait jamais le composant React.
+            'flash' => fn () => [
+                'success' => $request->session()->get('success'),
+                'error' => $request->session()->get('error'),
+            ],
         ];
     }
 }

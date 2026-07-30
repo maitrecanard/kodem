@@ -14,11 +14,12 @@ class PublicController extends Controller
     {
         return Inertia::render('Public/Home', [
             'meta' => [
-                'title' => 'Kodem — Création de site internet, logiciel et application web | Hébergement & audits',
-                'description' => 'Kodem conçoit votre site internet, application web ou logiciel sur-mesure, avec hébergement web managé et audits SEO et de sécurité automatisés. Testez votre site gratuitement en ligne.',
-                'keywords' => 'création site internet, création application web, création logiciel, hébergement web, développement web',
+                'title' => 'Dispositifs connectés sur site — conçus, déployés, sécurisés | Kodem',
+                'description' => 'Kodem développe le logiciel qui pilote vos bornes, écrans et installations interactives. Déploiement sur site partout en France, supervision dans la durée.',
             ],
-            'prestations' => PrestationCatalog::teaser(),
+            'positioning' => VitrineContent::positioning(),
+            'cases' => VitrineContent::cases(),
+            'testimonials' => VitrineContent::testimonials(),
         ]);
     }
 
@@ -52,9 +53,8 @@ class PublicController extends Controller
     {
         return Inertia::render('Public/Contact', [
             'meta' => [
-                'title' => 'Contact — Kodem | Agence développement web et hébergement',
-                'description' => 'Contactez Kodem pour un projet de développement web, création de SaaS, hébergement web ou audit SEO et de sécurité.',
-                'keywords' => 'contact kodem, développement web, hébergement web',
+                'title' => 'Contact — Kodem | Dispositifs connectés sur site en France',
+                'description' => 'Concevoir ou déployer un dispositif connecté sur site : borne, écran piloté, installation interactive. Kodem intervient partout en France, réponse sous 48 h.',
             ],
         ]);
     }
@@ -157,7 +157,7 @@ class PublicController extends Controller
         return Inertia::render('Public/Expertises', [
             'meta' => [
                 'title' => 'Capacités techniques — développement, hébergement, SEO, sécurité | Kodem',
-                'description' => 'Développement embarqué, hébergement, SEO local et sécurité : capacités de support des dispositifs connectés sur site déployés par Kodem en Nouvelle-Aquitaine.',
+                'description' => 'Développement embarqué, hébergement, SEO local et sécurité : les capacités qui soutiennent les dispositifs connectés déployés par Kodem partout en France.',
             ],
             'positioning' => VitrineContent::positioning(),
             'jsonLd' => [
@@ -215,8 +215,8 @@ class PublicController extends Controller
     {
         return Inertia::render('Public/ZoneIntervention', [
             'meta' => [
-                'title' => 'Zone d\'intervention — Kodem à Poitiers, Nouvelle-Aquitaine',
-                'description' => 'Kodem déploie des dispositifs connectés sur site en Nouvelle-Aquitaine. Basé à Poitiers, intervention physique chez le client pour l\'installation et la configuration.',
+                'title' => 'Zone d\'intervention — Poitiers et partout en France | Kodem',
+                'description' => 'Kodem déploie des dispositifs connectés sur site partout en France. Basé à Poitiers : intervention le jour même en Nouvelle-Aquitaine, sous 48 h ailleurs.',
             ],
             'positioning' => VitrineContent::positioning(),
             'jsonLd' => [
@@ -248,6 +248,7 @@ class PublicController extends Controller
                 'title' => 'Notes techniques — Kodem',
                 'description' => 'Notes de fond sur les dispositifs connectés sur site : choix techniques, retours d\'expérience et compromis documentés par Kodem.',
             ],
+            'notes' => VitrineContent::notes(),
             'jsonLd' => [
                 [
                     '@type' => 'BreadcrumbList',
@@ -263,6 +264,54 @@ class PublicController extends Controller
                             'position' => 2,
                             'name' => 'Notes techniques',
                             'item' => route('notes'),
+                        ],
+                    ],
+                ],
+            ],
+        ]);
+    }
+
+    public function noteShow(string $slug): Response
+    {
+        $note = VitrineContent::note($slug);
+        abort_unless($note, 404);
+
+        return Inertia::render('Public/NoteShow', [
+            'meta' => [
+                'title' => $note['titre'].' — Notes techniques Kodem',
+                'description' => $note['resume'],
+            ],
+            'note' => $note,
+            'jsonLd' => [
+                [
+                    '@type' => 'TechArticle',
+                    'headline' => $note['titre'],
+                    'description' => $note['resume'],
+                    'author' => ['@type' => 'Organization', 'name' => config('app.name', 'Kodem')],
+                    'publisher' => ['@type' => 'Organization', 'name' => config('app.name', 'Kodem')],
+                    'mainEntityOfPage' => route('notes.show', $slug),
+                    'inLanguage' => 'fr-FR',
+                ] + (isset($note['date_iso']) ? ['datePublished' => $note['date_iso']] : []),
+                [
+                    '@type' => 'BreadcrumbList',
+                    'itemListElement' => [
+                        [
+                            '@type' => 'ListItem',
+                            'position' => 1,
+                            'name' => 'Accueil',
+                            'item' => url('/'),
+                        ],
+                        [
+                            '@type' => 'ListItem',
+                            'position' => 2,
+                            'name' => 'Notes techniques',
+                            'item' => route('notes'),
+                        ],
+                        [
+                            '@type' => 'ListItem',
+                            'position' => 3,
+                            'name' => $note['titre'],
+                            'item' => route('notes.show', $slug),
                         ],
                     ],
                 ],

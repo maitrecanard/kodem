@@ -1,1 +1,37 @@
-[]
+[
+    {
+        "citation": "Mathieu Siaudeau a su comprendre nos problématiques métiers et nous accompagner dans la réalisation d'un outil adapté à nos besoins. Je recommande.",
+        "nom": "William",
+        "fonction": "Spécialiste logiciel embarqué",
+        "structure": "MUXEN",
+        "photo": ""
+    },
+    {
+        "citation": "Mathieu est un développeur hors norme, patient et à l'écoute. Je recommande amplement !",
+        "nom": "Keddy Andamba",
+        "fonction": "Gérant",
+        "structure": "AGKG ALL Création",
+        "photo": ""
+    },
+    {
+        "citation": "Un trés bon développeur, à l'écoute, il fait du super bon travail. je le recommande vivement !!!",
+        "nom": "Loïc Courteaux",
+        "fonction": "Gérant",
+        "structure": "Freendzy",
+        "photo": ""
+    },
+    {
+        "citation": "J'ai eu la chance de confier la création de mon site web à Mathieu et c'était l'une de mes meilleures décisions ! Il a su capter l'essence de mon métier et de ma personnalité pour construire un site qui me ressemble à 100%. À l'écoute, force de proposition, super réactif et toujours dans une dynamique bienveillante et pro.",
+        "nom": "Virginie",
+        "fonction": "Co-gérante",
+        "structure": "Rêv'olution Pro",
+        "photo": ""
+    },
+    {
+        "citation": "Bonjour Mathieu, Énorme bravo pour Freendzy 👏🔥 Une appli inspirante qui donne vraiment envie de sortir, de créer de nouvelles expériences et de transformer le virtuel en vraies rencontres humaines. Le concept est top, positif et fédérateur, et l'énergie ainsi que la bienveillance derrière le projet se ressentent clairement. Tu peux être fier de toi. Bonne continuation dans le développement de ton appli sur le réseau national — Freendzy a clairement tout pour aller loin !",
+        "nom": "Sophie Douezy",
+        "fonction": "Utilisateur",
+        "structure": "Freendzy",
+        "photo": ""
+    }
+]

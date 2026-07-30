@@ -87,29 +87,24 @@ class SeoRefonteTest extends TestCase
     }
 
     // -------------------------------------------------------------------------
-    // 3. Page d'accueil — meta cible les mots-clés création de site et hébergement
+    // 3. Page d'accueil — positionnement niche « dispositifs connectés » (§0/§5)
+    //    Le copy provient de content/positioning.json ; pas de keyword stuffing (§8).
     // -------------------------------------------------------------------------
 
-    public function test_home_page_meta_targets_creation_and_hebergement_keywords(): void
+    public function test_home_page_meta_targets_dispositifs_connectes_niche(): void
     {
         $this->get('/')
             ->assertOk()
             ->assertInertia(fn (AssertableInertia $page) => $page
                 ->component('Public/Home')
                 ->where('meta.title', fn (string $title) =>
-                    str_contains(strtolower($title), 'création') ||
-                    str_contains(strtolower($title), 'creation')
+                    str_contains(strtolower($title), 'dispositifs connectés') ||
+                    str_contains(strtolower($title), 'dispositifs connectes')
                 )
-                ->where('meta.keywords', fn (string $keywords) =>
-                    (
-                        str_contains(strtolower($keywords), 'création site') ||
-                        str_contains(strtolower($keywords), 'site internet')
-                    ) &&
-                    (
-                        str_contains(strtolower($keywords), 'hébergement') ||
-                        str_contains(strtolower($keywords), 'hebergement')
-                    )
+                ->where('positioning.hero_title', fn ($hero) =>
+                    str_contains(strtolower((string) $hero), 'dispositifs connectés')
                 )
+                ->missing('meta.keywords')
             );
     }
 

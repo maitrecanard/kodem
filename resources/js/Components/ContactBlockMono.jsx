@@ -3,8 +3,9 @@ import BrandWordmark from '@/Components/BrandWordmark';
 export default function ContactBlockMono({
     web = 'kodem.fr',
     email = 'contact@kodem.fr',
-    phone = '+33 (0)0 00 00 00 00',
-    address = 'Adresse à compléter',
+    phone = '+33 7 62 61 26 46',
+    address = 'Poitiers — Nouvelle-Aquitaine',
+    area = '',
     className = '',
 }) {
     const telHref = 'tel:' + phone.replace(/[^+\d]/g, '');
@@ -29,6 +30,12 @@ export default function ContactBlockMono({
                     <span className="text-cobalt-400">→</span>
                     <span>{address}</span>
                 </li>
+                {area && (
+                    <li className="flex items-baseline gap-3 font-mono text-sm">
+                        <span className="text-cobalt-400">→</span>
+                        <span>{area}</span>
+                    </li>
+                )}
             </ul>
         </div>
     );

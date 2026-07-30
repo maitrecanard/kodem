@@ -24,3 +24,9 @@ yarn-error.log
 /.nova
 /.vscode
 /.zed
+
+# Sources de travail déposées à la racine (images non destinées au dépôt).
+# Les visuels publiés vivent dans public/images/, convertis en WebP.
+/*.jpg
+/*.jpeg
+/*.png

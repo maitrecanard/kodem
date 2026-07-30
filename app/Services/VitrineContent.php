@@ -13,6 +13,9 @@ class VitrineContent
     /** @var array<int,array<string,mixed>>|null */
     private static ?array $testimonialsCache = null;
 
+    /** @var array<int,array<string,mixed>>|null */
+    private static ?array $notesCache = null;
+
     /**
      * Positioning copy — niche framing, single source of truth.
      * Source : content/positioning.json.
@@ -81,5 +84,31 @@ class VitrineContent
         return array_values(
             array_filter(self::testimonials(), fn ($t) => ($t['cas_lie'] ?? null) === $slug)
         );
+    }
+
+    /**
+     * Technical notes (KODEM "blog" — notes de fond, jamais des guides génériques).
+     * Source : content/notes.json.
+     *
+     * @return array<int,array<string,mixed>>
+     */
+    public static function notes(): array
+    {
+        if (self::$notesCache === null) {
+            $raw = @file_get_contents(base_path('content/notes.json'));
+            self::$notesCache = $raw ? (json_decode($raw, true) ?? []) : [];
+        }
+
+        return self::$notesCache;
+    }
+
+    /**
+     * Single note by slug, or null if not found.
+     *
+     * @return array<string,mixed>|null
+     */
+    public static function note(string $slug): ?array
+    {
+        return collect(self::notes())->firstWhere('slug', $slug);
     }
 }

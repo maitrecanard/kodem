@@ -23,12 +23,19 @@ class SecureHeaders
             'Cross-Origin-Resource-Policy' => 'same-origin',
         ];
 
-        if ($request->secure() || app()->environment('production')) {
+        $isSecureContext = $request->secure() || app()->environment('production');
+
+        if ($isSecureContext) {
             $headers['Strict-Transport-Security'] = 'max-age=63072000; includeSubDomains; preload';
         }
 
         $scriptSrc = "'self'";
-        $styleSrc = "'self' 'unsafe-inline'";
+        // Les polices de la charte (Space Grotesk, JetBrains Mono) sont servies
+        // par fonts.bunny.net depuis app.blade.php : sans ces deux origines, le
+        // CSP bloque la feuille ET les fichiers de police, et le site retombe
+        // sur les polices système.
+        $styleSrc = "'self' 'unsafe-inline' https://fonts.bunny.net";
+        $fontSrc = "'self' data: https://fonts.bunny.net";
         $connectSrc = "'self'";
 
         if (app()->environment('local')) {
@@ -38,19 +45,30 @@ class SecureHeaders
             $connectSrc .= ' ws://localhost:5173 ws://127.0.0.1:5173 http://localhost:5173 http://127.0.0.1:5173';
         }
 
-        $csp = implode('; ', [
+        $directives = [
             "default-src 'self'",
             "base-uri 'self'",
             "frame-ancestors 'none'",
             "form-action 'self'",
             "img-src 'self' data: blob:",
-            "font-src 'self' data:",
+            "font-src {$fontSrc}",
             "script-src {$scriptSrc}",
             "style-src {$styleSrc}",
             "connect-src {$connectSrc}",
             "object-src 'none'",
-            "upgrade-insecure-requests",
-        ]);
+        ];
+
+        // `upgrade-insecure-requests` réécrit toute requête http:// de la page en
+        // https://. En production c'est souhaitable ; en développement sur un
+        // serveur HTTP local, cela envoie chaque requête non-GET vers une adresse
+        // TLS inexistante — la réponse n'arrive jamais et l'interface reste figée
+        // (formulaires qui « ne font rien »). On l'émet donc aux mêmes conditions
+        // que HSTS : connexion déjà sécurisée, ou production.
+        if ($isSecureContext) {
+            $directives[] = 'upgrade-insecure-requests';
+        }
+
+        $csp = implode('; ', $directives);
 
         $headers['Content-Security-Policy'] = $csp;
 

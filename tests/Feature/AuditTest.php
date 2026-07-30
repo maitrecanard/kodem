@@ -61,7 +61,10 @@ class AuditTest extends TestCase
                 ->where('audit.score_security', null)
                 ->where('audit.results', null)
                 ->has('audit.teaser')
-                ->has('price.label')
+                // L'aperçu gratuit ne renvoie plus vers un déblocage à 29 € mais
+                // vers le rapport complet rédigé manuellement.
+                ->where('premium.price_label', '150 €')
+                ->where('premium.delivery_hours', '24 à 48 h')
             );
     }
 

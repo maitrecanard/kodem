@@ -6,6 +6,7 @@ use App\Modules\Audits\Mail\PremiumOrderConfirmation;
 use App\Modules\Audits\Models\AuditRequest;
 use App\Modules\Audits\Notifications\NewPremiumOrderForAdmin;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
@@ -171,8 +172,61 @@ class StripeWebhookTest extends TestCase
         $fresh = $audit->fresh();
         $this->assertNotNull($fresh->paid_at);
 
-        Mail::assertQueued(PremiumOrderConfirmation::class);
+        // ENVOI SYNCHRONE : mis en file, ces messages ne partaient jamais sans un
+        // worker `queue:work` en fonctionnement — le client payait sans rien
+        // recevoir et personne n'était alerté. assertSent (et non assertQueued)
+        // verrouille ce comportement.
+        Mail::assertSent(PremiumOrderConfirmation::class, fn ($mail) => $mail->hasTo($audit->email));
+        Mail::assertNotQueued(PremiumOrderConfirmation::class);
         Notification::assertSentOnDemand(NewPremiumOrderForAdmin::class);
+    }
+
+    public function test_the_internal_notification_goes_to_the_configured_admin_address(): void
+    {
+        Mail::fake();
+        Notification::fake();
+
+        config(['audits.admin_email' => 'mathieu.siaudeau@kodem.fr']);
+
+        $audit = $this->createPendingAudit();
+        $signed = $this->signedWebhookRequest($this->checkoutCompletedPayload(
+            ['audit_request_id' => (string) $audit->getKey()]
+        ));
+
+        $this->postWebhook($signed['payload'], $signed['signature'])->assertStatus(200);
+
+        Notification::assertSentOnDemand(
+            NewPremiumOrderForAdmin::class,
+            fn ($notification, $channels, $notifiable) => $notifiable->routes['mail'] === 'mathieu.siaudeau@kodem.fr'
+        );
+    }
+
+    /**
+     * Sans adresse admin configurée, la commande passe quand même : on ne perd
+     * pas un paiement pour un défaut de configuration, mais l'incident est tracé.
+     */
+    public function test_a_missing_admin_address_is_logged_without_breaking_the_payment(): void
+    {
+        Mail::fake();
+        Notification::fake();
+        Log::shouldReceive('warning')->atLeast()->once();
+        Log::shouldReceive('info')->zeroOrMoreTimes();
+        Log::shouldReceive('error')->zeroOrMoreTimes();
+
+        config(['audits.admin_email' => null]);
+
+        $audit = $this->createPendingAudit();
+        $signed = $this->signedWebhookRequest($this->checkoutCompletedPayload(
+            ['audit_request_id' => (string) $audit->getKey()]
+        ));
+
+        $this->postWebhook($signed['payload'], $signed['signature'])->assertStatus(200);
+
+        $this->assertDatabaseHas('audit_requests', [
+            'id' => $audit->getKey(),
+            'status' => 'queued',
+        ]);
+        Notification::assertNothingSent();
     }
 
     // Test 4: idempotent — same event twice sends mail exactly once
@@ -198,7 +252,8 @@ class StripeWebhookTest extends TestCase
             'status' => 'queued',
         ]);
 
-        Mail::assertQueued(PremiumOrderConfirmation::class, 1);
+        // Envoi synchrone : l'unicité se vérifie sur assertSent, pas assertQueued.
+        Mail::assertSent(PremiumOrderConfirmation::class, 1);
     }
 
     // Test 5: completed without metadata audit_request_id → 200, no DB change, no mail

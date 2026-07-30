@@ -98,10 +98,56 @@ class StripeWebhookController extends Controller
                 'paid_at'               => now(),
             ]);
 
-            Mail::to($audit->email)->queue(new PremiumOrderConfirmation($audit));
-            Notification::route('mail', config('audits.admin_email'))
-                ->notify(new NewPremiumOrderForAdmin($audit));
+            $this->notifyPaidOrder($audit);
         });
+    }
+
+    /**
+     * Confirmation au client + notification interne, après encaissement.
+     *
+     * ENVOI SYNCHRONE VOLONTAIRE. Ces messages passaient auparavant par la file
+     * (`->queue()` / `ShouldQueue`) : sans worker `queue:work` en fonctionnement,
+     * le job restait indéfiniment dans la table `jobs`, sans erreur ni alerte —
+     * le client payait 150 € sans rien recevoir, et personne n'était prévenu
+     * puisque la notification interne dormait dans la même file. Deux envois
+     * ajoutent moins d'une seconde au webhook et suppriment ce mode de panne.
+     *
+     * La commande est DÉJÀ enregistrée et payée à ce stade : un incident SMTP ne
+     * fait rien perdre. Les deux envois sont isolés pour qu'un échec côté client
+     * (adresse invalide) n'empêche pas la notification interne, et inversement.
+     */
+    private function notifyPaidOrder(AuditRequest $audit): void
+    {
+        try {
+            Mail::to($audit->email)->send(new PremiumOrderConfirmation($audit));
+        } catch (\Throwable $e) {
+            Log::error('Audits premium : échec de la confirmation au client.', [
+                'audit_uuid' => $audit->uuid,
+                'exception' => $e->getMessage(),
+            ]);
+        }
+
+        $admin = config('audits.admin_email');
+
+        if (blank($admin)) {
+            Log::warning('Audits premium : aucune adresse admin configurée, commande non notifiée.', [
+                'audit_uuid' => $audit->uuid,
+                'config' => 'audits.admin_email (AUDITS_ADMIN_EMAIL)',
+            ]);
+
+            return;
+        }
+
+        try {
+            Notification::route('mail', $admin)
+                ->notifyNow(new NewPremiumOrderForAdmin($audit));
+        } catch (\Throwable $e) {
+            Log::error('Audits premium : échec de la notification interne.', [
+                'audit_uuid' => $audit->uuid,
+                'destinataire' => $admin,
+                'exception' => $e->getMessage(),
+            ]);
+        }
     }
 
     private function handleCheckoutExpired(\Stripe\Checkout\Session $session): void

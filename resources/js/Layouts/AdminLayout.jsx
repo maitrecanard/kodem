@@ -16,6 +16,7 @@ export default function AdminLayout({ title, children }) {
                             <Link href="/admin" className="hover:text-cobalt-300">Tableau de bord</Link>
                             <Link href="/admin/audits" className="hover:text-cobalt-300">Audits</Link>
                             <Link href="/admin/messages" className="hover:text-cobalt-300">Messages</Link>
+                            <Link href="/admin/stats" className="hover:text-cobalt-300">Statistiques</Link>
                             <Link href="/admin/events" className="hover:text-cobalt-300">Événements</Link>
                         </nav>
                     </div>
