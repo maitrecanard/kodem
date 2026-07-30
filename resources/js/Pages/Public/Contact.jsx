@@ -28,9 +28,9 @@ export default function Contact({ meta, flash }) {
             <section className="max-w-6xl mx-auto px-6 py-16">
                 <SectionLabel>CONTACT</SectionLabel>
                 <h1 className="mt-3 text-kodem-h1 font-bold">Parlons de votre projet</h1>
-                <p className="mt-3 text-acier">
-                    Développement web, création de SaaS, hébergement web ou audit&nbsp;: décrivez-nous votre besoin,
-                    nous répondons sous 24&nbsp;h ouvrées.
+                <p className="animate-kodem-slide mt-3 text-acier">
+                    Dispositifs connectés, bornes, écrans pilotés, installations interactives&nbsp;:
+                    décrivez votre projet — matériel, lieu, contraintes. Réponse sous 48&nbsp;h.
                 </p>
 
                 {(wasSuccessful || flash?.success) && (
@@ -116,6 +116,10 @@ export default function Contact({ meta, flash }) {
                         >
                             {processing ? 'Envoi…' : 'Envoyer le message'}
                         </button>
+
+                        <p className="font-mono text-legende text-acier">
+                            // réponse sous 48 h · devis gratuit · interlocuteur unique
+                        </p>
                     </form>
 
                     <ContactBlockMono className="md:sticky md:top-24" />

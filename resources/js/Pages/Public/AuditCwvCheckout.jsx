@@ -18,7 +18,7 @@ export default function AuditCwvCheckout({ meta, audit, price, driver }) {
                     <div className="flex items-center justify-between gap-4">
                         <div>
                             <h1 className="text-2xl font-bold">Add-on · Core Web Vitals</h1>
-                            <p className="text-sm text-acier mt-1">
+                            <p className="animate-kodem-slide text-sm text-acier mt-1">
                                 Analyse de performance via Google PageSpeed Insights pour <span className="font-mono break-all">{audit.url}</span>.
                             </p>
                         </div>

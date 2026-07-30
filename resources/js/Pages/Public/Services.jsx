@@ -8,6 +8,11 @@ export default function Services({ meta, prestations = [] }) {
     return (
         <PublicLayout meta={meta}>
             <Banner
+                image="/images/banniere-kodem.webp"
+                imageSources={[
+                    { src: '/images/banniere-kodem.webp', width: 1006 },
+                    { src: '/images/banniere-kodem-2x.webp', width: 2012 },
+                ]}
                 title="Nos prestations"
                 cta={
                     <Link
@@ -21,12 +26,12 @@ export default function Services({ meta, prestations = [] }) {
 
             <section className="max-w-6xl mx-auto px-6 py-12">
                 <SectionLabel className="mb-4">CATALOGUE</SectionLabel>
-                <p className="text-acier max-w-2xl mb-8">
+                <p className="animate-kodem-fade text-acier max-w-2xl mb-8">
                     Découvrez nos prestations pour la création de site internet, d'application web et
                     de logiciel sur-mesure, l'hébergement web managé et les audits SEO et de sécurité
                     automatisés.
                 </p>
-                <div className="grid gap-6 md:grid-cols-2">
+                <div className="kodem-reveal grid gap-6 md:grid-cols-2">
                     {prestations.map((p, index) => {
                         const num = String(index + 1).padStart(2, '0');
                         return (

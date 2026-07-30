@@ -18,7 +18,7 @@ export default function MonitoringSubscribe({ meta, price, period_days, driver }
                 <div className="max-w-3xl mx-auto px-6 py-20">
                     <p className="uppercase tracking-widest text-xs text-indigo-200">Abonnement</p>
                     <h1 className="mt-2 text-4xl md:text-5xl font-bold">Monitoring mensuel — {price.label}/mois</h1>
-                    <p className="mt-4 text-indigo-100 text-lg">
+                    <p className="animate-kodem-slide mt-4 text-indigo-100 text-lg">
                         Audit SEO + sécurité automatique chaque semaine. Rapport email et alerte en cas de régression.
                     </p>
 

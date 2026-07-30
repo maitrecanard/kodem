@@ -4,10 +4,10 @@ import BrandWordmark from '@/Components/BrandWordmark';
 import ContactBlockMono from '@/Components/ContactBlockMono';
 
 export default function PublicLayout({ meta, children }) {
-    const title = meta?.title || 'Kodem — Développement web, hébergement et audits SEO/sécurité';
+    const title = meta?.title || 'Kodem — Dispositifs connectés sur site, partout en France';
     const description =
         meta?.description ||
-        "Kodem, société de développement web, création de SaaS, hébergement web et audits SEO et de sécurité automatisés.";
+        "Kodem conçoit, déploie et sécurise des dispositifs logiciels connectés sur site — bornes, écrans pilotés, installations interactives — partout en France.";
 
     // URL absolue de la page courante (partagée par Inertia via Ziggy) pour
     // canonical + Open Graph. L'origine sert à construire l'URL absolue de l'image OG.
@@ -26,7 +26,9 @@ export default function PublicLayout({ meta, children }) {
             <Head>
                 <title>{title}</title>
                 <meta name="description" content={description} />
-                <meta name="robots" content="index, follow" />
+                {/* Indexable par défaut ; une page peut s'en exclure via meta.robots
+                    (retours de paiement, pages de confirmation…). */}
+                <meta name="robots" content={meta?.robots || 'index, follow'} />
                 {canonical && <link rel="canonical" href={canonical} />}
 
                 {/* Open Graph */}
@@ -52,24 +54,18 @@ export default function PublicLayout({ meta, children }) {
                     </Link>
                     <div className="flex items-center gap-6">
                         <nav className="hidden md:flex items-center gap-6 text-sm text-acier">
-                            <Link href="/" onClick={() => trackClick('nav_home')} className="hover:text-cobalt-600">Accueil</Link>
-                            <Link href="/prestations" onClick={() => trackClick('nav_services')} className="hover:text-cobalt-600">Prestations</Link>
-                            <Link href="/realisations" onClick={() => trackClick('nav_realisations')} className="hover:text-cobalt-600">Réalisations</Link>
-                            <Link href="/expertises" onClick={() => trackClick('nav_expertises')} className="hover:text-cobalt-600">Expertises</Link>
-                            <Link href="/zone-intervention" onClick={() => trackClick('nav_zone_intervention')} className="hover:text-cobalt-600">Zone d'intervention</Link>
-                            <Link href="/audit" onClick={() => trackClick('nav_audit')} className="hover:text-cobalt-600">Audit en ligne</Link>
-                            <Link href="/contact" onClick={() => trackClick('nav_contact')} className="hover:text-cobalt-600">Contact</Link>
+                            <Link href="/realisations" onClick={() => trackClick('nav_realisations')} className="kodem-link hover:text-cobalt-600 transition-colors duration-[var(--kodem-dur-2)]">Réalisations</Link>
+                            <Link href="/expertises" onClick={() => trackClick('nav_expertises')} className="kodem-link hover:text-cobalt-600 transition-colors duration-[var(--kodem-dur-2)]">Expertises</Link>
+                            <Link href="/notes" onClick={() => trackClick('nav_notes')} className="kodem-link hover:text-cobalt-600 transition-colors duration-[var(--kodem-dur-2)]">Notes</Link>
+                            <Link href="/zone-intervention" onClick={() => trackClick('nav_zone_intervention')} className="kodem-link hover:text-cobalt-600 transition-colors duration-[var(--kodem-dur-2)]">Zone d'intervention</Link>
+                            <Link href="/contact" onClick={() => trackClick('nav_contact')} className="kodem-link hover:text-cobalt-600 transition-colors duration-[var(--kodem-dur-2)]">Contact</Link>
                         </nav>
-                        {/* Signature de marque (charte p.10) — tags métiers en mono */}
-                        <span className="hidden lg:inline font-mono text-legende uppercase tracking-widest text-acier">
-                            dev · host · seo · sec
-                        </span>
                         <Link
-                            href="/audit"
-                            onClick={() => trackClick('header_cta_audit')}
-                            className="hidden md:inline-flex items-center rounded-md bg-cobalt-600 px-4 py-2 text-white text-sm font-medium hover:bg-cobalt-700"
+                            href="/contact"
+                            onClick={() => trackClick('header_cta_contact')}
+                            className="hidden md:inline-flex items-center rounded-md bg-cobalt-600 px-4 py-2 text-white text-sm font-medium transition-colors duration-[var(--kodem-dur-2)] hover:bg-cobalt-700"
                         >
-                            Lancer un audit
+                            Parler de votre projet
                         </Link>
                     </div>
                 </div>
@@ -84,33 +80,35 @@ export default function PublicLayout({ meta, children }) {
                             <BrandWordmark className="text-xl text-white" bracketClassName="text-cobalt-400" />
                         </div>
                         <p className="text-sm text-acier">
-                            Développement web, création de SaaS, hébergement web et audits SEO / sécurité automatisés.
+                            Dispositifs logiciels connectés sur site — bornes, écrans pilotés, installations interactives.
+                            Développement, hébergement, visibilité et sécurité en support. Basé à Poitiers, intervention partout en France.
                         </p>
                     </div>
                     <div>
                         <h3 className="text-white font-semibold mb-3">Prestations</h3>
                         <ul className="space-y-2 text-sm">
-                            <li><Link href="/prestations" className="hover:text-white">Développement web</Link></li>
-                            <li><Link href="/prestations" className="hover:text-white">Création de SaaS</Link></li>
-                            <li><Link href="/hebergement-web" className="hover:text-white">Hébergement web</Link></li>
-                            <li><Link href="/audit" className="hover:text-white">Audit SEO</Link></li>
-                            <li><Link href="/audit" className="hover:text-white">Audit de sécurité</Link></li>
+                            <li><Link href="/prestations" className="transition-colors duration-[var(--kodem-dur-2)] hover:text-white">Développement web</Link></li>
+                            <li><Link href="/prestations" className="transition-colors duration-[var(--kodem-dur-2)] hover:text-white">Création de SaaS</Link></li>
+                            <li><Link href="/hebergement-web" className="transition-colors duration-[var(--kodem-dur-2)] hover:text-white">Hébergement web</Link></li>
+                            <li><Link href="/audit" className="transition-colors duration-[var(--kodem-dur-2)] hover:text-white">Audit SEO</Link></li>
+                            <li><Link href="/audit" className="transition-colors duration-[var(--kodem-dur-2)] hover:text-white">Audit de sécurité</Link></li>
                         </ul>
                     </div>
                     <div>
                         <h3 className="text-white font-semibold mb-3">Découvrir</h3>
                         <ul className="space-y-2 text-sm">
-                            <li><Link href="/realisations" className="hover:text-white">Réalisations</Link></li>
-                            <li><Link href="/expertises" className="hover:text-white">Expertises</Link></li>
-                            <li><Link href="/zone-intervention" className="hover:text-white">Zone d'intervention</Link></li>
+                            <li><Link href="/realisations" className="transition-colors duration-[var(--kodem-dur-2)] hover:text-white">Réalisations</Link></li>
+                            <li><Link href="/expertises" className="transition-colors duration-[var(--kodem-dur-2)] hover:text-white">Expertises</Link></li>
+                            <li><Link href="/notes" className="transition-colors duration-[var(--kodem-dur-2)] hover:text-white">Notes techniques</Link></li>
+                            <li><Link href="/zone-intervention" className="transition-colors duration-[var(--kodem-dur-2)] hover:text-white">Zone d'intervention</Link></li>
                         </ul>
                     </div>
                     <div>
                         <h3 className="text-white font-semibold mb-3">Société</h3>
                         <ul className="space-y-2 text-sm">
-                            <li><Link href="/contact" className="hover:text-white">Contact</Link></li>
-                            <li><Link href="/mentions-legales" className="hover:text-white">Mentions légales</Link></li>
-                            <li><Link href="/cgv" className="hover:text-white">CGV</Link></li>
+                            <li><Link href="/contact" className="transition-colors duration-[var(--kodem-dur-2)] hover:text-white">Contact</Link></li>
+                            <li><Link href="/mentions-legales" className="transition-colors duration-[var(--kodem-dur-2)] hover:text-white">Mentions légales</Link></li>
+                            <li><Link href="/cgv" className="transition-colors duration-[var(--kodem-dur-2)] hover:text-white">CGV</Link></li>
                         </ul>
                     </div>
                     <ContactBlockMono className="bg-transparent p-0" />

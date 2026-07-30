@@ -27,7 +27,7 @@ export default function AuditCwv({ meta, audit }) {
 
                 <div className="mt-4 bg-white rounded-xl border border-brume shadow-sm p-8">
                     <h1 className="text-2xl font-bold">Core Web Vitals</h1>
-                    <p className="text-sm text-acier mt-1 break-all">{audit.url}</p>
+                    <p className="animate-kodem-slide text-sm text-acier mt-1 break-all">{audit.url}</p>
 
                     {cwv.status === 'failed' ? (
                         <div className="mt-6 rounded-lg border border-rose-200 bg-rose-50 p-4 text-rose-800">

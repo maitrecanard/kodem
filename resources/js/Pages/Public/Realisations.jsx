@@ -4,11 +4,17 @@ import { trackClick } from '@/lib/track';
 import Banner from '@/Components/Banner';
 import SectionLabel from '@/Components/SectionLabel';
 import CodeButton from '@/Components/CodeButton';
+import CaseImage from '@/Components/CaseImage';
 
 export default function Realisations({ meta, positioning = {}, cases = [] }) {
     return (
         <PublicLayout meta={meta}>
             <Banner
+                image="/images/banniere-kodem.webp"
+                imageSources={[
+                    { src: '/images/banniere-kodem.webp', width: 1006 },
+                    { src: '/images/banniere-kodem-2x.webp', width: 2012 },
+                ]}
                 title={positioning.hero_title || 'Réalisations — dispositifs connectés sur site'}
                 cta={
                     <Link
@@ -24,7 +30,7 @@ export default function Realisations({ meta, positioning = {}, cases = [] }) {
             {/* Answer-first intro */}
             <section className="max-w-6xl mx-auto px-6 pt-16 pb-8">
                 <SectionLabel>RÉALISATIONS</SectionLabel>
-                <p className="mt-4 max-w-2xl text-lg text-acier">
+                <p className="animate-kodem-fade mt-4 max-w-2xl text-lg text-acier">
                     Deux cas concrets : un photomaton autonome et un réseau d'écrans piloté à distance.
                     Chaque projet suit le même schéma — problème réel, contrainte technique, choix justifié, résultat mesuré.
                 </p>
@@ -32,13 +38,15 @@ export default function Realisations({ meta, positioning = {}, cases = [] }) {
 
             {/* Case cards grid */}
             {cases.length > 0 ? (
-                <section className="max-w-6xl mx-auto px-6 pb-20">
+                <section className="kodem-reveal max-w-6xl mx-auto px-6 pb-20">
                     <div className="grid gap-6 md:grid-cols-2">
                         {cases.map((cas) => (
                             <article
                                 key={cas.slug}
-                                className="bg-white rounded-kodem border border-brume p-6 shadow-sm hover:shadow-md transition flex flex-col gap-4"
+                                className="kodem-card bg-white rounded-kodem border border-brume p-6 shadow-sm hover:shadow-md flex flex-col gap-4"
                             >
+                                <CaseImage cas={cas} variant="card" />
+
                                 <div className="flex items-center justify-between">
                                     <SectionLabel className="mb-0">{cas.secteur?.toUpperCase()}</SectionLabel>
                                     {cas.cas_date && !cas.cas_date.startsWith('// TODO') && (
@@ -63,13 +71,13 @@ export default function Realisations({ meta, positioning = {}, cases = [] }) {
                     </div>
                 </section>
             ) : (
-                <section className="max-w-6xl mx-auto px-6 pb-20">
+                <section className="kodem-reveal max-w-6xl mx-auto px-6 pb-20">
                     <p className="text-acier">Aucune réalisation disponible pour le moment.</p>
                 </section>
             )}
 
             {/* CTA contact */}
-            <section className="bg-white border-y border-brume">
+            <section className="kodem-reveal bg-white border-y border-brume">
                 <div className="max-w-6xl mx-auto px-6 py-16 text-center">
                     <SectionLabel className="justify-center">PROJET</SectionLabel>
                     <h2 className="mt-3 text-kodem-h1 font-bold">Un dispositif similaire à déployer ?</h2>

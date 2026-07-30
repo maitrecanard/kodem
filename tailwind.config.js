@@ -73,6 +73,43 @@ export default {
             borderRadius: {
                 kodem: '0.625rem', // 10px — rayon de carte standard
             },
+
+            /**
+             * Primitives d'animation KODEM.
+             * L'état MASQUÉ n'existe QUE dans les @keyframes : si les animations
+             * CSS ne s'appliquent pas (moteur sans support, CSS non chargé), aucune
+             * règle statique ne pose opacity:0 → le contenu reste VISIBLE.
+             * Seules `transform` et `opacity` sont animées : zéro reflow, zéro CLS.
+             */
+            keyframes: {
+                'kodem-fade': {
+                    from: { opacity: '0' },
+                    to: { opacity: '1' },
+                },
+                'kodem-rise': {
+                    from: { opacity: '0', transform: 'translateY(var(--kodem-rise))' },
+                    to: { opacity: '1', transform: 'translateY(0)' },
+                },
+                /**
+                 * Variante SANS opacité, réservée au contenu au-dessus de la ligne
+                 * de flottaison des pages sans bannière. Mesuré au Lighthouse le
+                 * 2026-07-30 sur /contact : un bloc de texte animé avec `kodem-rise`
+                 * (qui part d'opacity:0) retarde le LCP de 4,2 s contre 3,6 s sans
+                 * animation — Chrome ne retient pas un élément peint à opacité nulle
+                 * comme candidat LCP. Un élément seulement translaté reste peint,
+                 * donc éligible : le mouvement est conservé, le LCP ne bouge pas.
+                 */
+                'kodem-slide': {
+                    from: { transform: 'translateY(var(--kodem-rise))' },
+                    to: { transform: 'translateY(0)' },
+                },
+            },
+
+            animation: {
+                'kodem-fade': 'kodem-fade var(--kodem-dur-3) var(--kodem-ease) both',
+                'kodem-rise': 'kodem-rise var(--kodem-dur-3) var(--kodem-ease) both',
+                'kodem-slide': 'kodem-slide var(--kodem-dur-3) var(--kodem-ease) both',
+            },
         },
     },
 
