@@ -27,8 +27,8 @@ export default function Notes({ meta, notes = [] }) {
             </section>
 
             {notes.length > 0 ? (
-                <section className="kodem-reveal max-w-6xl mx-auto px-6 pb-24">
-                    <div className="grid gap-6 md:grid-cols-2">
+                <section className="max-w-6xl mx-auto px-6 pb-24">
+                    <div className="kodem-reveal-grid kodem-reveal-grid--2 grid gap-6 md:grid-cols-2">
                         {notes.map((note) => (
                             <article
                                 key={note.slug}

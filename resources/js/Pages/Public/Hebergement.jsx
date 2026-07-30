@@ -35,10 +35,10 @@ export default function Hebergement({ meta, prestation }) {
             </section>
 
             {prestation?.features?.length > 0 && (
-                <section className="kodem-reveal max-w-6xl mx-auto px-6 pb-20 pt-12">
+                <section className="max-w-6xl mx-auto px-6 pb-20 pt-12">
                     <SectionLabel number="01">FONCTIONNALITÉS</SectionLabel>
                     <h2 className="mt-3 text-kodem-h1 font-bold">Ce qui est inclus</h2>
-                    <ul className="mt-8 grid md:grid-cols-2 gap-4">
+                    <ul className="kodem-reveal-grid kodem-reveal-grid--2 mt-8 grid md:grid-cols-2 gap-4">
                         {prestation.features.map((f) => (
                             <li key={f} className="flex items-start gap-3 bg-white rounded-kodem border border-brume p-5 shadow-sm">
                                 <span className="font-mono text-cobalt-400 mt-0.5">→</span>
@@ -49,14 +49,14 @@ export default function Hebergement({ meta, prestation }) {
                 </section>
             )}
 
-            <section className="kodem-reveal bg-white border-y border-brume">
+            <section className="bg-white border-y border-brume">
                 <div className="max-w-6xl mx-auto px-6 py-20">
                     <SectionLabel number="02">PROJETS</SectionLabel>
                     <h2 className="mt-3 text-kodem-h1 font-bold">Pour quels projets ?</h2>
                     <p className="mt-4 text-acier max-w-2xl">
                         Notre hébergement web managé s'adapte à tous les types de projets web, des sites vitrines aux applications complexes.
                     </p>
-                    <div className="mt-8 grid md:grid-cols-3 gap-6">
+                    <div className="kodem-reveal-grid kodem-reveal-grid--3 mt-8 grid md:grid-cols-3 gap-6">
                         <div className="rounded-kodem border border-brume p-6">
                             <h3 className="text-kodem-h2 font-semibold">Site internet</h3>
                             <p className="mt-3 text-sm text-acier">

@@ -35,6 +35,16 @@ et le projet suit le [versionnage sémantique](https://semver.org/lang/fr/).
   timeline `view()`, une courbe ease-out y est doublement amortie et écrase la fin de course, et
   une plage trop courte (`cover 25%`) terminait la révélation dans les 250 px du bas de l'écran —
   une bande qu'on ne regarde jamais en défilant.
+- **Les grilles de cartes se révèlent carte par carte**, pas section par section (`.kodem-reveal-grid`) :
+  chaque carte a sa propre timeline `view()` liée à sa propre position, la cascade est donc gratuite.
+  Les cartes d'une même rangée entrant à la même hauteur, elles sont décalées en allongeant la plage
+  colonne par colonne (`cover 40%` → `52%` → `64%`) — `animation-delay` étant ignoré sur une timeline
+  de scroll, le décalage ne pouvait pas venir d'un délai. Modificateurs explicites `--2` / `--3` /
+  `--4` plutôt qu'un modulo unique, les grilles n'ayant pas toutes le même nombre de colonnes, et
+  décalages encadrés en `@media (min-width: 768px)` puisque les grilles sont en une colonne en deçà.
+  Mesuré au navigateur sur une grille à 4 colonnes : opacités `1 / 0,84 / 0,69 / 0,58` en cours
+  d'entrée — une vague en diagonale, pas une apparition simultanée. Les blocs qui ne sont pas une
+  répétition d'éléments (intros, FAQ, CTA, corps d'article) gardent `.kodem-reveal`.
 - Cascade `.kodem-stagger` disponible pour les grilles du premier écran (timeline du document).
   Elle ne doit **jamais** être combinée à `.kodem-reveal` : `animation-delay` est sans effet sur une
   timeline `view()`, la combinaison serait un bug silencieux — un test l'interdit.

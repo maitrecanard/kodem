@@ -38,8 +38,8 @@ export default function Realisations({ meta, positioning = {}, cases = [] }) {
 
             {/* Case cards grid */}
             {cases.length > 0 ? (
-                <section className="kodem-reveal max-w-6xl mx-auto px-6 pb-20">
-                    <div className="grid gap-6 md:grid-cols-2">
+                <section className="max-w-6xl mx-auto px-6 pb-20">
+                    <div className="kodem-reveal-grid kodem-reveal-grid--2 grid gap-6 md:grid-cols-2">
                         {cases.map((cas) => (
                             <article
                                 key={cas.slug}

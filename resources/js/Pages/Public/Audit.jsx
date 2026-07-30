@@ -136,14 +136,14 @@ export default function Audit({ meta, premium, paidPrestations = [], flash }) {
                 </div>
             </section>
 
-            <section className="kodem-reveal bg-brume border-y border-brume">
+            <section className="bg-brume border-y border-brume">
                 <div className="max-w-5xl mx-auto px-6 py-16">
                     <SectionLabel number="02" className="justify-center mb-4">ALLER PLUS LOIN</SectionLabel>
                     <h2 className="text-kodem-h1 font-bold text-center">Besoin d'aller plus loin ?</h2>
                     <p className="text-acier text-center mt-2 max-w-2xl mx-auto">
                         Prolongez l'audit avec nos prestations automatiques : monitoring, remédiation, hébergement managé.
                     </p>
-                    <div className="grid md:grid-cols-3 gap-6 mt-8">
+                    <div className="kodem-reveal-grid kodem-reveal-grid--3 grid md:grid-cols-3 gap-6 mt-8">
                         {paidPrestations.filter((p) => p.price_from !== 0).slice(0, 3).map((p) => (
                             <article key={p.slug} className="kodem-card bg-white rounded-kodem border border-brume p-6 shadow-sm">
                                 <h3 className="text-kodem-h2 font-semibold">{p.title}</h3>

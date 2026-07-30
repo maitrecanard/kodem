@@ -68,7 +68,7 @@ export function TestimonialSection({ items }) {
 
     return (
         <section className="mt-16">
-            <div className="grid gap-6 md:grid-cols-2">
+            <div className="kodem-reveal-grid kodem-reveal-grid--2 grid gap-6 md:grid-cols-2">
                 {valid.map((t, i) => (
                     <Testimonial
                         key={i}

@@ -41,8 +41,8 @@ export default function ZoneIntervention({ meta, positioning = {} }) {
             </section>
 
             {/* Advantage of local presence */}
-            <section className="kodem-reveal max-w-6xl mx-auto px-6 pb-16">
-                <div className="grid gap-6 md:grid-cols-3">
+            <section className="max-w-6xl mx-auto px-6 pb-16">
+                <div className="kodem-reveal-grid kodem-reveal-grid--3 grid gap-6 md:grid-cols-3">
                     <div className="bg-white rounded-kodem border border-brume p-6 shadow-sm">
                         <SectionLabel>DÉPLOIEMENT</SectionLabel>
                         <p className="mt-4 text-acier text-sm leading-relaxed">
@@ -67,11 +67,11 @@ export default function ZoneIntervention({ meta, positioning = {} }) {
             </section>
 
             {/* Modèle d'intervention */}
-            <section className="kodem-reveal bg-white border-y border-brume">
+            <section className="bg-white border-y border-brume">
                 <div className="max-w-6xl mx-auto px-6 py-16">
                     <SectionLabel>MODÈLE D'INTERVENTION</SectionLabel>
                     <h2 className="mt-3 text-kodem-h1 font-bold max-w-2xl">Comment KODEM couvre la France</h2>
-                    <div className="mt-10 grid gap-8 md:grid-cols-3">
+                    <div className="kodem-reveal-grid kodem-reveal-grid--3 mt-10 grid gap-8 md:grid-cols-3">
                         <div>
                             <SectionLabel number="01">PRÉPARATION À DISTANCE</SectionLabel>
                             <p className="mt-3 text-acier text-sm leading-relaxed">

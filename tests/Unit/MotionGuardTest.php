@@ -225,6 +225,26 @@ class MotionGuardTest extends TestCase
     }
 
     /**
+     * Détecte une classe EXACTE (`kodem-reveal` ou `kodem-reveal-grid`) dans un
+     * attribut de tag brut, jamais par sous-chaîne : `kodem-reveal-grid`
+     * CONTIENT littéralement `kodem-reveal`, donc un simple `str_contains`
+     * confondrait les deux classes (et déclencherait ce garde à tort partout
+     * où `kodem-reveal-grid` est posé sans jamais y avoir de vrai
+     * `kodem-reveal`). Les frontières interdisent tout caractère de nom de
+     * classe (lettre, chiffre, `_`, `-`) immédiatement avant ou après la
+     * classe recherchée, ce qui exclut à la fois `kodem-reveal-grid` (quand on
+     * cherche `kodem-reveal`, le `-` qui suit casse la frontière) et
+     * `kodem-reveal-grid--2` (quand on cherche `kodem-reveal-grid`, le `-` de
+     * `--2` casse la frontière).
+     */
+    private function attrsHasExactClass(string $attrs, string $className): bool
+    {
+        $pattern = '/(?<![\w-])'.preg_quote($className, '/').'(?![\w-])/';
+
+        return (bool) preg_match($pattern, $attrs);
+    }
+
+    /**
      * @return array<string, string> nom du keyframe => bloc CSS complet
      */
     private function extractKeyframeBlocksFromCss(string $css): array
@@ -704,14 +724,22 @@ class MotionGuardTest extends TestCase
     }
 
     /**
-     * `.kodem-reveal` pilote sa propre `animation-timeline: view()` : imbriquer
-     * un `.kodem-reveal` dans un autre produit un résultat incohérent (la
-     * timeline de l'enfant se calcule sur SA propre entrée dans le viewport,
-     * indépendamment de celle du parent — l'enfant peut donc apparaître avant,
-     * après, ou de façon désynchronisée par rapport au parent qui l'englobe).
-     * Réutilise `scanJsxTags` et une pile d'ancêtres (même mécanique que
-     * `test_no_h1_is_animated_on_public_surface`) pour détecter tout
-     * `.kodem-reveal` dont un ancêtre porte déjà cette classe.
+     * `.kodem-reveal` et `.kodem-reveal-grid > *` pilotent chacun leur PROPRE
+     * `animation-timeline: view()` : imbriquer l'un dans l'autre — dans
+     * n'importe quel sens, et y compris la même classe deux fois — produit un
+     * résultat incohérent (la timeline de l'enfant se calcule sur SA propre
+     * entrée dans le viewport, indépendamment de celle du parent — l'enfant
+     * peut donc apparaître avant, après, ou de façon désynchronisée par
+     * rapport au parent qui l'englobe). Réutilise `scanJsxTags` et une pile
+     * d'ancêtres (même mécanique que `test_no_h1_is_animated_on_public_surface`)
+     * pour détecter tout `.kodem-reveal`/`.kodem-reveal-grid` dont un ancêtre
+     * porte déjà l'une ou l'autre de ces deux classes.
+     *
+     * Détection par CLASSE EXACTE (`attrsHasExactClass`), jamais par
+     * sous-chaîne : `kodem-reveal-grid` contient littéralement `kodem-reveal`,
+     * un `str_contains` naïf confondrait donc les deux classes et ferait
+     * échouer ce garde sur la moitié des grilles converties (cf. rapport
+     * d'exécution — mutation rejouée pour le prouver).
      */
     public function test_kodem_reveal_is_never_nested(): void
     {
@@ -740,7 +768,8 @@ class MotionGuardTest extends TestCase
                     continue;
                 }
 
-                $isRevealed = str_contains($tag['attrs'], 'kodem-reveal');
+                $isRevealed = $this->attrsHasExactClass($tag['attrs'], 'kodem-reveal')
+                    || $this->attrsHasExactClass($tag['attrs'], 'kodem-reveal-grid');
 
                 if ($isRevealed) {
                     $checkedAtLeastOneReveal = true;
@@ -748,7 +777,7 @@ class MotionGuardTest extends TestCase
                     foreach ($stack as $frame) {
                         $this->assertFalse(
                             $frame['revealed'],
-                            "un <{$tag['name']}> kodem-reveal est imbriqué dans un ancêtre <{$frame['name']}> déjà kodem-reveal dans {$file}"
+                            "un <{$tag['name']}> kodem-reveal/kodem-reveal-grid est imbriqué dans un ancêtre <{$frame['name']}> déjà kodem-reveal/kodem-reveal-grid dans {$file}"
                         );
                     }
                 }
@@ -761,19 +790,21 @@ class MotionGuardTest extends TestCase
 
         $this->assertTrue(
             $checkedAtLeastOneReveal,
-            'précondition : au moins un élément kodem-reveal doit être scanné sur la surface publique'
+            'précondition : au moins un élément kodem-reveal ou kodem-reveal-grid doit être scanné sur la surface publique'
         );
     }
 
     /**
      * `animation-delay` (utilisé par `.kodem-stagger` pour décaler ses
-     * enfants) est ignoré sur une timeline `view()` (celle de
-     * `.kodem-reveal`) : combiner les deux classes sur un même élément est un
-     * bug silencieux — la cascade de décalage ne produit visuellement aucun
-     * effet, sans qu'aucune erreur ne le signale. Ce test l'interdit
-     * explicitement, tag par tag (pas seulement au niveau ancêtre : les deux
-     * classes doivent simplement ne jamais cohabiter dans le même attribut
-     * `className`).
+     * enfants) est ignoré sur une timeline `view()` (celle de `.kodem-reveal`
+     * ET de `.kodem-reveal-grid`) : combiner `.kodem-stagger` avec l'une ou
+     * l'autre sur un même élément est un bug silencieux — la cascade de
+     * décalage ne produit visuellement aucun effet, sans qu'aucune erreur ne
+     * le signale. Ce test l'interdit explicitement, tag par tag (pas
+     * seulement au niveau ancêtre : les classes doivent simplement ne jamais
+     * cohabiter dans le même attribut `className`). Détection par classe
+     * EXACTE (`attrsHasExactClass`) pour `kodem-reveal`/`kodem-reveal-grid` —
+     * même piège de sous-chaîne que `test_kodem_reveal_is_never_nested`.
      */
     public function test_stagger_and_reveal_are_never_combined(): void
     {
@@ -792,7 +823,8 @@ class MotionGuardTest extends TestCase
                 }
 
                 $hasStagger = str_contains($tag['attrs'], 'kodem-stagger');
-                $hasReveal = str_contains($tag['attrs'], 'kodem-reveal');
+                $hasReveal = $this->attrsHasExactClass($tag['attrs'], 'kodem-reveal')
+                    || $this->attrsHasExactClass($tag['attrs'], 'kodem-reveal-grid');
 
                 if ($hasStagger || $hasReveal) {
                     $checkedAtLeastOneStaggerOrReveal = true;
@@ -800,14 +832,49 @@ class MotionGuardTest extends TestCase
 
                 $this->assertFalse(
                     $hasStagger && $hasReveal,
-                    "un <{$tag['name']}> combine kodem-stagger et kodem-reveal dans {$file} : animation-delay est ignoré sur la timeline view() (cf. §4)"
+                    "un <{$tag['name']}> combine kodem-stagger et kodem-reveal/kodem-reveal-grid dans {$file} : animation-delay est ignoré sur la timeline view() (cf. §4)"
                 );
             }
         }
 
         $this->assertTrue(
             $checkedAtLeastOneStaggerOrReveal,
-            'précondition : au moins un élément kodem-stagger ou kodem-reveal doit être scanné sur la surface publique'
+            'précondition : au moins un élément kodem-stagger ou kodem-reveal/kodem-reveal-grid doit être scanné sur la surface publique'
         );
+    }
+
+    /**
+     * `animation-range` gouverne seule la vitesse perçue sur une timeline
+     * `view()` (cf. §4) : une valeur atteignant `cover 100%` (ou au-delà)
+     * ferait dépendre la fin de la révélation d'un point de défilement que
+     * l'utilisateur peut ne jamais atteindre (bas de page), laissant la carte
+     * bloquée à opacité nulle. Ce test borne TOUTE occurrence de
+     * `animation-range` dans `app.css` — qu'elle vienne de `.kodem-reveal` ou
+     * des paliers `.kodem-reveal-grid--N` — strictement en dessous de 100 %.
+     */
+    public function test_reveal_grid_range_stays_below_full_cover(): void
+    {
+        $css = $this->readRaw(base_path('resources/css/app.css'));
+
+        $this->assertMatchesRegularExpression(
+            '/animation-range\s*:/',
+            $css,
+            'précondition : au moins une déclaration animation-range doit être scannée'
+        );
+
+        preg_match_all('/animation-range\s*:\s*entry\s+0%\s+cover\s+(\d+(?:\.\d+)?)%/', $css, $matches);
+
+        $this->assertNotEmpty(
+            $matches[1],
+            'précondition : au moins une valeur "cover N%" doit être extraite de animation-range'
+        );
+
+        foreach ($matches[1] as $coverValue) {
+            $this->assertLessThan(
+                100,
+                (float) $coverValue,
+                "une valeur animation-range atteint ou dépasse cover 100% ({$coverValue}%) : un élément pourrait rester bloqué à opacité nulle"
+            );
+        }
     }
 }

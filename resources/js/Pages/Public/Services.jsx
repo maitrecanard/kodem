@@ -31,7 +31,7 @@ export default function Services({ meta, prestations = [] }) {
                     de logiciel sur-mesure, l'hébergement web managé et les audits SEO et de sécurité
                     automatisés.
                 </p>
-                <div className="kodem-reveal grid gap-6 md:grid-cols-2">
+                <div className="kodem-reveal-grid kodem-reveal-grid--2 grid gap-6 md:grid-cols-2">
                     {prestations.map((p, index) => {
                         const num = String(index + 1).padStart(2, '0');
                         return (

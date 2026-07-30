@@ -59,7 +59,7 @@ export default function Home({ meta, positioning = {}, cases = [], testimonials 
                 </div>
 
                 {proofPoints.length > 0 && (
-                    <dl className="kodem-reveal mt-12 grid grid-cols-2 md:grid-cols-4 gap-6 max-w-3xl">
+                    <dl className="kodem-reveal-grid kodem-reveal-grid--4 mt-12 grid grid-cols-2 md:grid-cols-4 gap-6 max-w-3xl">
                         {proofPoints.map((p) => (
                             <div key={p.label}>
                                 <dt className="text-kodem-h1 font-bold text-encre">{p.valeur}</dt>
@@ -93,7 +93,7 @@ export default function Home({ meta, positioning = {}, cases = [], testimonials 
 
             {/* Réalisations — teaser des cas */}
             {cases.length > 0 && (
-                <section className="kodem-reveal max-w-6xl mx-auto px-6 py-16">
+                <section className="max-w-6xl mx-auto px-6 py-16">
                     <div className="flex items-end justify-between mb-10">
                         <div>
                             <SectionLabel number="02">RÉALISATIONS</SectionLabel>
@@ -109,7 +109,7 @@ export default function Home({ meta, positioning = {}, cases = [], testimonials 
                             Toutes les réalisations →
                         </Link>
                     </div>
-                    <div className="grid gap-6 md:grid-cols-2">
+                    <div className="kodem-reveal-grid kodem-reveal-grid--2 grid gap-6 md:grid-cols-2">
                         {cases.map((cas) => (
                             <article
                                 key={cas.slug}
@@ -136,7 +136,7 @@ export default function Home({ meta, positioning = {}, cases = [], testimonials 
 
             {/* Témoignages (§5/§9-6 : sur l'accueil ; section masquée si aucune donnée réelle) */}
             {testimonials.length > 0 && (
-                <section className="kodem-reveal max-w-6xl mx-auto px-6 py-16">
+                <section className="max-w-6xl mx-auto px-6 py-16">
                     <SectionLabel number="03">TÉMOIGNAGES</SectionLabel>
                     <h2 className="mt-3 text-kodem-h1 font-bold">Ce que disent les clients</h2>
                     <TestimonialSection items={testimonials} />
@@ -145,7 +145,7 @@ export default function Home({ meta, positioning = {}, cases = [], testimonials 
 
             {/* Capacités en support (§8 : jamais en façade) */}
             {capabilities.length > 0 && (
-                <section className="kodem-reveal bg-white border-y border-brume">
+                <section className="bg-white border-y border-brume">
                     <div className="max-w-6xl mx-auto px-6 py-16">
                         <SectionLabel number="04">CAPACITÉS EN SUPPORT</SectionLabel>
                         <h2 className="mt-3 text-kodem-h1 font-bold max-w-3xl">
@@ -155,7 +155,7 @@ export default function Home({ meta, positioning = {}, cases = [], testimonials 
                             Développement, hébergement, visibilité et sécurité ne sont pas le produit :
                             ce sont les moyens qui font tenir un dispositif connecté dans la durée.
                         </p>
-                        <div className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+                        <div className="kodem-reveal-grid kodem-reveal-grid--2 kodem-reveal-grid--4 mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
                             {capabilities.map((c) => (
                                 <div key={c.titre} className="rounded-kodem border border-brume p-6">
                                     <h3 className="text-kodem-h2 font-semibold text-encre">{c.titre}</h3>

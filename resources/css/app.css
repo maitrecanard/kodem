@@ -159,6 +159,82 @@
             animation-timeline: view();
             animation-range: entry 0% cover 40%;
         }
+
+        /**
+         * Cascade de cartes — chaque enfant direct a sa PROPRE timeline `view()`,
+         * donc se révèle à sa propre position dans le défilement. Les cartes d'une
+         * même RANGÉE entrant à la même hauteur se révéleraient simultanément :
+         * on les décale en allongeant la plage colonne par colonne, ce qui produit
+         * une vague en diagonale.
+         *
+         * Le décalage passe par `animation-range` et NON par `animation-delay` :
+         * ce dernier est ignoré sur une timeline de scroll.
+         */
+        .kodem-reveal-grid > * {
+            --kodem-rise: var(--kodem-reveal-rise);
+            animation: kodem-rise var(--kodem-dur-3) linear both;
+            animation-timeline: view();
+            animation-range: entry 0% cover 40%;
+        }
+
+        /**
+         * Décalages par colonne — modificateurs explicites plutôt qu'un modulo
+         * unique : les grilles converties n'ont pas toutes le même nombre de
+         * colonnes (2, 3 ou 4 selon la page), et un modulo unique produirait une
+         * cascade fausse sur la moitié d'entre elles.
+         *
+         * ENCADREMENT RESPONSIVE — toutes les grilles converties sont en
+         * `grid-cols-1` (Tailwind mobile-first) en dessous du point de rupture
+         * où leur nombre de colonnes réel est déclaré (`md:grid-cols-N` ou
+         * `lg:grid-cols-N`) — seule exception : la grille des points de preuve
+         * de Home.jsx, qui est déjà à 2 colonnes sous ce point de rupture (cf.
+         * rapport d'exécution). Décaler par colonne n'a de sens que là où des
+         * colonnes existent visuellement : sous ce seuil, chaque carte est déjà
+         * empilée verticalement et dispose déjà de sa propre position de scroll
+         * via la règle de base ci-dessus — lui appliquer un modulo de colonne y
+         * introduirait une irrégularité de vitesse sans aucun bénéfice visuel
+         * (rangée d'une seule carte = pas de vague à créer). D'où le choix
+         * d'encadrer CHAQUE modificateur dans le `@media` correspondant au
+         * point de rupture Tailwind où la grille visée devient réellement
+         * multi-colonnes, plutôt que de le laisser actif en permanence.
+         *
+         * Pas de valeur au-delà de +36 % (colonne 4 → cover 76%) : on reste
+         * bien en deçà de `cover 100%`, garantissant qu'aucune carte ne peut
+         * rester bloquée à opacité nulle en bas de page (cf. test #16).
+         */
+        @media (min-width: 768px) {
+            .kodem-reveal-grid--2 > *:nth-child(2n) {
+                animation-range: entry 0% cover 52%;
+            }
+
+            .kodem-reveal-grid--3 > *:nth-child(3n + 2) {
+                animation-range: entry 0% cover 52%;
+            }
+            .kodem-reveal-grid--3 > *:nth-child(3n) {
+                animation-range: entry 0% cover 64%;
+            }
+        }
+
+        /**
+         * Grilles à 4 colonnes — déclarées `lg:grid-cols-4` dans le JSX : le
+         * palier de décalage à 4 colonnes n'a de sens qu'à partir du point de
+         * rupture `lg`, PAS `md` (où ces mêmes grilles n'affichent que 2
+         * colonnes, cf. `.kodem-reveal-grid--2` ci-dessus qui reste actif entre
+         * `md` et `lg`). Déclaré APRÈS le bloc `md` ci-dessus afin que, à partir
+         * de `lg`, ces règles (même spécificité) l'emportent en cascade sur les
+         * règles `--2` toujours vraies à cette largeur.
+         */
+        @media (min-width: 1024px) {
+            .kodem-reveal-grid--4 > *:nth-child(4n + 2) {
+                animation-range: entry 0% cover 52%;
+            }
+            .kodem-reveal-grid--4 > *:nth-child(4n + 3) {
+                animation-range: entry 0% cover 64%;
+            }
+            .kodem-reveal-grid--4 > *:nth-child(4n) {
+                animation-range: entry 0% cover 76%;
+            }
+        }
     }
 }
 
@@ -176,7 +252,8 @@
     .animate-kodem-fade,
     .animate-kodem-rise,
     .kodem-stagger > *,
-    .kodem-reveal {
+    .kodem-reveal,
+    .kodem-reveal-grid > * {
         animation: none !important;
     }
 

@@ -55,8 +55,8 @@ export default function Expertises({ meta, positioning = {} }) {
 
             {/* Capabilities grid */}
             {capabilities.length > 0 && (
-                <section className="kodem-reveal max-w-6xl mx-auto px-6 pb-20">
-                    <div className="grid gap-6 md:grid-cols-2">
+                <section className="max-w-6xl mx-auto px-6 pb-20">
+                    <div className="kodem-reveal-grid kodem-reveal-grid--2 grid gap-6 md:grid-cols-2">
                         {capabilities.map((cap, i) => (
                             <div
                                 key={i}
@@ -74,14 +74,14 @@ export default function Expertises({ meta, positioning = {} }) {
 
             {/* Socle technique — profondeur backend/réseau en support (jamais présenté comme dispositif sur site) */}
             {positioning.socle_technique?.elements?.length > 0 && (
-                <section className="kodem-reveal max-w-6xl mx-auto px-6 pb-20">
+                <section className="max-w-6xl mx-auto px-6 pb-20">
                     <SectionLabel>SOCLE TECHNIQUE</SectionLabel>
                     {positioning.socle_technique.intro && (
                         <p className="mt-4 max-w-2xl text-acier leading-relaxed">
                             {positioning.socle_technique.intro}
                         </p>
                     )}
-                    <div className="mt-8 grid gap-6 md:grid-cols-2">
+                    <div className="kodem-reveal-grid kodem-reveal-grid--2 mt-8 grid gap-6 md:grid-cols-2">
                         {positioning.socle_technique.elements.map((el, i) => (
                             <div key={i} className="border-l-2 border-cobalt-600 pl-5">
                                 <h3 className="font-mono text-sm uppercase tracking-widest text-encre">

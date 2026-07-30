@@ -35,14 +35,16 @@ export default function RealisationShow({ meta, cas, testimonials = [] }) {
             </div>
 
             {/* Case study content */}
-            <div className="kodem-reveal max-w-6xl mx-auto px-6 pb-16">
-                <CaseStudy cas={cas} />
+            <div className="max-w-6xl mx-auto px-6 pb-16">
+                <div className="kodem-reveal">
+                    <CaseStudy cas={cas} />
+                </div>
 
-                {/* Testimonials for this case */}
+                {/* Testimonials for this case — se révèle carte par carte (cf. Testimonial.jsx) */}
                 <TestimonialSection items={testimonials} />
 
                 {/* CTA */}
-                <div className="mt-16 grid md:grid-cols-2 gap-8 items-start">
+                <div className="kodem-reveal mt-16 grid md:grid-cols-2 gap-8 items-start">
                     <div>
                         <p className="text-lg font-medium text-encre mb-2">
                             Un projet similaire à déployer ?
