@@ -3,7 +3,9 @@
 /composer.phar
 /database/database.sqlite
 /node_modules
-/public/build
+# public/build est volontairement versionné : le serveur de production ne
+# compile pas les assets (pas de Node), il se contente d'un git pull.
+# Après chaque `npm run build`, committer les bundles régénérés.
 /public/hot
 /public/storage
 /storage/*.key

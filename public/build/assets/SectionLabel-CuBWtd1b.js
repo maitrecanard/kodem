@@ -1,0 +1,1 @@
+import{j as e}from"./app-DXIOk3R_.js";function r({children:t,number:s,className:a=""}){return e.jsxs("p",{className:`kodem-eyebrow flex items-center gap-2 ${a}`,children:[s&&e.jsxs("span",{className:"text-cobalt-400",children:[s," —"]}),e.jsxs("span",{children:["// ",t]})]})}export{r as S};
