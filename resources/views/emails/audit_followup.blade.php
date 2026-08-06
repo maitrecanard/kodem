@@ -4,7 +4,13 @@
 <body style="font-family: 'Space Grotesk', -apple-system, Segoe UI, Helvetica, sans-serif; color:#0B1B4D; background:#FBFCFE; padding:24px;">
     <div style="max-width:560px; margin:auto; background:#fff; border:1px solid #E8ECFF; border-radius:12px; overflow:hidden;">
         <div style="background:#0B1B4D; color:#fff; padding:20px;">
-            <div style="font-size:12px; letter-spacing:2px; text-transform:uppercase; opacity:.8;">[kodem]</div>
+            <table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>
+                <td style="padding-right:10px; vertical-align:middle;">
+                    <img src="{{ url('/email-logo-kodem.png') }}" width="32" height="32" alt=""
+                         style="display:block; width:32px; height:32px; border:0;">
+                </td>
+                <td style="vertical-align:middle; font-size:12px; letter-spacing:2px; text-transform:uppercase; opacity:.8; color:#fff;">[kodem]</td>
+            </tr></table>
             <div style="font-size:20px; font-weight:bold; margin-top:4px;">
                 Votre site mérite mieux que {{ $audit->score_total }}/100
             </div>
@@ -17,7 +23,7 @@
                 (SEO {{ $audit->score_seo }}/100, sécurité {{ $audit->score_security }}/100).
             </p>
             <p>
-                C'est en-dessous du seuil de 75 % que nous considérons comme satisfaisant.
+                C'est en dessous du seuil de 75 % que nous considérons comme satisfaisant.
                 Nous pouvons vous aider à corriger les points bloquants rapidement.
             </p>
 

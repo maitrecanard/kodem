@@ -1,0 +1,1 @@
+import{j as s}from"./app-D9aTYNUB.js";function o({value:t,className:e="",children:n,...r}){return s.jsx("label",{...r,className:"block text-sm font-medium text-encre "+e,children:t||n})}export{o as I};

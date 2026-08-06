@@ -5,6 +5,34 @@ Toutes les évolutions notables de ce projet sont consignées dans ce fichier.
 Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/)
 et le projet suit le [versionnage sémantique](https://semver.org/lang/fr/).
 
+## [1.16.1] — 2026-08-06
+
+### Fixed
+- **Un seul `<title>` par page dans le HTML brut, et c'est le bon.** `app.blade.php` déclarait
+  un `<title inertia>{{ config('app.name') }}</title>` en dur *et* `@inertiaHead` en injectait
+  un second issu du SSR. Le HTML servi en contenait donc deux, le générique en premier — or la
+  spec HTML n'en admet qu'un et c'est le premier qui fait foi. Résultat mesuré : tout crawler
+  sans JavaScript lisait « Kodem » sur **toutes** les pages, malgré le SSR actif. Le `<title>`
+  du Blade est supprimé ; le titre est désormais rendu par le seul `@inertiaHead`.
+- **Suffixe de marque dupliqué dans les titres.** Les meta titles publics se terminent déjà par
+  « | Kodem » (`PublicController`), et les deux points d'entrée y rajoutaient `` `${title} - ${appName}` ``,
+  donnant « … | Kodem - Kodem ». Nouveau helper partagé `resources/js/lib/pageTitle.js`, utilisé
+  par `app.jsx` et `ssr.jsx` : le suffixe n'est ajouté que si le titre ne porte pas déjà la marque.
+  Les pages à titre court (« Log in », « Statistiques ») continuent de le recevoir.
+- **Fautes d'orthographe** relevées par un balayage complet du corpus français (dictionnaire
+  hunspell fr étendu aux formes fléchies + relecture grammaticale) :
+  « trés » → « très » et majuscule après le point dans le témoignage de `content/testimonials.json`
+  (visible sur la page d'accueil) ; « en-dessous » → « en dessous » (le trait d'union est fautif)
+  dans l'e-mail de relance d'audit et dans l'aide de `audits:send-followup`.
+
+### Notes
+- La suppression du `<title>` du Blade a une contrepartie assumée : **si le process SSR n'est pas
+  démarré**, le HTML brut ne contient plus aucun `<title>`. Dans cet état, il ne contenait déjà ni
+  `<h1>`, ni `description`, ni `canonical`, ni la moindre balise `og:`/`twitter:` — un `<title>`
+  générique n'y changeait rien. Le SSR (`php artisan inertia:start-ssr`) n'est supervisé par aucun
+  service dans le dépôt : s'il tombe, Inertia repasse silencieusement en rendu client et le site
+  perd tout son référencement sans lever d'erreur. À traiter séparément.
+
 ## [1.16.0] — 2026-07-30
 
 ### Added
