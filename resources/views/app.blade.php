@@ -7,7 +7,11 @@
 
         <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 
-        <title inertia>{{ config('app.name', 'Laravel') }}</title>
+        {{-- PAS de <title> ici. Le titre est rendu côté serveur par @inertiaHead (voir plus bas),
+             à partir du <Head> de la page. Un <title inertia> en dur à cet endroit produisait un
+             SECOND <title> dans le HTML brut, placé AVANT celui du SSR : la spec HTML n'en admet
+             qu'un et c'est le premier qui fait foi, donc les crawlers lisaient « Kodem » sur
+             toutes les pages malgré le SSR. Ne pas le réintroduire. --}}
 
         <!-- Favicon — symbole [k] de la marque KODEM -->
         <link rel="icon" type="image/svg+xml" href="/favicon.svg">

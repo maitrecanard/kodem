@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\URL;
 class SendAuditFollowupCommand extends Command
 {
     protected $signature = 'audits:send-followup
-        {--threshold=75 : Score total en-dessous duquel relancer}
+        {--threshold=75 : Score total en dessous duquel relancer}
         {--delay-days=7 : Délai minimum depuis l\'audit}
         {--max-age-days=30 : Au-delà de cet âge, on ne relance plus}
         {--audit= : UUID d\'un audit précis (force la relance)}

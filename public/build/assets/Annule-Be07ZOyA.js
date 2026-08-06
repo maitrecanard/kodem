@@ -1,1 +1,0 @@
-import{j as e,L as n}from"./app-DXIOk3R_.js";function a(){return e.jsxs("div",{className:"text-center py-16",children:[e.jsx("h1",{children:"Paiement annulé"}),e.jsx("p",{className:"animate-kodem-slide",children:"Aucun montant n'a été prélevé."}),e.jsx(n,{href:route("audits.premium"),children:"Retour au formulaire"})]})}export{a as default};

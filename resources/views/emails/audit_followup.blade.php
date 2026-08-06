@@ -23,7 +23,7 @@
                 (SEO {{ $audit->score_seo }}/100, sécurité {{ $audit->score_security }}/100).
             </p>
             <p>
-                C'est en-dessous du seuil de 75 % que nous considérons comme satisfaisant.
+                C'est en dessous du seuil de 75 % que nous considérons comme satisfaisant.
                 Nous pouvons vous aider à corriger les points bloquants rapidement.
             </p>
 
