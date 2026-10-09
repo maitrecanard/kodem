@@ -4,46 +4,41 @@ namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Inertia\Testing\AssertableInertia;
+use Tests\Concerns\ReadsJsonLd;
 use Tests\TestCase;
 
 class PublicPagesTest extends TestCase
 {
+    use ReadsJsonLd;
     use RefreshDatabase;
 
-    public function test_home_page_renders_with_niche_positioning(): void
+    public function test_home_page_renders_the_backend_mockup(): void
     {
+        // Décision de l'actionnaire du 2026-10-09 : l'accueil reprend la maquette « backend de
+        // votre produit ». Son contenu vit dans Home.jsx, la page ne reçoit donc que ses meta.
         $this->get('/')
             ->assertOk()
             ->assertInertia(fn (AssertableInertia $page) => $page
                 ->component('Public/Home')
-                ->where('meta.title', fn ($t) => str_contains(strtolower($t), 'kodem')
-                    && str_contains(strtolower($t), 'dispositifs connectés'))
-                // Positionnement niche servi depuis content/positioning.json (§0)
-                ->where('positioning.hero_title', fn ($h) => str_contains(strtolower($h), 'dispositifs connectés'))
-                ->has('positioning.secteurs')
-                ->has('cases')
-                ->has('testimonials')
+                ->where('meta.title', fn ($t) => str_contains(mb_strtolower($t), 'kodem')
+                    && str_contains(mb_strtolower($t), 'backend'))
+                ->missing('positioning')
+                ->missing('cases')
+                ->missing('testimonials')
             );
     }
 
-    public function test_home_exposes_the_five_real_testimonials_without_rating(): void
+    public function test_public_contact_address_is_the_single_mailbox(): void
     {
-        $this->get('/')
-            ->assertOk()
-            ->assertInertia(fn (AssertableInertia $page) => $page
-                ->component('Public/Home')
-                ->has('testimonials', 5)
-                ->where('testimonials', function ($testimonials) {
-                    foreach ($testimonials as $t) {
-                        $this->assertNotEmpty($t['nom']);
-                        $this->assertNotSame('Prénom Nom', $t['nom']);
-                        $this->assertArrayNotHasKey('rating', $t);
-                        $this->assertArrayNotHasKey('exemple', $t);
-                    }
+        $expected = 'mathieu.siaudeau@kodem.fr';
 
-                    return true;
-                })
-            );
+        $response = $this->get('/')->assertOk();
+
+        $response->assertInertia(fn (AssertableInertia $page) => $page->where('contactEmail', $expected));
+
+        $organization = collect($this->jsonLdGraph($response))->firstWhere('@type', 'Organization');
+
+        $this->assertSame($expected, $organization['email']);
     }
 
     public function test_home_html_never_emits_self_review_schema(): void
@@ -57,15 +52,16 @@ class PublicPagesTest extends TestCase
         $this->assertStringNotContainsString('Review', $html);
     }
 
-    public function test_home_html_carries_the_imported_testimonial_authors(): void
+    public function test_home_source_carries_the_mockup_copy(): void
     {
-        // Preuve positive que les témoignages réels partent bien au client (SSR inactif en test :
-        // seul le JSON Inertia est présent dans le HTML, encodé/échappé par Blade).
-        $html = $this->get('/')->assertOk()->getContent();
+        // SSR inactif en test : le texte de l'accueil n'est vérifiable que dans la source JSX.
+        $source = file_get_contents(resource_path('js/Pages/Public/Home.jsx'));
 
-        $this->assertStringContainsString('MUXEN', $html);
-        $this->assertStringContainsString('Keddy Andamba', $html);
-        $this->assertStringContainsString('Sophie Douezy', $html);
+        $this->assertNotFalse($source);
+        $this->assertStringContainsString('de votre produit.', $source);
+        $this->assertStringContainsString('Trois façons de travailler ensemble.', $source);
+        $this->assertStringContainsString("J'ai réparé la production avant de la coder.", $source);
+        $this->assertSame(6, substr_count($source, "meta: '// compétence 0") + substr_count($source, 'meta: "// compétence 0'));
     }
 
     public function test_services_page_renders(): void

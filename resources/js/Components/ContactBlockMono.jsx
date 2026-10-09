@@ -1,13 +1,14 @@
+import { usePage } from '@inertiajs/react';
 import BrandWordmark from '@/Components/BrandWordmark';
 
 export default function ContactBlockMono({
     web = 'kodem.fr',
-    email = 'contact@kodem.fr',
     phone = '+33 7 62 61 26 46',
     address = 'Poitiers — Nouvelle-Aquitaine',
     area = '',
     className = '',
 }) {
+    const { contactEmail } = usePage().props;
     const telHref = 'tel:' + phone.replace(/[^+\d]/g, '');
     return (
         <div className={`bg-encre text-brume rounded-kodem p-8 ${className}`}>
@@ -20,7 +21,7 @@ export default function ContactBlockMono({
                 </li>
                 <li className="flex items-baseline gap-3 font-mono text-sm">
                     <span className="text-cobalt-400">→</span>
-                    <a href={`mailto:${email}`} className="hover:text-white">{email}</a>
+                    <a href={`mailto:${contactEmail}`} className="hover:text-white">{contactEmail}</a>
                 </li>
                 <li className="flex items-baseline gap-3 font-mono text-sm">
                     <span className="text-cobalt-400">→</span>

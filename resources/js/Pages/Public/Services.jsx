@@ -8,11 +8,6 @@ export default function Services({ meta, prestations = [] }) {
     return (
         <PublicLayout meta={meta}>
             <Banner
-                image="/images/banniere-kodem.webp"
-                imageSources={[
-                    { src: '/images/banniere-kodem.webp', width: 1006 },
-                    { src: '/images/banniere-kodem-2x.webp', width: 2012 },
-                ]}
                 title="Nos prestations"
                 cta={
                     <Link

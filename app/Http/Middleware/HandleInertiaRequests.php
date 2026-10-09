@@ -39,6 +39,7 @@ class HandleInertiaRequests extends Middleware
                 ...(new Ziggy)->toArray(),
                 'location' => $request->url(),
             ],
+            'contactEmail' => config('contact.public_email'),
             // Messages one-shot de session, consommés par les pages (bandeau de
             // succès/erreur). Sans ce partage, un `back()->with('error', …)`
             // n'atteindrait jamais le composant React.

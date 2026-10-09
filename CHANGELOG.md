@@ -5,6 +5,72 @@ Toutes les évolutions notables de ce projet sont consignées dans ce fichier.
 Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/)
 et le projet suit le [versionnage sémantique](https://semver.org/lang/fr/).
 
+## [1.18.0] (2026-10-09)
+
+### Changed (décision de l'actionnaire du 2026-10-09, contre les votes du 2026-09-28 et du 2026-09-29)
+- **L'accueil reprend la maquette « backend de votre produit ».** `Home.jsx` est réécrit : intro,
+  séquence de six compétences pilotée par le scroll, trois missions, parcours, contact avec copie
+  de l'adresse. Le texte de la maquette est repris à l'identique, y compris « freelance », le
+  paiement, Stripe et la reprise d'application. Styles dans `resources/css/home.css`, chargés avec
+  la page et préfixés `kh-`.
+- `PublicController::home()` n'envoie plus que les meta : `positioning`, `cases` et `testimonials`
+  ne partent plus sur l'accueil.
+- `PositioningCopyGuardTest` n'interdit plus « freelance ».
+- Tests de l'accueil réécrits (`PublicPagesTest`, `SeoRefonteTest`).
+
+### Known gaps
+- Le reste du site (`content/positioning.json`, JSON-LD, autres pages, `claude.md`) décrit toujours
+  le positionnement « outils métier sur mesure ».
+- `home.css` porte deux animations en boucle et des durées hors tokens : `MotionGuardTest` ne lit
+  que `app.css` et ne les voit pas.
+
+## [1.17.0] (2026-09-28)
+
+### Removed (vote du directeur du 2026-09-29)
+- **Promesses sans réalisation derrière.** `content/positioning.json` : secteurs opérateurs réseau
+  et PME retirés (seul reste ESN et agences), capacités inspections, documents et synchronisations
+  remplacées par deux capacités prouvées (applications métier de bout en bout, exploitation et
+  maintenance), situations d'inspection et de ressaisie retirées, FAQ 1 et 2 réécrites.
+- **MUXEN n'est plus présenté comme opérateur** : secteur « équipementier électrique nautique »,
+  titre du cas sans « réseau », parcours et intro des réalisations corrigés.
+- « En service depuis 5 ans » retiré du cas écran (aucune source) ; témoignage d'une utilisatrice
+  de Freendzy retiré (pas une cliente).
+- `PrestationCatalog` : remédiation à 390 € supprimée (sous le plancher horaire), hébergement sans
+  prix affiché ni WAF, DDoS ou surveillance 24/7, plus de sites vitrines ni d'hébergement inclus.
+- `/prestations`, `/hebergement-web`, `/audit` et `/monitoring` sortent du sitemap et du pied de
+  page ; `/prestations` et `/hebergement-web` passent en `noindex, follow`. Routes conservées.
+- Le JSON-LD ne publie plus le catalogue ni ses prix : seul reste le service « Outils métier sur
+  mesure ».
+- Image de bannière retirée de toutes les pages : le motif diagonal de marque prend le relais.
+- `PositioningCopyGuardTest` interdit désormais ces formulations sur toute la surface publique.
+
+### Changed
+- **Recentrage du site sur les outils métier sur mesure.** Toute la copy publique (positionnement,
+  meta, pages, JSON-LD) présente désormais un seul métier : « KODEM conçoit des outils métier sur
+  mesure qui suppriment les tâches manuelles : mises en service, inspections, documents,
+  synchronisations entre logiciels ». La source reste `content/positioning.json`, enrichi du
+  problème, des trois secteurs (opérateurs réseau, ESN et agences, PME), du parcours du dirigeant
+  et de la FAQ. La FAQ de `/expertises` et son nœud `FAQPage` sont construits depuis ce fichier.
+- **Page d'accueil restructurée** : hero, problème, trois secteurs avec leur preuve (nouveau
+  composant `SectorCards`, partagé avec `/expertises`), réalisations, témoignages, parcours, contact.
+- **`/zone-intervention` devient la page « Méthode de travail »** : à distance partout en France,
+  sur site si besoin, avec la promesse graduée inchangée.
+- **Une seule adresse de contact publiée**, `config('contact.public_email')`, partagée avec Inertia
+  (`contactEmail`) et le JSON-LD `Organization`.
+- `PrestationCatalog` : retrait de « nos équipes » et des mentions de paiement de l'offre SaaS.
+
+### Added
+- **Cas MUXEN et Freendzy** en tête des réalisations, avec leurs témoignages liés.
+- **Visibilité des cas** (`App\Enums\CaseVisibility`, champ `visibilite` de `content/cases.json`) :
+  accueil, liste ou archive. Les cas archivés (photomaton, contrôle d'accès) restent accessibles
+  par leur URL, sortent des listes et du sitemap et portent `noindex, follow`.
+- **Garde des formulations interdites** (`tests/Unit/PositioningCopyGuardTest.php`), prouvée par
+  mutation, et trait de test partagé `tests/Concerns/ScansSourceFiles.php`.
+
+### Removed
+- Les notes techniques sortent du menu et du sitemap et passent en `noindex` ; les URL répondent toujours.
+- Le champ inutilisé `testimonial_slug` de `content/cases.json`.
+
 ## [1.16.1] — 2026-08-06
 
 ### Fixed

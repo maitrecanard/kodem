@@ -2,11 +2,30 @@
 
 namespace Tests\Unit;
 
+use App\Enums\CaseVisibility;
+use App\Exceptions\VitrineContentUnreadable;
 use App\Services\VitrineContent;
+use Tests\Concerns\ServesTemporaryPositioning;
 use Tests\TestCase;
 
 class VitrineContentTest extends TestCase
 {
+    use ServesTemporaryPositioning;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        VitrineContent::flushCache();
+    }
+
+    protected function tearDown(): void
+    {
+        $this->restorePositioning();
+
+        parent::tearDown();
+    }
+
     // -------------------------------------------------------------------------
     // positioning()
     // -------------------------------------------------------------------------
@@ -18,43 +37,154 @@ class VitrineContentTest extends TestCase
         $this->assertIsArray($positioning);
         $this->assertNotEmpty($positioning);
 
-        foreach (['hero_title', 'hero_baseline', 'value_prop', 'capabilities', 'secteurs'] as $key) {
+        foreach (['metier', 'hero_title', 'hero_baseline', 'value_prop', 'probleme', 'capabilities', 'secteurs', 'parcours', 'faq', 'realisations_intro', 'cta_final'] as $key) {
             $this->assertArrayHasKey($key, $positioning, "positioning() doit contenir la clé '{$key}'");
         }
+    }
+
+    public function test_positioning_throws_when_the_file_is_missing(): void
+    {
+        $this->servePositioning(null);
+
+        $this->expectException(VitrineContentUnreadable::class);
+
+        VitrineContent::positioning();
+    }
+
+    public function test_positioning_throws_when_the_json_is_invalid(): void
+    {
+        $this->servePositioning('{"metier": ');
+
+        $this->expectException(VitrineContentUnreadable::class);
+
+        VitrineContent::positioning();
+    }
+
+    public function test_positioning_throws_when_the_json_root_is_not_an_object(): void
+    {
+        $this->servePositioning('"KODEM"');
+
+        $this->expectException(VitrineContentUnreadable::class);
+
+        VitrineContent::positioning();
+    }
+
+    public function test_positioning_throws_naming_the_first_missing_required_key(): void
+    {
+        $this->servePositioning('{"metier": "KODEM"}');
+
+        $this->expectException(VitrineContentUnreadable::class);
+        $this->expectExceptionMessage("'hero_title'");
+
+        VitrineContent::positioning();
     }
 
     public function test_positioning_announces_national_coverage_and_keeps_the_poitiers_base(): void
     {
         $positioning = VitrineContent::positioning();
 
-        $this->assertStringContainsString('partout en France', $positioning['hero_baseline']);
+        $this->assertStringContainsString('partout en France', $positioning['ancrage_local']);
+        $this->assertStringContainsString('Poitiers', $positioning['ancrage_local']);
         $this->assertStringNotContainsString('Nouvelle-Aquitaine', $positioning['hero_baseline']);
 
-        $this->assertStringContainsString('Poitiers', $positioning['ancrage_local']);
-        $this->assertStringContainsString('France', $positioning['ancrage_local']);
-
         foreach ($positioning['secteurs'] as $secteur) {
-            $this->assertStringNotContainsString('France', $secteur, "le secteur '{$secteur}' ne doit pas porter de mention géographique");
-            $this->assertStringNotContainsString('Poitiers', $secteur, "le secteur '{$secteur}' ne doit pas porter de mention géographique");
-            $this->assertStringNotContainsString('Aquitaine', $secteur, "le secteur '{$secteur}' ne doit pas porter de mention géographique");
+            foreach (['nom', 'processus', 'preuve'] as $field) {
+                foreach (['France', 'Poitiers', 'Aquitaine'] as $place) {
+                    $this->assertStringNotContainsString(
+                        $place,
+                        $secteur[$field],
+                        "le champ '{$field}' du secteur '{$secteur['nom']}' ne doit pas porter de mention géographique"
+                    );
+                }
+            }
         }
     }
 
-    // -------------------------------------------------------------------------
-    // cases()
-    // -------------------------------------------------------------------------
-
-    public function test_cases_returns_the_four_published_cases(): void
+    public function test_positioning_carries_no_todo_sentinel(): void
     {
-        $cases = VitrineContent::cases();
+        $json = json_encode(VitrineContent::positioning(), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
-        $this->assertCount(4, $cases, 'cases() doit retourner exactement 4 entrées');
+        $this->assertIsString($json);
+        $this->assertStringNotContainsString('// TODO', $json, 'le positionnement est affiché tel quel : aucune sentinelle ne doit y rester');
+    }
 
-        $slugs = array_column($cases, 'slug');
-        $this->assertContains('photomaton', $slugs);
-        $this->assertContains('ecran-raspberry', $slugs);
-        $this->assertContains('controle-acces-billetterie', $slugs);
-        $this->assertContains('carte-qr-manhattan-cafe', $slugs);
+    public function test_positioning_offers_only_the_sector_backed_by_a_delivered_project(): void
+    {
+        // Vote du 2026-09-29 : opérateurs et PME retirés, faute de réalisation qui les prouve.
+        $this->assertSame(
+            [
+                'ESN et agences de 10 à 200 personnes',
+            ],
+            array_column(VitrineContent::positioning()['secteurs'], 'nom')
+        );
+    }
+
+    // -------------------------------------------------------------------------
+    // cases(), homeCases(), listedCases()
+    // -------------------------------------------------------------------------
+
+    public function test_cases_returns_every_case_including_archived_ones(): void
+    {
+        $this->assertSame(
+            ['muxen', 'freendzy', 'ecran-raspberry', 'carte-qr-manhattan-cafe', 'photomaton', 'controle-acces-billetterie'],
+            array_column(VitrineContent::cases(), 'slug')
+        );
+    }
+
+    public function test_every_case_declares_a_known_visibility(): void
+    {
+        foreach (VitrineContent::cases() as $cas) {
+            $this->assertNotNull(
+                CaseVisibility::tryFrom($cas['visibilite'] ?? ''),
+                "le cas '{$cas['slug']}' doit déclarer une visibilité connue"
+            );
+        }
+    }
+
+    public function test_home_cases_are_muxen_then_freendzy(): void
+    {
+        $this->assertSame(['muxen', 'freendzy'], array_column(VitrineContent::homeCases(), 'slug'));
+    }
+
+    public function test_listed_cases_exclude_archived_ones_and_keep_file_order(): void
+    {
+        $this->assertSame(
+            ['muxen', 'freendzy', 'ecran-raspberry', 'carte-qr-manhattan-cafe'],
+            array_column(VitrineContent::listedCases(), 'slug')
+        );
+    }
+
+    public function test_listed_cases_carry_no_display_offer_wording(): void
+    {
+        foreach (VitrineContent::listedCases() as $cas) {
+            foreach (['titre', 'secteur', 'resume'] as $field) {
+                foreach (['raspberry', 'signalétique'] as $wording) {
+                    $this->assertStringNotContainsString(
+                        $wording,
+                        mb_strtolower($cas[$field]),
+                        "le champ '{$field}' du cas '{$cas['slug']}' vend encore l'offre d'affichage"
+                    );
+                }
+            }
+
+            foreach (['hôtellerie', 'restauration'] as $wording) {
+                $this->assertStringNotContainsString(
+                    $wording,
+                    mb_strtolower($cas['secteur']),
+                    "le secteur du cas '{$cas['slug']}' doit être un secteur métier"
+                );
+            }
+        }
+    }
+
+    public function test_listed_case_results_carry_no_approximate_figure(): void
+    {
+        foreach (VitrineContent::listedCases() as $cas) {
+            foreach ($cas['resultats'] as $resultat) {
+                $this->assertStringNotContainsString('~', $resultat['valeur'], "résultat approximatif dans le cas '{$cas['slug']}'");
+                $this->assertStringEndsNotWith('+', $resultat['valeur'], "résultat non borné dans le cas '{$cas['slug']}'");
+            }
+        }
     }
 
     // -------------------------------------------------------------------------
@@ -79,18 +209,22 @@ class VitrineContentTest extends TestCase
     // testimonials()
     // -------------------------------------------------------------------------
 
-    public function test_testimonials_returns_five_real_named_entries(): void
+    public function test_testimonials_returns_four_real_named_entries(): void
     {
         $testimonials = VitrineContent::testimonials();
 
-        $this->assertCount(5, $testimonials, 'testimonials() doit contenir les 5 témoignages réels importés');
+        $this->assertCount(4, $testimonials, 'testimonials() doit contenir les 4 témoignages de clients réels');
 
         foreach ($testimonials as $t) {
             $this->assertSame(
                 ['citation', 'nom', 'fonction', 'structure', 'photo'],
-                array_keys($t),
-                'chaque témoignage doit exposer exactement les clés citation/nom/fonction/structure/photo'
+                array_values(array_diff(array_keys($t), ['cas_lie'])),
+                'chaque témoignage doit exposer exactement les clés citation/nom/fonction/structure/photo, plus cas_lie au besoin'
             );
+
+            if (array_key_exists('cas_lie', $t)) {
+                $this->assertIsString($t['cas_lie'], 'cas_lie doit être le slug d\'un cas');
+            }
 
             foreach (['citation', 'nom', 'fonction', 'structure'] as $field) {
                 $value = trim($t[$field]);
@@ -132,14 +266,11 @@ class VitrineContentTest extends TestCase
     // testimonialsForCase()
     // -------------------------------------------------------------------------
 
-    public function test_testimonials_for_case_returns_empty_for_every_published_case(): void
+    public function test_testimonials_for_case_returns_only_linked_testimonials(): void
     {
-        foreach (VitrineContent::cases() as $cas) {
-            $result = VitrineContent::testimonialsForCase($cas['slug']);
-
-            $this->assertIsArray($result);
-            $this->assertSame([], $result, "testimonialsForCase('{$cas['slug']}') doit être vide (aucun cas_lie renseigné)");
-        }
+        $this->assertSame(['William'], array_column(VitrineContent::testimonialsForCase('muxen'), 'nom'));
+        $this->assertSame(['Loïc Courteaux'], array_column(VitrineContent::testimonialsForCase('freendzy'), 'nom'));
+        $this->assertSame([], VitrineContent::testimonialsForCase('photomaton'));
     }
 
     // -------------------------------------------------------------------------

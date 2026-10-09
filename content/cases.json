@@ -1,6 +1,77 @@
 [
     {
+        "slug": "muxen",
+        "visibilite": "accueil",
+        "titre": "MUXEN : mises en service automatisées",
+        "secteur": "équipementier électrique nautique",
+        "resume": "Outil conçu de zéro pour MUXEN : attribution DHCP automatique et configurations VPN générées. Les mises en service ne passent plus par la main.",
+        "probleme": "Chaque mise en service d'un client demandait une attribution d'adresse et un fichier de configuration VPN écrits à la main : une tâche répétée à chaque nouveau client, exposée aux erreurs de saisie.",
+        "contrainte": "Aucun outil existant à reprendre : l'application devait être conçue et écrite de zéro, de la base de données à l'interface, pour automatiser deux gestes précis, l'attribution DHCP et la production des configurations VPN.",
+        "choix": "Un backend Laravel adossé à une base MySQL porte les règles d'attribution DHCP et génère les fichiers de configuration VPN ; une interface web en Vue.js donne accès à ces fonctions. Les mises en service ne passent plus par la main.",
+        "resultats": [
+            { "label": "Attribution DHCP", "valeur": "automatique" },
+            { "label": "Configurations VPN", "valeur": "générées par l'outil" },
+            { "label": "Conception", "valeur": "de zéro" },
+            { "label": "Projet livré", "valeur": "2023 à 2025" }
+        ],
+        "image": "// TODO: visuel MUXEN à fournir (lot recentrage)",
+        "cas_date": "2023 à 2025"
+    },
+    {
+        "slug": "freendzy",
+        "visibilite": "accueil",
+        "titre": "Freendzy : une application SaaS en production",
+        "secteur": "application en production",
+        "resume": "Application SaaS Laravel et React en production, avec des abonnés payants, des tests automatisés, une intégration continue et un déploiement automatisé.",
+        "probleme": "Une application utilisée par des abonnés payants ne tolère ni régression ni mise en production hasardeuse : chaque évolution doit partir en production sans casser ce qui fonctionne.",
+        "contrainte": "Faire évoluer l'application sans interrompre le service de ceux qui l'utilisent.",
+        "choix": "Laravel côté serveur, React côté interface. 619 tests automatisés (unitaires, fonctionnels et de bout en bout) tournent dans une intégration continue GitHub Actions, avec analyse statique PHPStan/Larastan. Le déploiement en préproduction puis en production est automatisé, les environnements sont décrits en Docker Compose.",
+        "resultats": [
+            { "label": "Abonnés payants", "valeur": "30" },
+            { "label": "Tests automatisés", "valeur": "619" },
+            { "label": "Intégration continue", "valeur": "GitHub Actions" },
+            { "label": "Déploiement", "valeur": "automatisé" }
+        ],
+        "image": "// TODO: visuel Freendzy à fournir (lot recentrage)"
+    },
+    {
+        "slug": "ecran-raspberry",
+        "visibilite": "realisations",
+        "titre": "Back office de diffusion administré par le client",
+        "secteur": "back office client",
+        "resume": "Le client met à jour lui-même les contenus diffusés sur ses sites, depuis un back office. La tournée avec une clé USB à chaque changement a disparu.",
+        "probleme": "Pour changer un contenu affiché sur ses sites, le client copiait les fichiers sur une clé USB et se déplaçait jusqu'à chaque écran. Aucune modification urgente n'était possible.",
+        "contrainte": "Le matériel déjà installé devait être conservé, sans remplacement. L'outil devait rester utilisable par une personne sans compétence technique, avec une connexion réseau variable d'un site à l'autre.",
+        "choix": "Un back office Symfony que le client administre seul. Le contenu publié est récupéré par un lecteur léger installé sur le matériel existant, au redémarrage suivant ou immédiatement quand le réseau est disponible. Aucune dépendance à un service cloud externe.",
+        "resultats": [
+            { "label": "Déplacement sur site pour une mise à jour", "valeur": "0" },
+            { "label": "Gestion du contenu", "valeur": "en autonomie par le client" }
+        ],
+        "image": "// TODO: visuel sans matériel à fournir (lot recentrage)",
+        "image_focus": "bottom",
+        "cas_date": "// TODO: année de mise en service (lot recentrage)"
+    },
+    {
+        "slug": "carte-qr-manhattan-cafe",
+        "visibilite": "realisations",
+        "titre": "Une carte des vins que le restaurateur tient seul",
+        "secteur": "génération de documents",
+        "resume": "Le restaurateur tient seul sa carte des vins dans un back office : consultation par QR code en salle et version PDF générée sans intervention technique.",
+        "probleme": "Le restaurateur voulait donner accès à sa carte des vins directement en salle, sans support papier à réimprimer à chaque changement, et pouvoir la modifier lui-même.",
+        "contrainte": "L'accès devait être immédiat pour le client à table, par un simple scan de QR code, et la mise à jour autonome côté restaurateur, sans intervention technique.",
+        "choix": "Une application web avec un back office pour le restaurateur : il gère sa carte et en génère lui-même la version PDF. En salle, le client la consulte en un scan de QR code, sans installation.",
+        "resultats": [
+            { "label": "Mise à jour de la carte", "valeur": "en autonomie" },
+            { "label": "Version PDF", "valeur": "générée par le restaurateur" },
+            { "label": "Année de mise en ligne", "valeur": "2022" }
+        ],
+        "image": "/images/realisations/carte-qr-manhattan-cafe.webp",
+        "image_focus": "bottom",
+        "cas_date": "2022"
+    },
+    {
         "slug": "photomaton",
+        "visibilite": "archive",
         "titre": "Photomaton événementiel connecté",
         "secteur": "événementiel",
         "resume": "Borne photo autonome pilotée par un logiciel sur mesure : le visiteur récupère sa photo depuis une application web servie sur place, sans dépendre d'internet ni d'une solution propriétaire.",
@@ -15,30 +86,11 @@
         ],
         "image": "/images/realisations/photomaton.webp",
         "image_focus": "top",
-        "cas_date": "// TODO: mois/année de l'événement",
-        "testimonial_slug": ""
-    },
-    {
-        "slug": "ecran-raspberry",
-        "titre": "Écran piloté par Raspberry Pi",
-        "secteur": "signalétique dynamique",
-        "resume": "Affichage dynamique piloté depuis un back-office que le client met à jour lui-même, déployé sur Raspberry Pi existants — en service depuis 5 ans, contenu changé à distance, zéro déplacement sur site.",
-        "probleme": "Le client gérait plusieurs écrans d'affichage en point de vente via des clés USB. Chaque mise à jour nécessitait un déplacement physique et il ne pouvait pas modifier le contenu en urgence.",
-        "contrainte": "Le parc comprenait des Raspberry Pi existants à conserver. La solution devait fonctionner sur ce matériel sans remplacement, et rester administrable par le client sans compétence technique, avec une connexion réseau variable selon les sites.",
-        "choix": "Back-office Symfony administré directement par le client : il met à jour le contenu lui-même, sans intervention technique. Le contenu est diffusé vers un lecteur léger sur les Raspberry Pi, avec mise à jour automatique au prochain redémarrage ou en push si le réseau est disponible — zéro dépendance cloud externe.",
-        "resultats": [
-            { "label": "En service", "valeur": "depuis 5 ans" },
-            { "label": "Publications par an", "valeur": "~20" },
-            { "label": "Déplacement sur site pour une mise à jour", "valeur": "0" },
-            { "label": "Gestion du contenu", "valeur": "en autonomie par le client" }
-        ],
-        "image": "/images/realisations/ecran-raspberry.webp",
-        "image_focus": "bottom",
-        "cas_date": "// TODO: année de mise en service (~2021)",
-        "testimonial_slug": ""
+        "cas_date": "// TODO: mois/année de l'événement"
     },
     {
         "slug": "controle-acces-billetterie",
+        "visibilite": "archive",
         "titre": "Contrôle d'accès par QR code — billetterie",
         "secteur": "événementiel",
         "resume": "Démonstrateur de contrôle d'accès pour la billetterie : vente de billets en ligne et validation à l'entrée par scan de QR code, chaque billet vérifié selon ses conditions de génération. Construit pour valider le besoin d'un client.",
@@ -52,26 +104,6 @@
             { "label": "Statut", "valeur": "démonstrateur client" }
         ],
         "image": "/images/realisations/controle-acces-billetterie.webp",
-        "cas_date": "// TODO: mois/année (ou retirer — démonstrateur)",
-        "testimonial_slug": ""
-    },
-    {
-        "slug": "carte-qr-manhattan-cafe",
-        "titre": "Carte numérique accessible par QR code",
-        "secteur": "hôtellerie-restauration",
-        "resume": "Carte des vins numérique consultable par QR code sur place, avec back-office pour le restaurateur — plus de 10 000 scans.",
-        "probleme": "Le restaurateur voulait donner accès à sa carte des vins directement en salle, sans support papier à réimprimer à chaque changement, et pouvoir la mettre à jour lui-même.",
-        "contrainte": "L'accès devait être immédiat pour le client à table (un simple scan de QR code), et la mise à jour autonome côté restaurateur, sans intervention technique.",
-        "choix": "Une application web avec back-office pour le restaurateur et un accès client par QR code depuis la table. Le restaurateur gère sa carte lui-même ; le client la consulte en un scan, sans installation.",
-        "resultats": [
-            { "label": "Scans de la carte", "valeur": "10 000+" },
-            { "label": "PDF de carte générés", "valeur": "~100" },
-            { "label": "Mise à jour de la carte par le restaurateur", "valeur": "en autonomie" },
-            { "label": "Année de mise en ligne", "valeur": "2022" }
-        ],
-        "image": "/images/realisations/carte-qr-manhattan-cafe.webp",
-        "image_focus": "bottom",
-        "cas_date": "2022",
-        "testimonial_slug": ""
+        "cas_date": "// TODO: mois/année (ou retirer — démonstrateur)"
     }
 ]

@@ -9,12 +9,10 @@ class SitemapController extends Controller
 {
     public function index(): Response
     {
+        // Prestations, hébergement, audits et monitoring sont hors sitemap depuis le vote
+        // du 2026-09-29 : routes conservées, mais plus mises en avant.
         $urls = [
             ['loc' => url('/'), 'changefreq' => 'weekly', 'priority' => '1.0'],
-            ['loc' => url('/prestations'), 'changefreq' => 'weekly', 'priority' => '0.9'],
-            ['loc' => url('/hebergement-web'), 'changefreq' => 'monthly', 'priority' => '0.8'],
-            ['loc' => url('/audit'), 'changefreq' => 'weekly', 'priority' => '0.9'],
-            ['loc' => url('/monitoring'), 'changefreq' => 'monthly', 'priority' => '0.7'],
             ['loc' => url('/contact'), 'changefreq' => 'monthly', 'priority' => '0.6'],
             ['loc' => url('/mentions-legales'), 'changefreq' => 'yearly', 'priority' => '0.3'],
             ['loc' => url('/cgv'), 'changefreq' => 'yearly', 'priority' => '0.3'],
@@ -23,17 +21,8 @@ class SitemapController extends Controller
             ['loc' => url('/zone-intervention'), 'changefreq' => 'monthly', 'priority' => '0.6'],
         ];
 
-        foreach (VitrineContent::cases() as $cas) {
+        foreach (VitrineContent::listedCases() as $cas) {
             $urls[] = ['loc' => url('/realisations/'.$cas['slug']), 'changefreq' => 'monthly', 'priority' => '0.7'];
-        }
-
-        // /notes : index + notes publiées (contenu de fond, cible de citation IA).
-        if (VitrineContent::notes() !== []) {
-            $urls[] = ['loc' => url('/notes'), 'changefreq' => 'monthly', 'priority' => '0.6'];
-
-            foreach (VitrineContent::notes() as $note) {
-                $urls[] = ['loc' => url('/notes/'.$note['slug']), 'changefreq' => 'monthly', 'priority' => '0.6'];
-            }
         }
 
         $lastmod = now()->toDateString();

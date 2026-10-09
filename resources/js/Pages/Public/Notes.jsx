@@ -9,20 +9,14 @@ export default function Notes({ meta, notes = [] }) {
     return (
         <PublicLayout meta={meta}>
             <Banner
-                image="/images/banniere-kodem.webp"
-                imageSources={[
-                    { src: '/images/banniere-kodem.webp', width: 1006 },
-                    { src: '/images/banniere-kodem-2x.webp', width: 2012 },
-                ]}
                 title="Notes techniques"
             />
 
             <section className="max-w-6xl mx-auto px-6 pt-16 pb-8">
                 <SectionLabel>NOTES</SectionLabel>
                 <p className="animate-kodem-fade mt-4 max-w-2xl text-lg text-acier">
-                    Des notes de fond sur les dispositifs connectés sur site : choix techniques,
-                    retours d'expérience, compromis documentés. Aucun guide générique — uniquement
-                    des sujets où KODEM a une position à défendre.
+                    Notes de fond : choix techniques, retours d'expérience et compromis documentés sur des projets
+                    livrés. Aucun guide générique.
                 </p>
             </section>
 

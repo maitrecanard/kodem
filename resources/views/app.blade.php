@@ -28,6 +28,7 @@
             // Zone desservie : la France dans son ensemble. L'adresse et la geo ci-dessous restent
             // celles de la base physique (Poitiers) — siège, pas périmètre commercial.
             $areaServedFrance = ['@type' => 'Country', 'name' => 'France'];
+            $organization = \App\Services\OrganizationProfile::current();
             $graph = [
                 [
                     '@type' => 'Organization',
@@ -36,8 +37,9 @@
                     'url' => $appUrl,
                     'logo' => $appUrl.'/favicon.svg',
                     'image' => $appUrl.'/og-image.png',
-                    'description' => 'Société de développement web, création de SaaS, hébergement web et audits SEO / sécurité automatisés.',
-                    'email' => 'contact@kodem.fr',
+                    'description' => $organization->description,
+                    'email' => config('contact.public_email'),
+                    'knowsAbout' => $organization->knowsAbout,
                     'areaServed' => $areaServedFrance,
                 ],
                 [
@@ -71,27 +73,16 @@
                     'telephone' => '+33 7 62 61 26 46',
                     'areaServed' => $areaServedFrance,
                 ],
-            ];
-            foreach (\App\Services\PrestationCatalog::all() as $p) {
-                $node = [
+                [
                     '@type' => 'Service',
-                    '@id' => $appUrl.'/#service-'.$p['slug'],
-                    'name' => $p['title'],
-                    'description' => $p['description'],
-                    'serviceType' => $p['title'],
+                    '@id' => $appUrl.'/#service-outils-metier',
+                    'name' => 'Outils métier sur mesure',
+                    'description' => $organization->description,
+                    'serviceType' => 'Conception d\'outils métier sur mesure',
                     'provider' => ['@id' => $appUrl.'/#organization'],
                     'areaServed' => $areaServedFrance,
-                ];
-                if (isset($p['price_from']) && is_numeric($p['price_from'])) {
-                    $node['offers'] = [
-                        '@type' => 'Offer',
-                        'price' => (string) $p['price_from'],
-                        'priceCurrency' => 'EUR',
-                        'url' => $appUrl,
-                    ];
-                }
-                $graph[] = $node;
-            }
+                ],
+            ];
             foreach (\Illuminate\Support\Arr::wrap(data_get($page, 'props.jsonLd', [])) as $node) {
                 $graph[] = $node;
             }

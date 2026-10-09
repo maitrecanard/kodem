@@ -30,4 +30,12 @@ return [
 
     'send_acknowledgement' => (bool) env('CONTACT_SEND_ACK', true),
 
+    /*
+    | Seule adresse publiée sur le site (pages, pied de page, JSON-LD). Une seule
+    | boîte, testée en réception le jour de la mise en ligne : la changer ici la
+    | change partout.
+    */
+
+    'public_email' => 'mathieu.siaudeau@kodem.fr',
+
 ];

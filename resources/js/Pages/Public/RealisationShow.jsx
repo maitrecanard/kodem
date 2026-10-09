@@ -6,7 +6,7 @@ import CaseImage from '@/Components/CaseImage';
 import { TestimonialSection } from '@/Components/Testimonial';
 import ContactBlockMono from '@/Components/ContactBlockMono';
 
-export default function RealisationShow({ meta, cas, testimonials = [] }) {
+export default function RealisationShow({ meta, cas, testimonials = [], ctaFinal }) {
     return (
         <PublicLayout meta={meta}>
             <div className="max-w-6xl mx-auto px-6 pt-8">
@@ -47,11 +47,9 @@ export default function RealisationShow({ meta, cas, testimonials = [] }) {
                 <div className="kodem-reveal mt-16 grid md:grid-cols-2 gap-8 items-start">
                     <div>
                         <p className="text-lg font-medium text-encre mb-2">
-                            Un projet similaire à déployer ?
+                            Une tâche similaire à supprimer ?
                         </p>
-                        <p className="text-acier text-sm mb-6">
-                            Décrivez votre besoin — matériel, lieu, contraintes — et nous vous répondons sous 48 h.
-                        </p>
+                        <p className="text-acier text-sm mb-6">{ctaFinal.texte}</p>
                         <Link
                             href="/contact"
                             onClick={() => trackClick('case_cta_contact', { slug: cas?.slug })}

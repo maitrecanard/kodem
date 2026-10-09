@@ -3,35 +3,14 @@ import PublicLayout from '@/Layouts/PublicLayout';
 import { trackClick } from '@/lib/track';
 import Banner from '@/Components/Banner';
 import SectionLabel from '@/Components/SectionLabel';
-import CodeButton from '@/Components/CodeButton';
+import SectorCards from '@/Components/SectorCards';
+import FinalCallToAction from '@/Components/FinalCallToAction';
 
-const FAQ = [
-    {
-        q: 'Quelle est la différence entre un dispositif connecté sur site et une solution cloud générique ?',
-        a: 'Un dispositif sur site fonctionne localement — pas de dépendance internet pendant l\'utilisation. KODEM assure le déploiement physique, la configuration sur le matériel du client et la supervision à distance. La logique s\'exécute là où elle doit s\'exécuter.',
-    },
-    {
-        q: 'Sur quel matériel intervenez-vous ?',
-        a: 'Raspberry Pi, mini-PC x86, bornes custom, écrans industriels. Le choix du matériel dépend des contraintes d\'environnement (chaleur, humidité, vandalisme) et du budget. KODEM conseille et déploie.',
-    },
-    {
-        q: 'Le logiciel est-il maintenable après la livraison ?',
-        a: 'Oui. KODEM assure les mises à jour, le monitoring et les interventions correctives. Le code source appartient au client.',
-    },
-];
-
-export default function Expertises({ meta, positioning = {} }) {
-    const capabilities = positioning.capabilities || [];
-
+export default function Expertises({ meta, positioning }) {
     return (
         <PublicLayout meta={meta}>
             <Banner
-                image="/images/banniere-kodem.webp"
-                imageSources={[
-                    { src: '/images/banniere-kodem.webp', width: 1006 },
-                    { src: '/images/banniere-kodem-2x.webp', width: 2012 },
-                ]}
-                title="Capacités techniques — au service des dispositifs connectés"
+                title="Ce que KODEM automatise"
                 cta={
                     <Link
                         href="/contact"
@@ -47,108 +26,83 @@ export default function Expertises({ meta, positioning = {} }) {
             <section className="max-w-6xl mx-auto px-6 pt-16 pb-8">
                 <SectionLabel>CAPACITÉS</SectionLabel>
                 <p className="animate-kodem-fade mt-4 max-w-2xl text-lg text-acier">
-                    KODEM conçoit et déploie des dispositifs logiciels sur site.
-                    Le développement, l'hébergement, la visibilité et la sécurité sont des moyens — pas le produit.
-                    Ils entrent en jeu là où le projet l'exige.
+                    KODEM conçoit des outils métier sur mesure qui suppriment les tâches manuelles.
+                    Quatre familles de tâches, un même socle technique pour les automatiser.
                 </p>
             </section>
 
-            {/* Capabilities grid */}
-            {capabilities.length > 0 && (
-                <section className="max-w-6xl mx-auto px-6 pb-20">
-                    <div className="kodem-reveal-grid kodem-reveal-grid--2 grid gap-6 md:grid-cols-2">
-                        {capabilities.map((cap, i) => (
-                            <div
-                                key={i}
-                                className="bg-white rounded-kodem border border-brume p-6 shadow-sm"
-                            >
-                                <SectionLabel number={String(i + 1).padStart(2, '0')}>
-                                    {cap.titre.toUpperCase()}
-                                </SectionLabel>
-                                <p className="mt-4 text-acier leading-relaxed">{cap.role_support}</p>
-                            </div>
-                        ))}
-                    </div>
-                </section>
-            )}
+            <CapabilitiesGrid capabilities={positioning.capabilities} />
 
-            {/* Socle technique — profondeur backend/réseau en support (jamais présenté comme dispositif sur site) */}
-            {positioning.socle_technique?.elements?.length > 0 && (
-                <section className="max-w-6xl mx-auto px-6 pb-20">
-                    <SectionLabel>SOCLE TECHNIQUE</SectionLabel>
-                    {positioning.socle_technique.intro && (
-                        <p className="mt-4 max-w-2xl text-acier leading-relaxed">
-                            {positioning.socle_technique.intro}
-                        </p>
-                    )}
-                    <div className="kodem-reveal-grid kodem-reveal-grid--2 mt-8 grid gap-6 md:grid-cols-2">
-                        {positioning.socle_technique.elements.map((el, i) => (
-                            <div key={i} className="border-l-2 border-cobalt-600 pl-5">
-                                <h3 className="font-mono text-sm uppercase tracking-widest text-encre">
-                                    {el.titre}
-                                </h3>
-                                <p className="mt-2 text-acier leading-relaxed">{el.detail}</p>
-                            </div>
-                        ))}
-                    </div>
-                </section>
-            )}
+            {/* Socle technique : ce qui fait tenir un outil métier en production */}
+            <TechnicalFoundation socle={positioning.socle_technique} />
 
             {/* Secteurs */}
-            {positioning.secteurs?.length > 0 && (
-                <section className="kodem-reveal bg-white border-y border-brume">
-                    <div className="max-w-6xl mx-auto px-6 py-16">
+            <section className="bg-white border-y border-brume">
+                <div className="max-w-6xl mx-auto px-6 py-16">
+                    <div className="kodem-reveal">
                         <SectionLabel>SECTEURS</SectionLabel>
-                        <h2 className="mt-3 text-kodem-h1 font-bold max-w-2xl">
-                            Secteurs à présence physique
-                        </h2>
-                        <p className="mt-4 text-acier max-w-xl">
-                            Les dispositifs connectés ont du sens là où le public est physiquement présent.
-                        </p>
-                        <ul className="mt-8 flex flex-wrap gap-3">
-                            {positioning.secteurs.map((s, i) => (
-                                <li
-                                    key={i}
-                                    className="font-mono text-sm px-4 py-2 rounded-kodem border border-brume bg-papier text-encre"
-                                >
-                                    {s}
-                                </li>
-                            ))}
-                        </ul>
+                        <h2 className="mt-3 text-kodem-h1 font-bold max-w-2xl">Pour qui</h2>
                     </div>
-                </section>
-            )}
-
-            {/* FAQ */}
-            <section className="kodem-reveal max-w-6xl mx-auto px-6 py-20">
-                <SectionLabel>FAQ</SectionLabel>
-                <h2 className="mt-3 text-kodem-h1 font-bold max-w-2xl">Questions fréquentes</h2>
-                <dl className="mt-8 space-y-8 max-w-3xl">
-                    {FAQ.map((item, i) => (
-                        <div key={i} className="border-b border-brume pb-8 last:border-0 last:pb-0">
-                            <dt className="font-semibold text-encre mb-3">{item.q}</dt>
-                            <dd className="text-acier leading-relaxed">{item.a}</dd>
-                        </div>
-                    ))}
-                </dl>
-            </section>
-
-            {/* CTA */}
-            <section className="kodem-reveal max-w-6xl mx-auto px-6 pb-20 text-center">
-                <SectionLabel className="justify-center">PROJET</SectionLabel>
-                <h2 className="mt-3 text-kodem-h1 font-bold">Un dispositif à concevoir ou à reprendre ?</h2>
-                <p className="mt-4 text-acier max-w-xl mx-auto">
-                    Décrivez votre contexte — matériel, secteur, contraintes — et nous vous répondons sous 48 h.
-                </p>
-                <div className="mt-8">
-                    <CodeButton
-                        href="/contact"
-                        onClick={() => trackClick('expertises_cta_contact')}
-                    >
-                        contacter_kodem()
-                    </CodeButton>
+                    <SectorCards secteurs={positioning.secteurs} />
                 </div>
             </section>
+
+            <FaqList faq={positioning.faq} />
+
+            <FinalCallToAction
+                ctaFinal={positioning.cta_final}
+                trackingEvent="expertises_cta_contact"
+                className="pb-20"
+            />
         </PublicLayout>
+    );
+}
+
+function CapabilitiesGrid({ capabilities }) {
+    return (
+        <section className="max-w-6xl mx-auto px-6 pb-20">
+            <div className="kodem-reveal-grid kodem-reveal-grid--2 grid gap-6 md:grid-cols-2">
+                {capabilities.map((cap, i) => (
+                    <div key={cap.titre} className="bg-white rounded-kodem border border-brume p-6 shadow-sm">
+                        <SectionLabel number={String(i + 1).padStart(2, '0')}>{cap.titre.toUpperCase()}</SectionLabel>
+                        <p className="mt-4 text-acier leading-relaxed">{cap.role_support}</p>
+                    </div>
+                ))}
+            </div>
+        </section>
+    );
+}
+
+function TechnicalFoundation({ socle }) {
+    return (
+        <section className="max-w-6xl mx-auto px-6 pb-20">
+            <SectionLabel>SOCLE TECHNIQUE</SectionLabel>
+            <p className="mt-4 max-w-2xl text-acier leading-relaxed">{socle.intro}</p>
+            <div className="kodem-reveal-grid kodem-reveal-grid--2 mt-8 grid gap-6 md:grid-cols-2">
+                {socle.elements.map((el) => (
+                    <div key={el.titre} className="border-l-2 border-cobalt-600 pl-5">
+                        <h3 className="font-mono text-sm uppercase tracking-widest text-encre">{el.titre}</h3>
+                        <p className="mt-2 text-acier leading-relaxed">{el.detail}</p>
+                    </div>
+                ))}
+            </div>
+        </section>
+    );
+}
+
+function FaqList({ faq }) {
+    return (
+        <section className="kodem-reveal max-w-6xl mx-auto px-6 py-20">
+            <SectionLabel>FAQ</SectionLabel>
+            <h2 className="mt-3 text-kodem-h1 font-bold max-w-2xl">Questions fréquentes</h2>
+            <dl className="mt-8 space-y-8 max-w-3xl">
+                {faq.map((item) => (
+                    <div key={item.question} className="border-b border-brume pb-8 last:border-0 last:pb-0">
+                        <dt className="font-semibold text-encre mb-3">{item.question}</dt>
+                        <dd className="text-acier leading-relaxed">{item.reponse}</dd>
+                    </div>
+                ))}
+            </dl>
+        </section>
     );
 }

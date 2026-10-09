@@ -1,6 +1,9 @@
+import { usePage } from '@inertiajs/react';
 import PublicLayout from '@/Layouts/PublicLayout';
 
 export default function Mentions({ meta }) {
+    const { contactEmail } = usePage().props;
+
     return (
         <PublicLayout meta={meta}>
             <section className="max-w-3xl mx-auto px-6 py-16 prose prose-slate">
@@ -13,7 +16,7 @@ export default function Mentions({ meta }) {
                 <ul>
                     <li>Raison sociale : Kodem</li>
                     <li>SIREN / RCS : 922 818 547</li>
-                    <li>Email : contact@kodem.fr</li>
+                    <li>Email : {contactEmail}</li>
                 </ul>
 
                 <h2>Hébergement</h2>
@@ -33,7 +36,7 @@ export default function Mentions({ meta }) {
                     Les données saisies dans le formulaire de contact et le formulaire d'audit sont stockées en base à des
                     fins de suivi de la demande. Les adresses IP des visiteurs sont anonymisées (hachage SHA-256 salé) pour
                     les besoins statistiques. Vous pouvez exercer vos droits d'accès, de rectification et d'effacement à
-                    l'adresse&nbsp;: contact@kodem.fr.
+                    l'adresse&nbsp;: {contactEmail}.
                 </p>
 
                 <h2>Cookies</h2>

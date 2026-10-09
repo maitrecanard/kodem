@@ -5,17 +5,13 @@ import Banner from '@/Components/Banner';
 import SectionLabel from '@/Components/SectionLabel';
 import CodeButton from '@/Components/CodeButton';
 import CaseImage from '@/Components/CaseImage';
+import FinalCallToAction from '@/Components/FinalCallToAction';
 
-export default function Realisations({ meta, positioning = {}, cases = [] }) {
+export default function Realisations({ meta, intro, cases = [], ctaFinal }) {
     return (
         <PublicLayout meta={meta}>
             <Banner
-                image="/images/banniere-kodem.webp"
-                imageSources={[
-                    { src: '/images/banniere-kodem.webp', width: 1006 },
-                    { src: '/images/banniere-kodem-2x.webp', width: 2012 },
-                ]}
-                title={positioning.hero_title || 'Réalisations — dispositifs connectés sur site'}
+                title="Réalisations : des outils métier en production"
                 cta={
                     <Link
                         href="/contact"
@@ -30,10 +26,7 @@ export default function Realisations({ meta, positioning = {}, cases = [] }) {
             {/* Answer-first intro */}
             <section className="max-w-6xl mx-auto px-6 pt-16 pb-8">
                 <SectionLabel>RÉALISATIONS</SectionLabel>
-                <p className="animate-kodem-fade mt-4 max-w-2xl text-lg text-acier">
-                    Deux cas concrets : un photomaton autonome et un réseau d'écrans piloté à distance.
-                    Chaque projet suit le même schéma — problème réel, contrainte technique, choix justifié, résultat mesuré.
-                </p>
+                <p className="animate-kodem-fade mt-4 max-w-2xl text-lg text-acier">{intro}</p>
             </section>
 
             {/* Case cards grid */}
@@ -76,24 +69,11 @@ export default function Realisations({ meta, positioning = {}, cases = [] }) {
                 </section>
             )}
 
-            {/* CTA contact */}
-            <section className="kodem-reveal bg-white border-y border-brume">
-                <div className="max-w-6xl mx-auto px-6 py-16 text-center">
-                    <SectionLabel className="justify-center">PROJET</SectionLabel>
-                    <h2 className="mt-3 text-kodem-h1 font-bold">Un dispositif similaire à déployer ?</h2>
-                    <p className="mt-4 text-acier max-w-xl mx-auto">
-                        Décrivez votre besoin — matériel, lieu, contraintes — et nous vous répondons sous 48 h.
-                    </p>
-                    <div className="mt-8">
-                        <CodeButton
-                            href="/contact"
-                            onClick={() => trackClick('realisations_cta_contact')}
-                        >
-                            contacter_kodem()
-                        </CodeButton>
-                    </div>
-                </div>
-            </section>
+            <FinalCallToAction
+                ctaFinal={ctaFinal}
+                trackingEvent="realisations_cta_contact"
+                className="bg-white border-y border-brume py-16"
+            />
         </PublicLayout>
     );
 }
