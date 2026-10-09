@@ -18,6 +18,13 @@ class VisitTrackingTest extends TestCase
         $this->assertSame('prestations', PageVisit::first()->url);
     }
 
+    public function test_internal_monitoring_probe_is_not_tracked(): void
+    {
+        $this->withHeader('User-Agent', 'kodem-sonde/1 (surveillance KODEM)')->get('/')->assertOk();
+
+        $this->assertSame(0, PageVisit::count());
+    }
+
     public function test_admin_routes_are_not_tracked(): void
     {
         $user = User::factory()->create(['is_admin' => true]);

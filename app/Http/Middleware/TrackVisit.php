@@ -50,7 +50,9 @@ class TrackVisit
         }
 
         $ua = strtolower((string) $request->userAgent());
-        if ($ua && preg_match('/bot|crawler|spider|headless/i', $ua)) {
+        // « kodem-sonde » : sonde de surveillance interne, une requête par minute. Sans cette
+        // exclusion elle représentait 83 % des pages vues enregistrées en septembre 2026.
+        if ($ua && preg_match('/bot|crawler|spider|headless|kodem-sonde/i', $ua)) {
             return false;
         }
 

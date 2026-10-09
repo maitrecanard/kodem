@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Inertia\Testing\AssertableInertia;
 use Tests\TestCase;
 
 class SecurityHeadersTest extends TestCase
@@ -87,5 +88,34 @@ class SecurityHeadersTest extends TestCase
 
         $this->assertStringContainsString('https://fonts.bunny.net', $style[1] ?? '');
         $this->assertStringContainsString('https://fonts.bunny.net', $font[1] ?? '');
+    }
+
+    // -------------------------------------------------------------------------
+    // route() côté navigateur : la liste des routes passe par la prop partagée
+    // « ziggy », jamais par un script en ligne que le CSP bloquerait.
+    // -------------------------------------------------------------------------
+
+    public function test_root_view_ships_no_inline_ziggy_script(): void
+    {
+        $html = $this->get('/')->assertOk()->getContent();
+
+        $this->assertStringNotContainsString('const Ziggy', $html);
+    }
+
+    public function test_shared_route_list_hides_admin_and_technical_routes(): void
+    {
+        $this->get('/login')
+            ->assertOk()
+            ->assertInertia(fn (AssertableInertia $page) => $page
+                ->has('ziggy.routes.login')
+                ->has('ziggy.routes.dashboard')
+                ->where('ziggy.routes', function ($routes) {
+                    foreach (array_keys(collect($routes)->all()) as $name) {
+                        $this->assertDoesNotMatchRegularExpression('/^(admin|sanctum|storage|stripe)\\./', $name);
+                    }
+
+                    return true;
+                })
+            );
     }
 }

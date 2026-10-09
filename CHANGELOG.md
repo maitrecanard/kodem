@@ -5,6 +5,19 @@ Toutes les évolutions notables de ce projet sont consignées dans ce fichier.
 Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/)
 et le projet suit le [versionnage sémantique](https://semver.org/lang/fr/).
 
+## [1.18.1] (2026-10-09)
+
+### Fixed
+- **`route()` n'existait pas dans le navigateur en production** : le script en ligne de Ziggy
+  était bloqué par le CSP, et la page de connexion ne s'affichait plus. La fonction globale est
+  désormais construite dans `app.jsx` depuis la prop partagée `ziggy` ; `@routes` est retiré de
+  la vue racine.
+- La sonde de surveillance interne (`kodem-sonde`) n'est plus comptée dans les visites.
+
+### Changed
+- `config/ziggy.php` : les routes d'administration, de webhook et techniques ne sont plus
+  envoyées au navigateur. Le HTML de l'accueil passe de 75 Ko à 46 Ko.
+
 ## [1.18.0] (2026-10-09)
 
 ### Changed (décision de l'actionnaire du 2026-10-09, contre les votes du 2026-09-28 et du 2026-09-29)
