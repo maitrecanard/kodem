@@ -94,7 +94,9 @@
         <script type="application/ld+json">{!! json_encode($structuredData, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) !!}</script>
 
         <!-- Scripts -->
-        @routes
+        {{-- Pas de @routes ici : ce script en ligne est bloqué par le CSP (script-src 'self'), donc
+             route() n'existait pas dans le navigateur en production. La liste des routes arrive par
+             la prop partagée « ziggy » et app.jsx en tire la fonction globale route(). --}}
         @viteReactRefresh
         @vite(['resources/js/app.jsx', "resources/js/Pages/{$page['component']}.jsx"])
         @inertiaHead
