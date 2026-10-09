@@ -340,7 +340,7 @@ export default function AuditResult({ meta, audit, paid, premium, paidPrestation
                     <SectionLabel className="text-cobalt-200 mb-3">ALLER PLUS LOIN</SectionLabel>
                     <h2 className="text-kodem-h2 font-semibold">Besoin d'aller plus loin ?</h2>
                     <p className="mt-2 text-slate-300 text-sm">
-                        Monitoring mensuel, remédiation assistée, hébergement managé : toutes nos prestations sont tarifées et disponibles en ligne.
+                        Monitoring mensuel et développement sur mesure : nos prestations sont décrites en ligne.
                     </p>
                     <div className="mt-6 grid md:grid-cols-3 gap-4">
                         {paidPrestations.filter((p) => p.slug !== 'audit-seo' && p.slug !== 'audit-securite').slice(0, 3).map((p) => (

@@ -5,11 +5,15 @@ namespace Tests\Feature;
 use App\Services\VitrineContent;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Inertia\Testing\AssertableInertia as Assert;
+use Tests\Concerns\ReadsJsonLd;
 use Tests\TestCase;
 
 class VitrineTest extends TestCase
 {
+    use ReadsJsonLd;
     use RefreshDatabase;
+
+    private const PUBLISHED_CASE_SLUGS = ['muxen', 'freendzy', 'ecran-raspberry', 'carte-qr-manhattan-cafe'];
 
     // -------------------------------------------------------------------------
     // GET /realisations
@@ -118,6 +122,8 @@ class VitrineTest extends TestCase
     {
         $pages = [
             '/realisations',
+            '/realisations/muxen',
+            '/realisations/freendzy',
             '/realisations/photomaton',
             '/realisations/ecran-raspberry',
             '/expertises',
@@ -129,8 +135,7 @@ class VitrineTest extends TestCase
             $this->get($route)
                 ->assertOk()
                 ->assertInertia(fn (Assert $page) => $page
-                    ->where('jsonLd', fn ($jsonLd) =>
-                        collect($jsonLd)->contains('@type', 'BreadcrumbList')
+                    ->where('jsonLd', fn ($jsonLd) => collect($jsonLd)->contains('@type', 'BreadcrumbList')
                     )
                 );
         }
@@ -151,53 +156,143 @@ class VitrineTest extends TestCase
     }
 
     // -------------------------------------------------------------------------
-    // Case images: real path for the illustrated case, TODO sentinel for the rest
+    // Case images: real path for the illustrated cases, TODO sentinel for the rest
     // -------------------------------------------------------------------------
 
-    public function test_case_pages_expose_real_image_paths(): void
+    public function test_case_pages_expose_the_expected_image_or_sentinel(): void
     {
-        $illustrated = [
+        $expectedImages = [
+            'muxen' => null,
+            'freendzy' => null,
+            'ecran-raspberry' => null,
             'carte-qr-manhattan-cafe' => '/images/realisations/carte-qr-manhattan-cafe.webp',
-            'controle-acces-billetterie' => '/images/realisations/controle-acces-billetterie.webp',
-            'ecran-raspberry' => '/images/realisations/ecran-raspberry.webp',
             'photomaton' => '/images/realisations/photomaton.webp',
+            'controle-acces-billetterie' => '/images/realisations/controle-acces-billetterie.webp',
         ];
 
-        foreach ($illustrated as $slug => $expectedImage) {
+        foreach ($expectedImages as $slug => $expectedImage) {
             $this->get("/realisations/{$slug}")
                 ->assertOk()
                 ->assertInertia(fn (Assert $page) => $page
                     ->component('Public/RealisationShow')
-                    ->where('cas.image', $expectedImage)
+                    ->where('cas.image', fn (string $image) => $expectedImage === null
+                        ? str_starts_with($image, '// TODO')
+                        : $image === $expectedImage)
                 );
         }
 
-        // Le jeu ci-dessus doit couvrir TOUS les cas publiés : si un cas est
-        // ajouté sans visuel, ce test doit le signaler plutôt que l'ignorer.
+        // Le jeu ci-dessus doit couvrir TOUS les cas : un cas ajouté sans être
+        // déclaré ici doit faire échouer ce test plutôt que passer inaperçu.
         $this->assertEqualsCanonicalizing(
-            array_keys($illustrated),
+            array_keys($expectedImages),
             array_column(VitrineContent::cases(), 'slug'),
-            'tout cas publié doit être couvert par ce test (visuel réel attendu)'
+            'tout cas doit être couvert par ce test (visuel réel ou sentinelle attendus)'
         );
     }
 
-    public function test_realisations_index_exposes_the_case_images(): void
+    public function test_realisations_index_lists_the_four_published_cases_in_order(): void
     {
         $this->get('/realisations')
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->component('Public/Realisations')
-                ->has('cases', 4)
-                ->where('cases', function ($cases) {
-                    $withRealImage = collect($cases)->filter(
-                        fn ($cas) => ! str_starts_with($cas['image'], '// TODO')
-                    );
+                ->where('cases', fn ($cases) => collect($cases)->pluck('slug')->all() === [
+                    'muxen',
+                    'freendzy',
+                    'ecran-raspberry',
+                    'carte-qr-manhattan-cafe',
+                ])
+            );
+    }
 
-                    $this->assertCount(4, $withRealImage, 'les quatre cas doivent exposer une image réelle');
+    public function test_archived_cases_stay_reachable_but_are_not_indexed(): void
+    {
+        foreach (['/realisations/photomaton', '/realisations/controle-acces-billetterie'] as $route) {
+            $this->get($route)
+                ->assertOk()
+                ->assertInertia(fn (Assert $page) => $page->where('meta.robots', 'noindex, follow'));
+        }
+
+        $this->get('/realisations/muxen')
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page->missing('meta.robots'));
+    }
+
+    public function test_notes_stay_reachable_but_are_not_indexed(): void
+    {
+        foreach (['/notes', '/notes/borne-evenement-sans-internet'] as $route) {
+            $this->get($route)
+                ->assertOk()
+                ->assertInertia(fn (Assert $page) => $page->where('meta.robots', 'noindex, follow'));
+        }
+    }
+
+    public function test_case_testimonials_are_linked_to_their_case(): void
+    {
+        $this->get('/realisations/muxen')
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->has('testimonials', 1)
+                ->where('testimonials.0.nom', 'William')
+            );
+
+        $this->get('/realisations/freendzy')
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page->has('testimonials', 1));
+    }
+
+    public function test_expertises_faq_json_ld_is_built_from_the_positioning_faq(): void
+    {
+        $faq = VitrineContent::positioning()['faq'];
+
+        $this->get('/expertises')
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('jsonLd', function ($jsonLd) use ($faq) {
+                    $faqPage = collect($jsonLd)->firstWhere('@type', 'FAQPage');
+
+                    $this->assertNotNull($faqPage, 'la page doit porter un nœud FAQPage');
+                    $this->assertCount(count($faq), $faqPage['mainEntity']);
+                    $this->assertSame($faq[0]['question'], $faqPage['mainEntity'][0]['name']);
 
                     return true;
                 })
             );
+    }
+
+    public function test_sitemap_lists_only_published_cases_and_hides_notes(): void
+    {
+        $content = $this->get('/sitemap.xml')->assertOk()->getContent();
+
+        foreach (self::PUBLISHED_CASE_SLUGS as $slug) {
+            $this->assertStringContainsString('<loc>'.url('/realisations/'.$slug).'</loc>', $content, "le cas publié '{$slug}' doit figurer au sitemap");
+        }
+
+        foreach (['photomaton', 'controle-acces-billetterie'] as $slug) {
+            $this->assertStringNotContainsString('<loc>'.url('/realisations/'.$slug).'</loc>', $content, "le cas archivé '{$slug}' ne doit pas figurer au sitemap");
+        }
+
+        $this->assertStringNotContainsString(url('/notes'), $content, 'les notes ne doivent pas figurer au sitemap');
+    }
+
+    public function test_published_case_pages_serve_meta_that_fits_search_snippets(): void
+    {
+        foreach (self::PUBLISHED_CASE_SLUGS as $slug) {
+            $this->get('/realisations/'.$slug)
+                ->assertOk()
+                ->assertInertia(fn (Assert $page) => $page
+                    ->where('meta.title', function (string $title) use ($slug) {
+                        $this->assertLessThanOrEqual(60, mb_strlen($title), "le titre du cas '{$slug}' dépasse 60 caractères");
+
+                        return true;
+                    })
+                    ->where('meta.description', function (string $description) use ($slug) {
+                        $this->assertLessThanOrEqual(160, mb_strlen($description), "le résumé du cas '{$slug}' dépasse 160 caractères");
+
+                        return true;
+                    })
+                );
+        }
     }
 
     public function test_case_pages_do_not_leak_home_testimonials(): void
@@ -222,6 +317,8 @@ class VitrineTest extends TestCase
     {
         $pages = [
             '/realisations',
+            '/realisations/muxen',
+            '/realisations/freendzy',
             '/realisations/photomaton',
             '/realisations/ecran-raspberry',
             '/expertises',
@@ -230,7 +327,8 @@ class VitrineTest extends TestCase
         ];
 
         foreach ($pages as $route) {
-            $html = $this->get($route)->getContent();
+            $response = $this->get($route);
+            $html = $response->getContent();
 
             // § Safety — no review-inflation schema
             $this->assertStringNotContainsString(
@@ -249,24 +347,7 @@ class VitrineTest extends TestCase
             );
 
             // § Parseable ld+json block must be present
-            $matched = preg_match(
-                '/<script\s+type="application\/ld\+json">(.*?)<\/script>/s',
-                $html,
-                $matches
-            );
-
-            $this->assertSame(
-                1,
-                $matched,
-                "{$route} doit contenir un bloc <script type=\"application/ld+json\">"
-            );
-
-            $data = json_decode($matches[1], true);
-
-            $this->assertNotNull(
-                $data,
-                "{$route} : le contenu ld+json doit être du JSON valide"
-            );
+            $this->jsonLdGraph($response);
         }
     }
 
@@ -330,20 +411,7 @@ class VitrineTest extends TestCase
 
     public function test_local_business_json_ld_serves_the_whole_of_france(): void
     {
-        $html = $this->get('/zone-intervention')->assertOk()->getContent();
-
-        $matched = preg_match(
-            '/<script\s+type="application\/ld\+json">(.*?)<\/script>/s',
-            $html,
-            $matches
-        );
-
-        $this->assertSame(1, $matched, '/zone-intervention doit contenir un bloc <script type="application/ld+json">');
-
-        $data = json_decode($matches[1], true);
-        $this->assertNotNull($data, 'le contenu ld+json doit être du JSON valide');
-
-        $graph = collect($data['@graph']);
+        $graph = collect($this->jsonLdGraph($this->get('/zone-intervention')->assertOk()));
 
         $localBusiness = $graph->firstWhere('@type', 'LocalBusiness');
         $this->assertNotNull($localBusiness, 'le graphe doit contenir un nœud LocalBusiness');

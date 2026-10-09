@@ -20,11 +20,6 @@ export default function Audit({ meta, premium, paidPrestations = [], flash }) {
     return (
         <PublicLayout meta={meta}>
             <Banner
-                image="/images/banniere-kodem.webp"
-                imageSources={[
-                    { src: '/images/banniere-kodem.webp', width: 1006 },
-                    { src: '/images/banniere-kodem-2x.webp', width: 2012 },
-                ]}
                 title="Audit SEO & sécurité en ligne"
                 cta={
                     <a
@@ -141,7 +136,7 @@ export default function Audit({ meta, premium, paidPrestations = [], flash }) {
                     <SectionLabel number="02" className="justify-center mb-4">ALLER PLUS LOIN</SectionLabel>
                     <h2 className="text-kodem-h1 font-bold text-center">Besoin d'aller plus loin ?</h2>
                     <p className="text-acier text-center mt-2 max-w-2xl mx-auto">
-                        Prolongez l'audit avec nos prestations automatiques : monitoring, remédiation, hébergement managé.
+                        Prolongez l'audit avec le monitoring mensuel.
                     </p>
                     <div className="kodem-reveal-grid kodem-reveal-grid--3 grid md:grid-cols-3 gap-6 mt-8">
                         {paidPrestations.filter((p) => p.price_from !== 0).slice(0, 3).map((p) => (

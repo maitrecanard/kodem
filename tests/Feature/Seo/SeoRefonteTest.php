@@ -2,13 +2,14 @@
 
 namespace Tests\Feature\Seo;
 
-use App\Services\PrestationCatalog;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Inertia\Testing\AssertableInertia;
+use Tests\Concerns\ReadsJsonLd;
 use Tests\TestCase;
 
 class SeoRefonteTest extends TestCase
 {
+    use ReadsJsonLd;
     use RefreshDatabase;
 
     // -------------------------------------------------------------------------
@@ -21,10 +22,10 @@ class SeoRefonteTest extends TestCase
             ->assertOk()
             ->assertInertia(fn (AssertableInertia $page) => $page
                 ->component('Public/Hebergement')
-                ->where('meta.title', fn (string $title) =>
-                    str_contains($title, 'Hébergement') && str_contains($title, 'managé')
+                ->where('meta.title', fn (string $title) => str_contains($title, 'Hébergement') && str_contains($title, 'managé')
                 )
                 ->where('prestation.slug', 'hebergement-web')
+                ->where('meta.robots', 'noindex, follow')
             );
     }
 
@@ -52,11 +53,14 @@ class SeoRefonteTest extends TestCase
             'Le sitemap doit contenir l\'élément racine <urlset>'
         );
 
-        $this->assertStringContainsString(
-            '/hebergement-web',
-            $content,
-            'Le sitemap doit contenir /hebergement-web'
-        );
+        // Vote du 2026-09-29 : catalogue, hébergement, audits et monitoring hors sitemap.
+        foreach (['/prestations', '/hebergement-web', '/audit', '/monitoring'] as $retired) {
+            $this->assertStringNotContainsString(
+                '<loc>'.url($retired).'</loc>',
+                $content,
+                "Le sitemap ne doit plus contenir {$retired}"
+            );
+        }
 
         $this->assertStringContainsString(
             url('/'),
@@ -87,23 +91,17 @@ class SeoRefonteTest extends TestCase
     }
 
     // -------------------------------------------------------------------------
-    // 3. Page d'accueil — positionnement niche « dispositifs connectés » (§0/§5)
-    //    Le copy provient de content/positioning.json ; pas de keyword stuffing (§8).
+    // 3. Page d'accueil : maquette « backend de votre produit » (décision de l'actionnaire
+    //    du 2026-10-09). Le copy est porté par Home.jsx ; pas de keyword stuffing (§8).
     // -------------------------------------------------------------------------
 
-    public function test_home_page_meta_targets_dispositifs_connectes_niche(): void
+    public function test_home_page_meta_targets_the_backend_positioning(): void
     {
         $this->get('/')
             ->assertOk()
             ->assertInertia(fn (AssertableInertia $page) => $page
                 ->component('Public/Home')
-                ->where('meta.title', fn (string $title) =>
-                    str_contains(strtolower($title), 'dispositifs connectés') ||
-                    str_contains(strtolower($title), 'dispositifs connectes')
-                )
-                ->where('positioning.hero_title', fn ($hero) =>
-                    str_contains(strtolower((string) $hero), 'dispositifs connectés')
-                )
+                ->where('meta.title', fn (string $title) => str_contains(mb_strtolower($title), 'backend'))
                 ->missing('meta.keywords')
             );
     }
@@ -118,8 +116,7 @@ class SeoRefonteTest extends TestCase
             ->assertOk()
             ->assertInertia(fn (AssertableInertia $page) => $page
                 ->component('Public/Services')
-                ->where('meta.keywords', fn (string $keywords) =>
-                    str_contains(strtolower($keywords), 'création') &&
+                ->where('meta.keywords', fn (string $keywords) => str_contains(strtolower($keywords), 'création') &&
                     (
                         str_contains(strtolower($keywords), 'hébergement') ||
                         str_contains(strtolower($keywords), 'hebergement')
@@ -156,37 +153,7 @@ class SeoRefonteTest extends TestCase
     {
         // GET sans header X-Inertia → Inertia retourne la vue complète (app.blade.php)
         // Le JSON-LD est rendu côté serveur dans le <head> de app.blade.php.
-        $response = $this->get('/');
-        $html = $response->getContent();
-
-        $matched = preg_match(
-            '/<script\s+type="application\/ld\+json">(.*?)<\/script>/s',
-            $html,
-            $matches
-        );
-
-        $this->assertSame(
-            1,
-            $matched,
-            'Le HTML de / doit contenir un bloc <script type="application/ld+json">'
-        );
-
-        // PHP json_encode avec JSON_HEX_QUOT encode " en " — json_decode le relit correctement.
-        $data = json_decode($matches[1], true);
-
-        $this->assertNotNull(
-            $data,
-            'Le contenu du script ld+json doit être du JSON valide (parsable par json_decode)'
-        );
-
-        $this->assertArrayHasKey(
-            '@graph',
-            $data,
-            'Le JSON-LD doit utiliser un @graph'
-        );
-
-        /** @var array<int, array<string, mixed>> $graph */
-        $graph = $data['@graph'];
+        $graph = $this->jsonLdGraph($this->get('/'));
 
         $serviceNodes = array_values(array_filter(
             $graph,
@@ -201,11 +168,14 @@ class SeoRefonteTest extends TestCase
 
         $serviceNames = array_column($serviceNodes, 'name');
 
-        $this->assertContains(
-            'Hébergement web managé',
-            $serviceNames,
-            'Le JSON-LD doit référencer la prestation "Hébergement web managé"'
-        );
+        $this->assertContains('Outils métier sur mesure', $serviceNames);
+
+        // Vote du 2026-09-29 : l'ancien catalogue (audits, monitoring, hébergement à prix
+        // affiché) ne doit plus être publié aux moteurs de recherche.
+        $this->assertNotContains('Hébergement web managé', $serviceNames);
+        foreach ($serviceNodes as $node) {
+            $this->assertArrayNotHasKey('offers', $node, 'aucun prix du catalogue ne doit partir dans le JSON-LD');
+        }
     }
 
     // -------------------------------------------------------------------------

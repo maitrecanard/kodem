@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Unit;
 
+use Tests\Concerns\ScansSourceFiles;
 use Tests\TestCase;
 
 /**
@@ -24,6 +27,8 @@ use Tests\TestCase;
  */
 class MotionGuardTest extends TestCase
 {
+    use ScansSourceFiles;
+
     /**
      * @var list<string>
      */
@@ -37,6 +42,8 @@ class MotionGuardTest extends TestCase
         'CaseStudy',
         'Testimonial',
         'CaseImage',
+        'SectorCards',
+        'FinalCallToAction',
     ];
 
     /**
@@ -53,25 +60,6 @@ class MotionGuardTest extends TestCase
         }
 
         return array_values(array_unique($files));
-    }
-
-    /**
-     * @return list<string>
-     */
-    private function globRecursive(string $dir, string $pattern): array
-    {
-        $found = glob($dir.'/'.$pattern) ?: [];
-
-        foreach (glob($dir.'/*', GLOB_ONLYDIR) ?: [] as $subDir) {
-            // Ne jamais suivre un lien symbolique : évite toute récursion infinie.
-            if (is_link($subDir)) {
-                continue;
-            }
-
-            $found = array_merge($found, $this->globRecursive($subDir, $pattern));
-        }
-
-        return $found;
     }
 
     private function readRaw(string $path): string

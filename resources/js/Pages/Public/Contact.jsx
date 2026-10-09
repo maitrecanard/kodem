@@ -27,10 +27,10 @@ export default function Contact({ meta, flash }) {
         <PublicLayout meta={meta}>
             <section className="max-w-6xl mx-auto px-6 py-16">
                 <SectionLabel>CONTACT</SectionLabel>
-                <h1 className="mt-3 text-kodem-h1 font-bold">Parlons de votre projet</h1>
+                <h1 className="mt-3 text-kodem-h1 font-bold">Décrivez la tâche que vous voulez supprimer</h1>
                 <p className="animate-kodem-slide mt-3 text-acier">
-                    Dispositifs connectés, bornes, écrans pilotés, installations interactives&nbsp;:
-                    décrivez votre projet — matériel, lieu, contraintes. Réponse sous 48&nbsp;h.
+                    En quoi consiste la tâche, qui la fait, à quelle fréquence, avec quels logiciels : quelques lignes
+                    suffisent. Réponse sous 48&nbsp;h.
                 </p>
 
                 {(wasSuccessful || flash?.success) && (

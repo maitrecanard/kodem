@@ -4,22 +4,22 @@ namespace App\Http\Controllers;
 
 use App\Services\PrestationCatalog;
 use App\Services\VitrineContent;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class PublicController extends Controller
 {
+    private const NOINDEX = 'noindex, follow';
+
     public function home(): Response
     {
+        // Décision de l'actionnaire du 2026-10-09 : l'accueil reprend la maquette « backend de
+        // votre produit ». Son contenu est porté par Home.jsx, la page ne reçoit que ses meta.
         return Inertia::render('Public/Home', [
             'meta' => [
-                'title' => 'Dispositifs connectés sur site — conçus, déployés, sécurisés | Kodem',
-                'description' => 'Kodem développe le logiciel qui pilote vos bornes, écrans et installations interactives. Déploiement sur site partout en France, supervision dans la durée.',
+                'title' => 'Backend Laravel et Symfony pour votre produit | Kodem',
+                'description' => 'API, paiements, temps réel, tests et mise en production, en Laravel ou en Symfony : le backend de votre produit, de l\'architecture au déploiement. À distance, partout en France.',
             ],
-            'positioning' => VitrineContent::positioning(),
-            'cases' => VitrineContent::cases(),
-            'testimonials' => VitrineContent::testimonials(),
         ]);
     }
 
@@ -30,6 +30,8 @@ class PublicController extends Controller
                 'title' => 'Prestations — Création de site internet, logiciel, application web & hébergement | Kodem',
                 'description' => 'Toutes les prestations Kodem : création de site internet, d\'application web et de logiciel sur-mesure, hébergement web managé, audit SEO et audit de sécurité automatisés.',
                 'keywords' => 'création site internet, application web, création logiciel, hébergement web, audit SEO, audit de sécurité',
+                // Ancien catalogue, hors navigation depuis le recentrage : la route reste servie mais n'est plus indexée.
+                'robots' => self::NOINDEX,
             ],
             'prestations' => PrestationCatalog::all(),
         ]);
@@ -41,9 +43,11 @@ class PublicController extends Controller
 
         return Inertia::render('Public/Hebergement', [
             'meta' => [
-                'title' => 'Hébergement web managé — sécurisé, sauvegardé, monitoré | Kodem',
-                'description' => 'Hébergement web managé pour vos sites et applications : TLS automatique, sauvegardes chiffrées, WAF et monitoring 24/7.',
+                'title' => 'Hébergement web managé | Kodem',
+                'description' => 'Hébergement des applications conçues par KODEM : TLS automatique, sauvegardes chiffrées, supervision et correctifs.',
                 'keywords' => 'hébergement web, hébergement web managé, hébergement sécurisé, hébergement application web',
+                // Réservé aux clients existants, sans offre publique : hors navigation et hors index.
+                'robots' => self::NOINDEX,
             ],
             'prestation' => $prestation,
         ]);
@@ -53,8 +57,8 @@ class PublicController extends Controller
     {
         return Inertia::render('Public/Contact', [
             'meta' => [
-                'title' => 'Contact — Kodem | Dispositifs connectés sur site en France',
-                'description' => 'Concevoir ou déployer un dispositif connecté sur site : borne, écran piloté, installation interactive. Kodem intervient partout en France, réponse sous 48 h.',
+                'title' => 'Contact : décrivez la tâche à supprimer | Kodem',
+                'description' => 'Décrivez la tâche manuelle que vous voulez supprimer et les logiciels concernés. Réponse sous 48 h, partout en France.',
             ],
         ]);
     }
@@ -83,32 +87,17 @@ class PublicController extends Controller
 
     public function realisations(): Response
     {
+        $positioning = VitrineContent::positioning();
+
         return Inertia::render('Public/Realisations', [
             'meta' => [
-                'title' => 'Réalisations — dispositifs connectés sur site déployés par Kodem',
-                'description' => 'Cas clients Kodem : photomaton événementiel et écran piloté par Raspberry Pi. Problème, contrainte technique, choix retenu, résultat chiffré.',
+                'title' => 'Réalisations : outils métier en production | Kodem',
+                'description' => 'MUXEN, outil de mises en service conçu de zéro, et Freendzy, application en production : problème, contrainte, choix, résultat.',
             ],
-            'positioning' => VitrineContent::positioning(),
-            'cases' => VitrineContent::cases(),
-            'jsonLd' => [
-                [
-                    '@type' => 'BreadcrumbList',
-                    'itemListElement' => [
-                        [
-                            '@type' => 'ListItem',
-                            'position' => 1,
-                            'name' => 'Accueil',
-                            'item' => url('/'),
-                        ],
-                        [
-                            '@type' => 'ListItem',
-                            'position' => 2,
-                            'name' => 'Réalisations',
-                            'item' => route('realisations.index'),
-                        ],
-                    ],
-                ],
-            ],
+            'intro' => $positioning['realisations_intro'],
+            'cases' => VitrineContent::listedCases(),
+            'ctaFinal' => $positioning['cta_final'],
+            'jsonLd' => [$this->buildBreadcrumbList(['Réalisations' => route('realisations.index')])],
         ]);
     }
 
@@ -117,96 +106,40 @@ class PublicController extends Controller
         $cas = VitrineContent::case($slug);
         abort_unless($cas, 404);
 
+        $meta = [
+            'title' => $cas['titre'].' | Kodem',
+            'description' => $cas['resume'],
+        ];
+
+        if (VitrineContent::isArchived($cas)) {
+            $meta['robots'] = self::NOINDEX;
+        }
+
         return Inertia::render('Public/RealisationShow', [
-            'meta' => [
-                'title' => $cas['titre'].' — Réalisation Kodem',
-                'description' => $cas['resume'],
-            ],
+            'meta' => $meta,
             'cas' => $cas,
             'testimonials' => VitrineContent::testimonialsForCase($slug),
-            'jsonLd' => [
-                [
-                    '@type' => 'BreadcrumbList',
-                    'itemListElement' => [
-                        [
-                            '@type' => 'ListItem',
-                            'position' => 1,
-                            'name' => 'Accueil',
-                            'item' => url('/'),
-                        ],
-                        [
-                            '@type' => 'ListItem',
-                            'position' => 2,
-                            'name' => 'Réalisations',
-                            'item' => route('realisations.index'),
-                        ],
-                        [
-                            '@type' => 'ListItem',
-                            'position' => 3,
-                            'name' => $cas['titre'],
-                            'item' => route('realisations.show', $slug),
-                        ],
-                    ],
-                ],
-            ],
+            'ctaFinal' => VitrineContent::positioning()['cta_final'],
+            'jsonLd' => [$this->buildBreadcrumbList([
+                'Réalisations' => route('realisations.index'),
+                $cas['titre'] => route('realisations.show', $slug),
+            ])],
         ]);
     }
 
     public function expertises(): Response
     {
+        $positioning = VitrineContent::positioning();
+
         return Inertia::render('Public/Expertises', [
             'meta' => [
-                'title' => 'Capacités techniques — développement, hébergement, SEO, sécurité | Kodem',
-                'description' => 'Développement embarqué, hébergement, SEO local et sécurité : les capacités qui soutiennent les dispositifs connectés déployés par Kodem partout en France.',
+                'title' => 'Expertises : automatiser les tâches manuelles | Kodem',
+                'description' => 'Applications métier conçues de bout en bout, puis exploitées et maintenues : ce que KODEM automatise, de la conception à la production, partout en France.',
             ],
-            'positioning' => VitrineContent::positioning(),
+            'positioning' => $positioning,
             'jsonLd' => [
-                [
-                    '@type' => 'BreadcrumbList',
-                    'itemListElement' => [
-                        [
-                            '@type' => 'ListItem',
-                            'position' => 1,
-                            'name' => 'Accueil',
-                            'item' => url('/'),
-                        ],
-                        [
-                            '@type' => 'ListItem',
-                            'position' => 2,
-                            'name' => 'Expertises',
-                            'item' => route('expertises'),
-                        ],
-                    ],
-                ],
-                [
-                    '@type' => 'FAQPage',
-                    'mainEntity' => [
-                        [
-                            '@type' => 'Question',
-                            'name' => 'Quelle est la différence entre un dispositif connecté sur site et une solution cloud générique ?',
-                            'acceptedAnswer' => [
-                                '@type' => 'Answer',
-                                'text' => 'Un dispositif sur site fonctionne localement — pas de dépendance internet pendant l\'utilisation. Kodem assure le déploiement physique, la configuration sur le matériel du client et la supervision à distance.',
-                            ],
-                        ],
-                        [
-                            '@type' => 'Question',
-                            'name' => 'Sur quel matériel Kodem intervient-il ?',
-                            'acceptedAnswer' => [
-                                '@type' => 'Answer',
-                                'text' => 'Raspberry Pi, mini-PC x86, bornes custom, écrans industriels. Le choix du matériel dépend des contraintes d\'environnement et du budget. Kodem conseille et déploie.',
-                            ],
-                        ],
-                        [
-                            '@type' => 'Question',
-                            'name' => 'Le logiciel est-il maintenable après la livraison ?',
-                            'acceptedAnswer' => [
-                                '@type' => 'Answer',
-                                'text' => 'Oui. Kodem assure les mises à jour, le monitoring et les interventions correctives. Le code source appartient au client.',
-                            ],
-                        ],
-                    ],
-                ],
+                $this->buildBreadcrumbList(['Expertises' => route('expertises')]),
+                $this->buildFaqPage($positioning['faq']),
             ],
         ]);
     }
@@ -215,29 +148,11 @@ class PublicController extends Controller
     {
         return Inertia::render('Public/ZoneIntervention', [
             'meta' => [
-                'title' => 'Zone d\'intervention — Poitiers et partout en France | Kodem',
-                'description' => 'Kodem déploie des dispositifs connectés sur site partout en France. Basé à Poitiers : intervention le jour même en Nouvelle-Aquitaine, sous 48 h ailleurs.',
+                'title' => 'Méthode de travail, à distance depuis Poitiers | Kodem',
+                'description' => 'Basé à Poitiers, KODEM conçoit et met en production vos outils à distance. Sur site : le jour même en Nouvelle-Aquitaine, sous 48 h ailleurs en France.',
             ],
-            'positioning' => VitrineContent::positioning(),
-            'jsonLd' => [
-                [
-                    '@type' => 'BreadcrumbList',
-                    'itemListElement' => [
-                        [
-                            '@type' => 'ListItem',
-                            'position' => 1,
-                            'name' => 'Accueil',
-                            'item' => url('/'),
-                        ],
-                        [
-                            '@type' => 'ListItem',
-                            'position' => 2,
-                            'name' => 'Zone d\'intervention',
-                            'item' => route('zone-intervention'),
-                        ],
-                    ],
-                ],
-            ],
+            'ctaFinal' => VitrineContent::positioning()['cta_final'],
+            'jsonLd' => [$this->buildBreadcrumbList(['Méthode de travail' => route('zone-intervention')])],
         ]);
     }
 
@@ -245,29 +160,12 @@ class PublicController extends Controller
     {
         return Inertia::render('Public/Notes', [
             'meta' => [
-                'title' => 'Notes techniques — Kodem',
-                'description' => 'Notes de fond sur les dispositifs connectés sur site : choix techniques, retours d\'expérience et compromis documentés par Kodem.',
+                'title' => 'Notes techniques | Kodem',
+                'description' => 'Notes de fond de KODEM : choix techniques, retours d\'expérience et compromis documentés sur des projets livrés.',
+                'robots' => self::NOINDEX,
             ],
             'notes' => VitrineContent::notes(),
-            'jsonLd' => [
-                [
-                    '@type' => 'BreadcrumbList',
-                    'itemListElement' => [
-                        [
-                            '@type' => 'ListItem',
-                            'position' => 1,
-                            'name' => 'Accueil',
-                            'item' => url('/'),
-                        ],
-                        [
-                            '@type' => 'ListItem',
-                            'position' => 2,
-                            'name' => 'Notes techniques',
-                            'item' => route('notes'),
-                        ],
-                    ],
-                ],
-            ],
+            'jsonLd' => [$this->buildBreadcrumbList(['Notes techniques' => route('notes')])],
         ]);
     }
 
@@ -278,44 +176,80 @@ class PublicController extends Controller
 
         return Inertia::render('Public/NoteShow', [
             'meta' => [
-                'title' => $note['titre'].' — Notes techniques Kodem',
+                'title' => $note['titre'].' | Notes techniques Kodem',
                 'description' => $note['resume'],
+                'robots' => self::NOINDEX,
             ],
             'note' => $note,
             'jsonLd' => [
-                [
-                    '@type' => 'TechArticle',
-                    'headline' => $note['titre'],
-                    'description' => $note['resume'],
-                    'author' => ['@type' => 'Organization', 'name' => config('app.name', 'Kodem')],
-                    'publisher' => ['@type' => 'Organization', 'name' => config('app.name', 'Kodem')],
-                    'mainEntityOfPage' => route('notes.show', $slug),
-                    'inLanguage' => 'fr-FR',
-                ] + (isset($note['date_iso']) ? ['datePublished' => $note['date_iso']] : []),
-                [
-                    '@type' => 'BreadcrumbList',
-                    'itemListElement' => [
-                        [
-                            '@type' => 'ListItem',
-                            'position' => 1,
-                            'name' => 'Accueil',
-                            'item' => url('/'),
-                        ],
-                        [
-                            '@type' => 'ListItem',
-                            'position' => 2,
-                            'name' => 'Notes techniques',
-                            'item' => route('notes'),
-                        ],
-                        [
-                            '@type' => 'ListItem',
-                            'position' => 3,
-                            'name' => $note['titre'],
-                            'item' => route('notes.show', $slug),
-                        ],
-                    ],
-                ],
+                $this->buildTechArticle($note, $slug),
+                $this->buildBreadcrumbList([
+                    'Notes techniques' => route('notes'),
+                    $note['titre'] => route('notes.show', $slug),
+                ]),
             ],
         ]);
+    }
+
+    /**
+     * @param  array<string,string>  $trail  libellé => URL absolue, après « Accueil »
+     * @return array<string,mixed>
+     */
+    private function buildBreadcrumbList(array $trail): array
+    {
+        $crumbs = ['Accueil' => url('/')] + $trail;
+        $items = [];
+
+        foreach ($crumbs as $name => $url) {
+            $items[] = [
+                '@type' => 'ListItem',
+                'position' => count($items) + 1,
+                'name' => (string) $name,
+                'item' => $url,
+            ];
+        }
+
+        return [
+            '@type' => 'BreadcrumbList',
+            'itemListElement' => $items,
+        ];
+    }
+
+    /**
+     * @param  array{titre: string, resume: string, date_iso?: string}  $note
+     * @return array<string,mixed>
+     */
+    private function buildTechArticle(array $note, string $slug): array
+    {
+        $publisher = ['@type' => 'Organization', 'name' => config('app.name', 'Kodem')];
+
+        return [
+            '@type' => 'TechArticle',
+            'headline' => $note['titre'],
+            'description' => $note['resume'],
+            'author' => $publisher,
+            'publisher' => $publisher,
+            'mainEntityOfPage' => route('notes.show', $slug),
+            'inLanguage' => 'fr-FR',
+        ] + (isset($note['date_iso']) ? ['datePublished' => $note['date_iso']] : []);
+    }
+
+    /**
+     * @param  list<array{question: string, reponse: string}>  $faq
+     * @return array<string,mixed>
+     */
+    private function buildFaqPage(array $faq): array
+    {
+        return [
+            '@type' => 'FAQPage',
+            'mainEntity' => array_map(fn (array $item): array => [
+                '@type' => 'Question',
+                'name' => $item['question'],
+                'acceptedAnswer' => [
+                    '@type' => 'Answer',
+                    'text' => $item['reponse'],
+                ],
+            ], $faq),
+        ];
     }
 }
