@@ -13,13 +13,14 @@ class PublicController extends Controller
 
     public function home(): Response
     {
-        // Décision de l'actionnaire du 2026-10-09 : l'accueil reprend la maquette « backend de
-        // votre produit ». Son contenu est porté par Home.jsx, la page ne reçoit que ses meta.
+        // Vote du directeur du 2026-10-15 : l'accueil revient au positionnement « outils métier
+        // sur mesure » des pages intérieures. Le texte vient de content/positioning.json.
         return Inertia::render('Public/Home', [
             'meta' => [
-                'title' => 'Backend Laravel et Symfony pour votre produit | Kodem',
-                'description' => 'API, paiements, temps réel, tests et mise en production, en Laravel ou en Symfony : le backend de votre produit, de l\'architecture au déploiement. À distance, partout en France.',
+                'title' => 'Outils métier sur mesure contre les tâches manuelles | Kodem',
+                'description' => 'KODEM conçoit des outils métier sur mesure qui suppriment vos tâches manuelles, de la base de données à la mise en production. À distance, partout en France.',
             ],
+            'positioning' => VitrineContent::positioning(),
         ]);
     }
 
@@ -67,9 +68,9 @@ class PublicController extends Controller
     {
         return Inertia::render('Public/Mentions', [
             'meta' => [
-                'title' => 'Mentions légales — Kodem',
-                'description' => 'Mentions légales de la société Kodem, société de développement web et d\'hébergement.',
-                'keywords' => 'mentions légales, Kodem',
+                'title' => 'Mentions légales | Kodem',
+                'description' => 'Mentions légales du site kodem.fr, édité par Mathieu Siaudeau, entrepreneur individuel exerçant sous le nom commercial KODEM.',
+                'keywords' => 'mentions légales, KODEM',
             ],
         ]);
     }

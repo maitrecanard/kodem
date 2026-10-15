@@ -92,7 +92,7 @@ export default function PublicLayout({ meta, children }) {
                         </ul>
                     </div>
                     <div>
-                        <h3 className="text-white font-semibold mb-3">Société</h3>
+                        <h3 className="text-white font-semibold mb-3">Entreprise</h3>
                         <ul className="space-y-2 text-sm">
                             <li><Link href="/contact" className="transition-colors duration-[var(--kodem-dur-2)] hover:text-white">Contact</Link></li>
                             <li><Link href="/mentions-legales" className="transition-colors duration-[var(--kodem-dur-2)] hover:text-white">Mentions légales</Link></li>
@@ -103,7 +103,7 @@ export default function PublicLayout({ meta, children }) {
                 </div>
                 <div className="border-t border-cobalt-900">
                     <div className="max-w-6xl mx-auto px-6 py-4 text-xs text-acier flex items-center justify-between">
-                        <span>© {new Date().getFullYear()} Kodem. Tous droits réservés.</span>
+                        <span>© {new Date().getFullYear()} KODEM. Tous droits réservés.</span>
                         <span>Fabriqué avec Laravel + React + Vite</span>
                     </div>
                 </div>

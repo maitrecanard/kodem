@@ -13,7 +13,10 @@ class VitrineTest extends TestCase
     use ReadsJsonLd;
     use RefreshDatabase;
 
-    private const PUBLISHED_CASE_SLUGS = ['muxen', 'freendzy', 'ecran-raspberry', 'carte-qr-manhattan-cafe'];
+    private const PUBLISHED_CASE_SLUGS = ['muxen', 'freendzy'];
+
+    /** Vote du directeur du 2026-10-15 : écran et carte des vins rejoignent les archives. */
+    private const ARCHIVED_CASE_SLUGS = ['ecran-raspberry', 'carte-qr-manhattan-cafe', 'photomaton', 'controle-acces-billetterie'];
 
     // -------------------------------------------------------------------------
     // GET /realisations
@@ -190,25 +193,20 @@ class VitrineTest extends TestCase
         );
     }
 
-    public function test_realisations_index_lists_the_four_published_cases_in_order(): void
+    public function test_realisations_index_lists_the_two_published_cases_in_order(): void
     {
         $this->get('/realisations')
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->component('Public/Realisations')
-                ->where('cases', fn ($cases) => collect($cases)->pluck('slug')->all() === [
-                    'muxen',
-                    'freendzy',
-                    'ecran-raspberry',
-                    'carte-qr-manhattan-cafe',
-                ])
+                ->where('cases', fn ($cases) => collect($cases)->pluck('slug')->all() === self::PUBLISHED_CASE_SLUGS)
             );
     }
 
     public function test_archived_cases_stay_reachable_but_are_not_indexed(): void
     {
-        foreach (['/realisations/photomaton', '/realisations/controle-acces-billetterie'] as $route) {
-            $this->get($route)
+        foreach (self::ARCHIVED_CASE_SLUGS as $slug) {
+            $this->get('/realisations/'.$slug)
                 ->assertOk()
                 ->assertInertia(fn (Assert $page) => $page->where('meta.robots', 'noindex, follow'));
         }
@@ -268,7 +266,7 @@ class VitrineTest extends TestCase
             $this->assertStringContainsString('<loc>'.url('/realisations/'.$slug).'</loc>', $content, "le cas publié '{$slug}' doit figurer au sitemap");
         }
 
-        foreach (['photomaton', 'controle-acces-billetterie'] as $slug) {
+        foreach (self::ARCHIVED_CASE_SLUGS as $slug) {
             $this->assertStringNotContainsString('<loc>'.url('/realisations/'.$slug).'</loc>', $content, "le cas archivé '{$slug}' ne doit pas figurer au sitemap");
         }
 

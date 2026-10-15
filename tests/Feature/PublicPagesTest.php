@@ -12,17 +12,20 @@ class PublicPagesTest extends TestCase
     use ReadsJsonLd;
     use RefreshDatabase;
 
-    public function test_home_page_renders_the_backend_mockup(): void
+    public function test_home_page_renders_the_business_tools_positioning(): void
     {
-        // Décision de l'actionnaire du 2026-10-09 : l'accueil reprend la maquette « backend de
-        // votre produit ». Son contenu vit dans Home.jsx, la page ne reçoit donc que ses meta.
+        // Vote du directeur du 2026-10-15 : l'accueil revient au positionnement « outils métier
+        // sur mesure » et lit son texte dans content/positioning.json, comme les pages intérieures.
         $this->get('/')
             ->assertOk()
             ->assertInertia(fn (AssertableInertia $page) => $page
                 ->component('Public/Home')
                 ->where('meta.title', fn ($t) => str_contains(mb_strtolower($t), 'kodem')
-                    && str_contains(mb_strtolower($t), 'backend'))
-                ->missing('positioning')
+                    && str_contains(mb_strtolower($t), 'outils métier'))
+                ->where('meta.description', fn ($d) => ! str_contains(mb_strtolower($d), 'paiement')
+                    && ! str_contains(mb_strtolower($d), 'backend'))
+                ->has('positioning.hero_baseline')
+                ->has('positioning.cta_final')
                 ->missing('cases')
                 ->missing('testimonials')
             );
@@ -52,16 +55,24 @@ class PublicPagesTest extends TestCase
         $this->assertStringNotContainsString('Review', $html);
     }
 
-    public function test_home_source_carries_the_mockup_copy(): void
+    public function test_home_source_carries_the_business_tools_copy(): void
     {
         // SSR inactif en test : le texte de l'accueil n'est vérifiable que dans la source JSX.
         $source = file_get_contents(resource_path('js/Pages/Public/Home.jsx'));
 
         $this->assertNotFalse($source);
-        $this->assertStringContainsString('de votre produit.', $source);
-        $this->assertStringContainsString('Trois façons de travailler ensemble.', $source);
+        $this->assertStringContainsString('Des outils métier sur mesure qui suppriment vos', $source);
         $this->assertStringContainsString("J'ai réparé la production avant de la coder.", $source);
-        $this->assertSame(6, substr_count($source, "meta: '// compétence 0") + substr_count($source, 'meta: "// compétence 0'));
+        $this->assertSame(5, substr_count($source, "meta: '// compétence 0") + substr_count($source, 'meta: "// compétence 0'));
+
+        // Vote du directeur du 2026-10-15 : ni paiement, ni reprise comme spécialité, ni preuve
+        // hors de la liste fermée sur l'accueil.
+        foreach ([
+            'backend php', 'freelance', 'stripe', 'paiement', 'marketplace', "backend d'une app mobile",
+            'reprendre une application', 'saas santé', 'équipe de 10', 'abonnements et factures',
+        ] as $forbidden) {
+            $this->assertStringNotContainsString($forbidden, mb_strtolower($source), "l'accueil ne doit plus porter « {$forbidden} »");
+        }
     }
 
     public function test_services_page_renders(): void
@@ -84,7 +95,24 @@ class PublicPagesTest extends TestCase
     {
         $this->get('/mentions-legales')
             ->assertOk()
-            ->assertInertia(fn (AssertableInertia $page) => $page->component('Public/Mentions'));
+            ->assertInertia(fn (AssertableInertia $page) => $page->component('Public/Mentions')
+                ->where('meta.description', fn ($d) => str_contains($d, 'entrepreneur individuel')
+                    && ! str_contains(mb_strtolower($d), 'société'))
+            );
+    }
+
+    public function test_mentions_legales_source_names_the_individual_entrepreneur_and_the_real_host(): void
+    {
+        $source = file_get_contents(resource_path('js/Pages/Public/Mentions.jsx'));
+
+        $this->assertNotFalse($source);
+        $this->assertStringContainsString('entrepreneur individuel', $source);
+        $this->assertStringContainsString('Directeur de la publication : Mathieu Siaudeau', $source);
+        $this->assertStringContainsString('SIREN : 922 818 547', $source);
+        $this->assertStringContainsString('OVH SAS', $source);
+        $this->assertStringContainsString('2 rue Kellermann, 59100 Roubaix', $source);
+        $this->assertStringNotContainsString('la société', $source);
+        $this->assertStringNotContainsString('hébergé par Kodem', $source);
     }
 
     public function test_cgv_page_renders(): void

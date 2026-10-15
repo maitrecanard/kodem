@@ -1,112 +1,74 @@
 import { useEffect, useRef, useState } from 'react';
-import { usePage } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import PublicLayout from '@/Layouts/PublicLayout';
 import { trackClick } from '@/lib/track';
 import '../../../css/home.css';
-
-const CHIPS = [
-    { label: 'Laravel', key: true },
-    { label: 'Symfony', key: true },
-    { label: 'PHP 8' },
-    { label: 'API REST' },
-    { label: 'MySQL' },
-    { label: 'Stripe' },
-    { label: 'React' },
-    { label: 'Vue.js' },
-    { label: 'PHPUnit' },
-    { label: 'GitHub Actions' },
-    { label: 'Docker' },
-    { label: 'Reverb' },
-];
 
 /**
  * Une ligne de code : [seuil d'apparition (0 à 1), segments, optionnelle].
  * Un segment est soit du texte brut, soit [classe, texte] avec la classe parmi
  * k (mot clé), s (chaîne), c (commentaire), ok (succès), cursor (curseur).
  * Les lignes optionnelles sont masquées sur les petits écrans peu hauts.
+ *
+ * Chaque « used » ne cite qu'une preuve de la liste fermée du directeur
+ * (offres.md, « Preuves mobilisables ») : aucune autre preuve ici.
  */
 const SKILLS = [
     {
-        meta: '// compétence 01 · backend & api',
-        word: 'backend',
-        desc: "Je conçois la base de données, l'authentification, la logique métier et l'API, puis l'espace d'administration. Laravel ou Symfony selon votre existant.",
-        tags: ['Laravel 12', 'Symfony', 'API REST publique', 'MySQL', 'SQL Server'],
+        meta: '// compétence 01 · conception de bout en bout',
+        word: 'conception',
+        desc: "Base de données, règles métier et interface : l'outil est conçu de zéro, puis mené jusqu'à la mise en production par un seul interlocuteur.",
+        tags: ['Base de données', 'Règles métier', 'Interface web', 'API REST', 'Laravel, React ou Vue.js'],
         used: (
             <>
-                en production sur <b>un SaaS</b> et <b>le backend d'une app mobile</b>
+                un outil de mises en service <b>conçu de zéro</b>, livré de 2024 à 2025
             </>
         ),
-        file: 'routes/api.php',
+        file: 'routes/web.php',
         lines: [
-            [0.05, [['k', 'Route'], '::middleware(', ['s', "'auth:sanctum'"], ')']],
-            [0.12, ['  ->prefix(', ['s', "'v1'"], ')']],
+            [0.05, [['k', 'Route'], '::middleware(', ['s', "'auth'"], ')']],
+            [0.12, ['  ->prefix(', ['s', "'mises-en-service'"], ')']],
             [0.19, ['  ->group(', ['k', 'function'], ' () {']],
-            [0.26, ['    Route::apiResource(', ['s', "'projects'"], ', ProjectController::', ['k', 'class'], ');']],
-            [0.33, ['    Route::post(', ['s', "'projects/{project}/publish'"], ',']],
-            [0.4, ['        [ProjectController::', ['k', 'class'], ', ', ['s', "'publish'"], ']);']],
+            [0.26, ['    Route::get(', ['s', "'/'"], ', [MiseEnServiceController::', ['k', 'class'], ', ', ['s', "'index'"], ']);']],
+            [0.33, ['    Route::post(', ['s', "'{client}/lancer'"], ',']],
+            [0.4, ['        [MiseEnServiceController::', ['k', 'class'], ', ', ['s', "'lancer'"], ']);']],
             [0.47, ['  });']],
             [0.54, [' '], true],
-            [0.58, [['c', '// GET  /api/v1/projects        200']], true],
-            [0.62, [['c', '// POST /api/v1/projects/42/publish  201']], true],
+            [0.58, [['c', '// une règle métier, un écran, une route']], true],
         ],
     },
     {
         variant: 'alt',
-        meta: '// compétence 02 · paiement en ligne',
-        word: 'paiement',
-        desc: "Abonnements, facturation, remboursements, et marketplaces où l'argent est reversé automatiquement aux prestataires. Aucune donnée de carte ne passe par vos serveurs.",
-        tags: ['Stripe Billing', 'Stripe Connect Express', 'Webhooks', "QR code d'accès"],
+        meta: '// compétence 02 · mises en service automatisées',
+        word: 'automatiser',
+        desc: "Attribution DHCP automatique et génération des configurations VPN : la mise en service d'un client ne passe plus par la main, ni par une saisie qui peut couper un service.",
+        tags: ['Attribution DHCP', 'Configurations VPN', 'Génération de fichiers', 'Règles écrites avant le code'],
         used: (
             <>
-                en production sur <b>un SaaS par abonnement</b> et <b>une marketplace mobile</b>
+                mises en service <b>qui ne passent plus par la main</b>
             </>
         ),
-        file: 'StripeWebhookController.php',
+        file: 'app/Actions/MettreEnService.php',
         lines: [
-            [0.05, [['k', 'match'], ' ($event->type) {']],
-            [0.12, ['  ', ['s', "'invoice.paid'"], ' =>']],
-            [0.19, ['      $subscriptions->activate($event),']],
-            [0.26, ['  ', ['s', "'charge.refunded'"], ' =>']],
-            [0.33, ['      $subscriptions->refund($event),']],
-            [0.4, ['  ', ['s', "'transfer.created'"], ' =>']],
-            [0.47, ['      $payouts->confirm($event),']],
-            [0.54, ['  ', ['k', 'default'], ' => ', ['k', 'null'], ','], true],
-            [0.6, ['};']],
+            [0.05, [['k', 'public function'], ' __invoke(Client $client): ', ['k', 'void']]],
+            [0.12, ['{']],
+            [0.19, ['    $bail = $this->dhcp->attribuer($client);']],
+            [0.26, ['    $config = $this->vpn->generer($client, $bail);']],
+            [0.33, [' '], true],
+            [0.38, ['    Storage::put(', ['s', '"vpn/{$client->code}.conf"'], ', $config);']],
+            [0.45, ['}']],
+            [0.52, [' '], true],
+            [0.58, [['ok', '✓ client 0412 en service'], '  ', ['c', '· 0 saisie manuelle']], true],
         ],
     },
     {
-        meta: "// compétence 03 · contrôle d'accès",
-        word: 'accès',
-        desc: "Authentification, rôles et permissions, accès réservé aux abonnés actifs, contrôle sur place par QR code. Chaque utilisateur voit ce qu'il a le droit de voir, rien de plus.",
-        tags: ['Authentification', 'Rôles & permissions', 'Policies & middlewares', 'Accès par abonnement', 'QR code'],
-        used: (
-            <>
-                contrôle d'abonnement <b>par QR code</b> en production
-            </>
-        ),
-        file: 'VerifyPassController.php',
-        lines: [
-            [0.05, [['c', "// scan du QR code à l'entrée"]]],
-            [0.12, [['k', 'public function'], ' __invoke(Member $member)']],
-            [0.19, ['{']],
-            [0.26, ['    $this->authorize(', ['s', "'scan'"], ', $member);']],
-            [0.31, [' '], true],
-            [0.36, ['    ', ['k', 'return'], ' $member->subscription?->active()']],
-            [0.43, ['        ? response()->json([', ['s', "'access'"], ' => ', ['s', "'granted'"], '])']],
-            [0.5, ['        : response()->json([', ['s', "'access'"], ' => ', ['s', "'denied'"], '], ', ['k', '403'], ');']],
-            [0.57, ['}']],
-            [0.62, [['ok', '✓ 200 granted'], '  ', ['c', '· abonné actif']], true],
-        ],
-    },
-    {
-        variant: 'alt',
-        meta: '// compétence 04 · qualité & mise en production',
+        meta: '// compétence 03 · qualité & mise en production',
         word: 'qualité',
-        desc: "Tests unitaires, d'intégration et de bout en bout, analyse statique, intégration continue, puis un déploiement automatique en préproduction et en production.",
-        tags: ['PHPUnit', 'Tests E2E', 'PHPStan / Larastan', 'GitHub Actions', 'Docker Compose'],
+        desc: "Tests unitaires, fonctionnels et de bout en bout, analyse statique, intégration continue, puis un déploiement automatique en préproduction et en production.",
+        tags: ['PHPUnit', 'Tests de bout en bout', 'PHPStan / Larastan', 'GitHub Actions', 'Docker Compose'],
         used: (
             <>
-                chaque mise en ligne passe par <b>les tests et la CI</b>, paiement compris
+                <b>619 tests automatisés</b> sur une application en production, avec intégration continue et analyse statique
             </>
         ),
         file: 'github actions · laravel ci',
@@ -115,115 +77,104 @@ const SKILLS = [
             [0.12, [['ok', '✓'], ' php artisan migrate']],
             [0.19, [['ok', '✓'], ' phpstan analyse']],
             [0.26, [['ok', '✓'], ' Tests\\Unit']],
-            [0.33, [['ok', '✓'], ' Tests\\Feature\\Stripe\\StripeWebhookRefundTest']],
-            [0.4, [['ok', '✓'], ' Tests\\E2E\\UserJourneyTest']],
+            [0.33, [['ok', '✓'], ' Tests\\Feature']],
+            [0.4, [['ok', '✓'], ' Tests\\E2E']],
             [0.47, [' '], true],
             [0.54, [['k', '→'], ' deploy preprod … ', ['ok', 'ok']]],
             [0.61, [['k', '→'], ' deploy production … ', ['ok', 'ok'], ' ', ['cursor', '']]],
         ],
     },
     {
-        meta: '// compétence 05 · temps réel & intégrations',
-        word: 'temps réel',
-        desc: "Messages instantanés et mises à jour en direct via WebSockets avec Laravel Reverb, hébergé sur votre serveur. S'y ajoutent les notifications push, les e‑mails planifiés et les bots connectés à votre API.",
-        tags: ['Laravel Reverb', 'Broadcasting', 'Laravel Echo', 'Expo Notifications', 'Tâches planifiées'],
+        variant: 'alt',
+        meta: '// compétence 04 · exploitation & maintenance',
+        word: 'exploitation',
+        desc: "Déploiement automatisé, sauvegardes chiffrées, corrections et évolutions après la livraison : l'outil reste en service sans régression, et le code source appartient au client.",
+        tags: ['Déploiement automatisé', 'Sauvegardes chiffrées', 'Tâches planifiées', 'Corrections et évolutions'],
         used: (
             <>
-                WebSockets <b>auto‑hébergés</b>, sans service tiers facturé au message
+                SaaS en production, <b>30 abonnements payants</b>
             </>
         ),
-        file: 'app/Events/MessageSent.php · reverb',
+        file: 'routes/console.php',
         lines: [
-            [0.05, [['k', 'class'], ' MessageSent ', ['k', 'implements'], ' ShouldBroadcast']],
-            [0.12, ['{']],
-            [0.19, ['    ', ['k', 'public function'], ' broadcastOn(): ', ['k', 'array']]],
-            [0.26, ['    {']],
-            [0.33, ['        ', ['k', 'return'], ' [', ['k', 'new'], ' PrivateChannel(', ['s', '"chat.{$this->roomId}"'], ')];']],
-            [0.4, ['    }']],
-            [0.47, ['}']],
-            [0.52, [' '], true],
-            [0.57, [['c', '// front : Echo.private(`chat.${roomId}`)']]],
-            [0.62, [['c', "//   .listen('MessageSent', render)"]]],
+            [0.05, [['c', '// ce qui tourne sans personne']]],
+            [0.12, ['Schedule::command(', ['s', "'backup:run'"], ')->dailyAt(', ['s', "'02:30'"], ');']],
+            [0.19, ['Schedule::command(', ['s', "'backup:clean'"], ')->daily();']],
+            [0.26, ['Schedule::command(', ['s', "'queue:prune-failed'"], ')->weekly();']],
+            [0.33, [' '], true],
+            [0.4, [['c', '// chaque correction repasse par la CI']]],
+            [0.47, [['k', '→'], ' release v1.12.3 … ', ['ok', 'ok']]],
         ],
     },
     {
         variant: 'dark',
-        meta: '// compétence 06 · diagnostic en production',
+        meta: '// compétence 05 · diagnostic en production',
         word: 'diagnostic',
-        desc: "Quand ça casse en production, je pars des données. Six ans de support sur un parc de sites e‑commerce m'ont appris à écrire la requête qui trouve la cause, pas à deviner.",
+        desc: "Quand ça casse en production, je pars des données. Six ans de support sur un parc de sites de vente en ligne m'ont appris à écrire la requête qui trouve la cause, pas à deviner.",
         tags: ["SQL d'investigation", 'Procédures stockées', "Gestion d'incidents", 'Windows Server', 'Réseau, DHCP, VPN'],
         used: (
             <>
-                6 ans de <b>support en production</b> avant le développement
+                6 ans de <b>diagnostic SQL en production</b> avant le développement
             </>
         ),
         file: 'incident.sql',
         lines: [
-            [0.05, [['c', '-- commandes payées sans billet émis']]],
-            [0.12, [['k', 'SELECT'], ' o.id, o.paid_at, o.site_id']],
+            [0.05, [['c', '-- commandes validées sans billet émis']]],
+            [0.12, [['k', 'SELECT'], ' o.id, o.created_at, o.site_id']],
             [0.19, [['k', 'FROM'], ' orders o']],
             [0.26, [['k', 'LEFT JOIN'], ' tickets t ', ['k', 'ON'], ' t.order_id = o.id']],
-            [0.33, [['k', 'WHERE'], ' o.status = ', ['s', "'paid'"]]],
+            [0.33, [['k', 'WHERE'], ' o.status = ', ['s', "'validated'"]]],
             [0.4, ['  ', ['k', 'AND'], ' t.id ', ['k', 'IS NULL']]],
-            [0.47, [['k', 'ORDER BY'], ' o.paid_at ', ['k', 'DESC'], ';']],
+            [0.47, [['k', 'ORDER BY'], ' o.created_at ', ['k', 'DESC'], ';']],
             [0.54, [' '], true],
             [0.61, [['c', '-- cause trouvée, correctif livré'], ' ', ['cursor', '']]],
         ],
     },
 ];
 
-const OFFERS = [
-    {
-        action: 'action(construire)',
-        title: 'Construire un backend',
-        text: "Vous avez un produit à lancer. Je conçois et livre le backend, l'API et le paiement, testés et déployés.",
-        points: ['architecture et base de données', 'API documentée', 'déploiement préprod et prod'],
-    },
-    {
-        action: 'action(encaisser)',
-        title: 'Ajouter le paiement',
-        text: "Votre application existe et doit facturer. J'intègre Stripe, abonnements ou marketplace, avec des webhooks couverts par des tests.",
-        points: ['abonnements et factures', 'reversements aux prestataires', 'remboursements testés'],
-    },
-    {
-        action: 'action(fiabiliser)',
-        title: 'Reprendre une application',
-        text: 'Votre application casse ou fait peur à chaque mise en ligne. Je diagnostique, je pose les tests et une intégration continue.',
-        points: ['audit et diagnostic', 'tests et analyse statique', 'mises en ligne sans stress'],
-    },
-];
+/** Libellé de code affiché sur chaque carte, dans l'ordre des capacités puis des secteurs. */
+const OFFER_ACTIONS = ['action(concevoir)', 'action(exploiter)', 'action(renforcer)'];
 
+/** Frise alignée sur les profils publics (export LinkedIn du 2025-09-24). */
 const TIMELINE = [
-    { date: '2016', text: "Technicien d'assistance informatique, AFPA" },
-    { date: '2017–23', text: 'Support de sites e‑commerce en production', key: true },
-    { date: '2021', text: 'Premières missions freelance, Laravel et Symfony' },
+    { date: '2017 à 2023', text: 'Technicien support fonctionnel chez Vivaticket, sites de billetterie en production', key: true },
+    { date: '2021', text: 'Développeur professionnel : premières missions Laravel et Symfony' },
     { date: '2022', text: 'Titre pro développeur web et web mobile' },
-    { date: '2023', text: 'SaaS santé, en équipe de 10 développeurs' },
-    { date: '2024 →', text: 'Freelance : SaaS, backend mobile, produit réseau', key: true },
+    { date: '2024', text: 'Développeur en CDI chez PICTAV Informatique, de février 2024 à janvier 2025' },
+    { date: '2024 à 2025', text: 'Outil de mises en service conçu de zéro pour MUXEN, de janvier 2024 à septembre 2025', key: true },
+    { date: "aujourd'hui", text: 'KODEM : outils métier sur mesure, de la base de données à la mise en production' },
 ];
 
 const pad = (n) => String(n).padStart(2, '0');
 
-export default function Home({ meta }) {
+export default function Home({ meta, positioning = {} }) {
+    const capabilities = positioning.capabilities || [];
+    const secteurs = positioning.secteurs || [];
+    const offers = [
+        ...capabilities.map((c) => ({ title: c.titre, text: c.role_support })),
+        ...secteurs.map((s) => ({ title: s.nom, text: s.processus })),
+    ].map((offer, i) => ({ ...offer, action: OFFER_ACTIONS[i] || 'action()' }));
+    const situations = positioning.probleme?.situations || [];
+    const cta = positioning.cta_primary || { label: 'Décrivez la tâche que vous voulez supprimer', href: '/contact' };
+
     return (
         <PublicLayout meta={meta}>
             <div className="kh">
                 <section className="kh-intro">
-                    <p className="kh-eyebrow">// mathieu siaudeau · développeur backend php · freelance · poitiers</p>
+                    <p className="kh-eyebrow">// mathieu siaudeau · KODEM · outils métier sur mesure · poitiers</p>
                     <h1>
-                        Je construis le <b>[</b>backend<b>]</b> de votre produit.
+                        Des outils métier sur mesure qui suppriment vos <b>[</b>tâches manuelles<b>]</b>.
                     </h1>
+                    <p className="kh-lead">{positioning.hero_baseline}</p>
                     <p className="kh-lead">
-                        API, paiements, temps réel, tests et mise en production, en Laravel ou en Symfony. Je prends le
-                        projet seul, de l'architecture au déploiement, et je travaille à distance.
+                        <Link
+                            href={cta.href}
+                            className="kh-btn"
+                            onClick={() => trackClick('hero_cta_contact', { location: 'home_hero' })}
+                        >
+                            {cta.label}
+                        </Link>
                     </p>
-                    <ul className="kh-chips" aria-label="Technologies">
-                        {CHIPS.map((chip) => (
-                            <li key={chip.label} className={chip.key ? 'kh-chip--key' : undefined}>
-                                {chip.label}
-                            </li>
-                        ))}
-                    </ul>
                     <span className="kh-go">
                         <i />
                         scrollez pour parcourir {SKILLS.length} compétences
@@ -234,18 +185,20 @@ export default function Home({ meta }) {
 
                 <section className="kh-block" id="missions">
                     <p className="kh-eyebrow">// missions</p>
-                    <h2>Trois façons de travailler ensemble.</h2>
+                    <h2>{positioning.probleme?.titre || 'Des tâches qui passent encore par la main'}</h2>
+                    {situations.length > 0 && (
+                        <ul className="kh-path-intro">
+                            {situations.map((situation) => (
+                                <li key={situation}>{situation}</li>
+                            ))}
+                        </ul>
+                    )}
                     <div className="kh-offers">
-                        {OFFERS.map((offer) => (
+                        {offers.map((offer) => (
                             <article key={offer.action} className="kh-offer">
                                 <code>{offer.action}</code>
                                 <h3>{offer.title}</h3>
                                 <p>{offer.text}</p>
-                                <ul>
-                                    {offer.points.map((point) => (
-                                        <li key={point}>{point}</li>
-                                    ))}
-                                </ul>
                             </article>
                         ))}
                     </div>
@@ -255,8 +208,9 @@ export default function Home({ meta }) {
                     <p className="kh-eyebrow">// parcours</p>
                     <h2>J'ai réparé la production avant de la coder.</h2>
                     <p className="kh-path-intro">
-                        Six ans au support d'un parc de sites de billetterie, à chercher dans les bases pourquoi une
-                        commande avait échoué. C'est pour ça que je teste tout ce qui touche à l'argent.
+                        Six ans au support fonctionnel d'un parc de sites de billetterie, à chercher dans les bases
+                        pourquoi une commande avait échoué. C'est pour ça que chaque outil livré par KODEM part en
+                        production avec ses tests.
                     </p>
                     <ol className="kh-tl">
                         {TIMELINE.map((step) => (
@@ -268,7 +222,7 @@ export default function Home({ meta }) {
                     </ol>
                 </section>
 
-                <HomeContact />
+                <HomeContact ctaFinal={positioning.cta_final} />
             </div>
         </PublicLayout>
     );
@@ -460,7 +414,7 @@ function SkillLayer({ skill, number }) {
     );
 }
 
-function HomeContact() {
+function HomeContact({ ctaFinal }) {
     const { contactEmail } = usePage().props;
     const mailRef = useRef(null);
     const [label, setLabel] = useState("Copier l'adresse");
@@ -488,12 +442,9 @@ function HomeContact() {
         <section className="kh-outro" id="contact">
             <p className="kh-eyebrow">// contact</p>
             <h2>
-                Un backend à <b>[</b>construire<b>]</b> ou à reprendre ?
+                Une tâche manuelle à <b>[</b>supprimer<b>]</b> ?
             </h2>
-            <p>
-                Décrivez le produit, ce qui existe déjà et ce qui bloque. Je réponds avec une approche technique et un
-                ordre de prix.
-            </p>
+            <p>{ctaFinal?.texte || 'Décrivez la tâche, les logiciels concernés et sa fréquence : réponse sous 48 h.'}</p>
             <div className="kh-contact">
                 <span className="kh-mail" ref={mailRef}>
                     {contactEmail}

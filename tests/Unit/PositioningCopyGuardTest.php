@@ -48,8 +48,9 @@ class PositioningCopyGuardTest extends TestCase
         $patterns = [
             '20 ans' => "/(?<![\\p{N}])20{$space}+ans(?!\\p{L})/iu",
             'administrateur système' => "/administrateurs?{$space}+systèmes?/iu",
-            // « freelance » n'est plus interdit : décision de l'actionnaire du 2026-10-09
-            // (registre des décisions), l'accueil reprend la maquette qui l'emploie.
+            // « freelance » interdit à nouveau : l'accueil qui l'employait (décision de
+            // l'actionnaire du 2026-10-09) est réaligné par le vote du directeur du 2026-10-15.
+            'freelance' => '/freelance/iu',
             'nos équipes' => "/nos{$space}+équipes/iu",
             '619 tests unitaires' => "/619{$space}+tests?{$space}+unitaires/iu",
             '2 500 utilisateurs' => "/2{$space}?500{$space}+utilisateurs/iu",

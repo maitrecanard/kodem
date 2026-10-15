@@ -149,7 +149,7 @@ class VitrineContentTest extends TestCase
     public function test_listed_cases_exclude_archived_ones_and_keep_file_order(): void
     {
         $this->assertSame(
-            ['muxen', 'freendzy', 'ecran-raspberry', 'carte-qr-manhattan-cafe'],
+            ['muxen', 'freendzy'],
             array_column(VitrineContent::listedCases(), 'slug')
         );
     }

@@ -12,10 +12,10 @@
             { "label": "Attribution DHCP", "valeur": "automatique" },
             { "label": "Configurations VPN", "valeur": "générées par l'outil" },
             { "label": "Conception", "valeur": "de zéro" },
-            { "label": "Projet livré", "valeur": "2023 à 2025" }
+            { "label": "Projet livré", "valeur": "2024 à 2025" }
         ],
         "image": "// TODO: visuel MUXEN à fournir (lot recentrage)",
-        "cas_date": "2023 à 2025"
+        "cas_date": "2024 à 2025"
     },
     {
         "slug": "freendzy",
@@ -36,7 +36,7 @@
     },
     {
         "slug": "ecran-raspberry",
-        "visibilite": "realisations",
+        "visibilite": "archive",
         "titre": "Back office de diffusion administré par le client",
         "secteur": "back office client",
         "resume": "Le client met à jour lui-même les contenus diffusés sur ses sites, depuis un back office. La tournée avec une clé USB à chaque changement a disparu.",
@@ -53,7 +53,7 @@
     },
     {
         "slug": "carte-qr-manhattan-cafe",
-        "visibilite": "realisations",
+        "visibilite": "archive",
         "titre": "Une carte des vins que le restaurateur tient seul",
         "secteur": "génération de documents",
         "resume": "Le restaurateur tient seul sa carte des vins dans un back office : consultation par QR code en salle et version PDF générée sans intervention technique.",
