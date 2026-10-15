@@ -10,24 +10,30 @@ export default function Mentions({ meta }) {
                 <h1>Mentions légales</h1>
                 <h2>Éditeur du site</h2>
                 <p>
-                    Le présent site est édité par la société <strong>Kodem</strong>, société spécialisée en développement web,
-                    création de SaaS, hébergement web et audits SEO et de sécurité.
+                    Le présent site est édité par <strong>Mathieu Siaudeau</strong>, entrepreneur individuel exerçant
+                    sous le nom commercial <strong>KODEM</strong> (conception d'outils métier sur mesure).
                 </p>
                 <ul>
-                    <li>Raison sociale : Kodem</li>
-                    <li>SIREN / RCS : 922 818 547</li>
+                    <li>Nom : Mathieu Siaudeau, entrepreneur individuel (EI)</li>
+                    <li>Nom commercial : KODEM</li>
+                    <li>Adresse : 13 Résidence de la Picauderie, 86300 Valdivienne, France</li>
+                    <li>SIREN : 922 818 547</li>
                     <li>Email : {contactEmail}</li>
+                    <li>Téléphone : 07 62 61 26 46</li>
+                    <li>Directeur de la publication : Mathieu Siaudeau</li>
                 </ul>
 
                 <h2>Hébergement</h2>
-                <p>
-                    Le site est hébergé par Kodem (infrastructure managée, serveurs en Europe). Toutes les communications
-                    sont chiffrées via TLS et les sauvegardes sont chiffrées au repos.
-                </p>
+                <p>Le site est hébergé sur un serveur dédié loué auprès de :</p>
+                <ul>
+                    <li>OVH SAS</li>
+                    <li>2 rue Kellermann, 59100 Roubaix, France</li>
+                    <li>Téléphone : 1007</li>
+                </ul>
 
                 <h2>Propriété intellectuelle</h2>
                 <p>
-                    L'ensemble des contenus (textes, logos, visuels, code source) est la propriété exclusive de Kodem, sauf
+                    L'ensemble des contenus (textes, logos, visuels, code source) est la propriété exclusive de Mathieu Siaudeau (KODEM), sauf
                     mention contraire. Toute reproduction, même partielle, est interdite sans autorisation écrite.
                 </p>
 
@@ -41,7 +47,7 @@ export default function Mentions({ meta }) {
 
                 <h2>Cookies</h2>
                 <p>
-                    Kodem n'utilise pas de cookies publicitaires ni de traceurs tiers. Seuls des cookies techniques
+                    KODEM n'utilise pas de cookies publicitaires ni de traceurs tiers. Seuls des cookies techniques
                     strictement nécessaires au fonctionnement du site (session, CSRF) sont déposés.
                 </p>
             </section>

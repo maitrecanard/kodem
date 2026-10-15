@@ -42,7 +42,7 @@
         "titre": "Parcours du dirigeant",
         "paragraphes": [
             "Je m'appelle Mathieu Siaudeau et je dirige KODEM. Dans le métier depuis 2017, j'ai d'abord été technicien support fonctionnel chez Vivaticket, salarié, de 2017 à 2023.",
-            "Développeur professionnel depuis 2021, j'ai conçu et écrit de zéro l'outil de mises en service de MUXEN, équipementier électrique nautique, livré entre 2023 et 2025. Freendzy, application SaaS en production, est construite avec la même méthode : tests automatisés, intégration continue, déploiement automatisé.",
+            "Développeur professionnel depuis 2021, j'ai conçu et écrit de zéro l'outil de mises en service de MUXEN, équipementier électrique nautique, livré entre janvier 2024 et septembre 2025. Freendzy, application SaaS en production, est construite avec la même méthode : tests automatisés, intégration continue, déploiement automatisé.",
             "C'est cette méthode que KODEM applique à vos tâches manuelles : un seul interlocuteur, de la base de données à la mise en production."
         ]
     },
@@ -58,7 +58,7 @@
         },
         { "question": "Le logiciel est-il maintenable après la livraison ?", "reponse": "Oui. Le code est couvert par des tests automatisés et déployé par intégration continue. KODEM assure les corrections et les évolutions ; le code source appartient au client." }
     ],
-    "realisations_intro": "Deux projets de référence : l'outil de mises en service conçu de zéro pour MUXEN, équipementier électrique nautique, et Freendzy, application SaaS en production. Suivent des réalisations plus anciennes où un back office a remplacé une tâche manuelle. Chaque cas suit le même schéma : problème réel, contrainte, choix justifié, résultat.",
+    "realisations_intro": "Deux projets de référence : l'outil de mises en service conçu de zéro pour MUXEN, équipementier électrique nautique, et Freendzy, application SaaS en production. Chaque cas suit le même schéma : problème réel, contrainte, choix justifié, résultat.",
     "ancrage_local": "Basé à Poitiers, à distance partout en France",
     "cta_primary": { "label": "Décrivez la tâche que vous voulez supprimer", "href": "/contact" },
     "cta_secondary": { "label": "Voir les réalisations", "href": "/realisations" },

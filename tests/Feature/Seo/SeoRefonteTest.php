@@ -91,17 +91,19 @@ class SeoRefonteTest extends TestCase
     }
 
     // -------------------------------------------------------------------------
-    // 3. Page d'accueil : maquette « backend de votre produit » (décision de l'actionnaire
-    //    du 2026-10-09). Le copy est porté par Home.jsx ; pas de keyword stuffing (§8).
+    // 3. Page d'accueil : positionnement « outils métier sur mesure » (vote du directeur
+    //    du 2026-10-15) ; pas de keyword stuffing (§8).
     // -------------------------------------------------------------------------
 
-    public function test_home_page_meta_targets_the_backend_positioning(): void
+    public function test_home_page_meta_targets_the_business_tools_positioning(): void
     {
         $this->get('/')
             ->assertOk()
             ->assertInertia(fn (AssertableInertia $page) => $page
                 ->component('Public/Home')
-                ->where('meta.title', fn (string $title) => str_contains(mb_strtolower($title), 'backend'))
+                ->where('meta.title', fn (string $title) => str_contains(mb_strtolower($title), 'outils métier')
+                    && mb_strlen($title) <= 60)
+                ->where('meta.description', fn (string $description) => mb_strlen($description) <= 160)
                 ->missing('meta.keywords')
             );
     }

@@ -5,6 +5,24 @@ Toutes les évolutions notables de ce projet sont consignées dans ce fichier.
 Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/)
 et le projet suit le [versionnage sémantique](https://semver.org/lang/fr/).
 
+## [1.19.0] (2026-10-15)
+
+### Changed
+- **Accueil réaligné sur « outils métier sur mesure »**, comme les pages intérieures et les messages
+  de prospection (vote du directeur du 2026-10-15). L'accueil lit désormais `content/positioning.json`.
+  Retirés : le bandeau « développeur backend php », l'offre paiement, la reprise présentée comme
+  spécialité, les mentions « marketplace mobile », « app mobile » et « SaaS santé », la liste de
+  technologies. Title et meta description réécrits.
+- Carte des vins et écran Raspberry passés en archive : hors de `/realisations` et du sitemap,
+  pages servies en `noindex, follow`.
+- Frise et cas MUXEN alignés sur les profils : MUXEN de janvier 2024 à septembre 2025, CDI PICTAV
+  de février 2024 à janvier 2025.
+
+### Fixed
+- **Mentions légales** : éditeur présenté comme entrepreneur individuel (nom commercial KODEM),
+  adresse, SIREN, directeur de la publication et hébergeur réel (OVH SAS). Pied de page :
+  « Entreprise » au lieu de « Société », « © KODEM ».
+
 ## [1.18.1] (2026-10-09)
 
 ### Fixed
