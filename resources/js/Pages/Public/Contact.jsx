@@ -2,6 +2,7 @@ import { useForm } from '@inertiajs/react';
 import PublicLayout from '@/Layouts/PublicLayout';
 import { trackClick } from '@/lib/track';
 import SectionLabel from '@/Components/SectionLabel';
+import FormField, { FormInputStyle } from '@/Components/FormField';
 import ContactBlockMono from '@/Components/ContactBlockMono';
 
 export default function Contact({ meta, flash }) {
@@ -60,7 +61,7 @@ export default function Contact({ meta, flash }) {
                         </div>
 
                         <div className="grid md:grid-cols-2 gap-4">
-                            <Field label="Nom" error={errors.name}>
+                            <FormField label="Nom" error={errors.name}>
                                 <input
                                     type="text"
                                     value={data.name}
@@ -68,8 +69,8 @@ export default function Contact({ meta, flash }) {
                                     required
                                     className="input"
                                 />
-                            </Field>
-                            <Field label="Email" error={errors.email}>
+                            </FormField>
+                            <FormField label="Email" error={errors.email}>
                                 <input
                                     type="email"
                                     value={data.email}
@@ -77,19 +78,19 @@ export default function Contact({ meta, flash }) {
                                     required
                                     className="input"
                                 />
-                            </Field>
+                            </FormField>
                         </div>
 
-                        <Field label="Société (facultatif)" error={errors.company}>
+                        <FormField label="Société (facultatif)" error={errors.company}>
                             <input
                                 type="text"
                                 value={data.company}
                                 onChange={(e) => setData('company', e.target.value)}
                                 className="input"
                             />
-                        </Field>
+                        </FormField>
 
-                        <Field label="Sujet" error={errors.subject}>
+                        <FormField label="Sujet" error={errors.subject}>
                             <input
                                 type="text"
                                 value={data.subject}
@@ -97,9 +98,9 @@ export default function Contact({ meta, flash }) {
                                 required
                                 className="input"
                             />
-                        </Field>
+                        </FormField>
 
-                        <Field label="Message" error={errors.message}>
+                        <FormField label="Message" error={errors.message}>
                             <textarea
                                 rows={6}
                                 value={data.message}
@@ -107,7 +108,7 @@ export default function Contact({ meta, flash }) {
                                 required
                                 className="input"
                             />
-                        </Field>
+                        </FormField>
 
                         <button
                             type="submit"
@@ -125,18 +126,8 @@ export default function Contact({ meta, flash }) {
                     <ContactBlockMono className="md:sticky md:top-24" />
                 </div>
 
-                <style>{`.input{width:100%;border:1px solid #C7D2FB;border-radius:.5rem;padding:.6rem .75rem;font-size:.95rem}.input:focus{outline:none;border-color:#2348E0;box-shadow:0 0 0 3px rgba(35,72,224,.15)}`}</style>
+                <FormInputStyle />
             </section>
         </PublicLayout>
-    );
-}
-
-function Field({ label, error, children }) {
-    return (
-        <label className="block">
-            <span className="block text-sm font-medium text-encre mb-1">{label}</span>
-            {children}
-            {error && <span className="block mt-1 text-sm text-rose-600">{error}</span>}
-        </label>
     );
 }

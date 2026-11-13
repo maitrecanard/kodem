@@ -19,6 +19,7 @@ class SitemapController extends Controller
             ['loc' => url('/realisations'), 'changefreq' => 'monthly', 'priority' => '0.8'],
             ['loc' => url('/expertises'), 'changefreq' => 'monthly', 'priority' => '0.6'],
             ['loc' => url('/zone-intervention'), 'changefreq' => 'monthly', 'priority' => '0.6'],
+            ['loc' => url('/pub-ia'), 'changefreq' => 'monthly', 'priority' => '0.5'],
         ];
 
         foreach (VitrineContent::listedCases() as $cas) {

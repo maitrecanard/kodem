@@ -130,4 +130,80 @@ class PublicPagesTest extends TestCase
                 ->has('paidPrestations')
             );
     }
+
+    public function test_pub_ia_page_renders_without_video_until_rights_are_cleared(): void
+    {
+        // Arbitrage du 2026-11-13 : la vidéo de démonstration n'est servie que si son fichier
+        // est déployé, après l'enregistrement Stability AI et l'accord écrit de Localoge.
+        $this->withPubIaVideo(false, fn () => $this->get('/pub-ia')
+            ->assertOk()
+            ->assertInertia(fn (AssertableInertia $page) => $page
+                ->component('Public/PubIa')
+                ->where('meta.title', fn ($t) => str_contains($t, 'IA') && str_contains($t, 'Kodem'))
+                ->where('meta.description', fn ($d) => ! preg_match('/\\d+\\s?€/u', $d))
+                ->where('video', null)
+            ));
+    }
+
+    public function test_pub_ia_page_serves_the_demo_video_once_deployed(): void
+    {
+        $this->withPubIaVideo(true, fn () => $this->get('/pub-ia')
+            ->assertOk()
+            ->assertInertia(fn (AssertableInertia $page) => $page
+                ->where('video.src', '/media/pub-ia/demo-16x9.mp4')
+            ));
+    }
+
+    /**
+     * Exécute $test avec ou sans fichier vidéo, sans toucher durablement au fichier local
+     * éventuellement présent (il n'est pas versionné).
+     */
+    private function withPubIaVideo(bool $present, callable $test): void
+    {
+        $fichier = public_path('media/pub-ia/demo-16x9.mp4');
+        $sauvegarde = $fichier.'.test-bak';
+        $existait = is_file($fichier);
+        $dossierCree = false;
+
+        if ($existait) {
+            rename($fichier, $sauvegarde);
+        }
+        if ($present) {
+            if (! is_dir(dirname($fichier))) {
+                mkdir(dirname($fichier), 0775, true);
+                $dossierCree = true;
+            }
+            file_put_contents($fichier, 'video');
+        }
+
+        try {
+            $test();
+        } finally {
+            if ($present) {
+                unlink($fichier);
+            }
+            if ($existait) {
+                rename($sauvegarde, $fichier);
+            }
+            if ($dossierCree) {
+                rmdir(dirname($fichier));
+            }
+        }
+    }
+
+    public function test_pub_ia_waitlist_goes_through_the_contact_form(): void
+    {
+        $this->from('/pub-ia')->post('/contact', [
+            'name' => 'Hôte Test',
+            'email' => 'hote@example.com',
+            'company' => 'Gîte test',
+            'subject' => 'Publicités IA : être prévenu du lancement',
+            'message' => 'Je souhaite être prévenu du lancement des publicités vidéo et photo générées par IA.',
+        ])->assertRedirect('/pub-ia');
+
+        $this->assertDatabaseHas('contact_messages', [
+            'email' => 'hote@example.com',
+            'subject' => 'Publicités IA : être prévenu du lancement',
+        ]);
+    }
 }

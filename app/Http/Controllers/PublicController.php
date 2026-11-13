@@ -9,6 +9,10 @@ use Inertia\Response;
 
 class PublicController extends Controller
 {
+    private const PUB_IA_VIDEO = 'media/pub-ia/demo-16x9.mp4';
+
+    private const PUB_IA_POSTER = 'media/pub-ia/demo-16x9.jpg';
+
     private const NOINDEX = 'noindex, follow';
 
     public function home(): Response
@@ -142,6 +146,26 @@ class PublicController extends Controller
                 $this->buildBreadcrumbList(['Expertises' => route('expertises')]),
                 $this->buildFaqPage($positioning['faq']),
             ],
+        ]);
+    }
+
+    public function pubIa(): Response
+    {
+        // Arbitrage de l'actionnaire du 2026-11-13 : page d'annonce de l'offre de publicités
+        // générées par IA, cible de la publicité diffusée sur localoge.com. La vidéo de
+        // démonstration n'est servie que si son fichier est déployé (droits à constater avant).
+        $video = is_file(public_path(self::PUB_IA_VIDEO)) ? [
+            'src' => '/'.self::PUB_IA_VIDEO,
+            'poster' => is_file(public_path(self::PUB_IA_POSTER)) ? '/'.self::PUB_IA_POSTER : null,
+        ] : null;
+
+        return Inertia::render('Public/PubIa', [
+            'meta' => [
+                'title' => 'Bientôt : vos publicités vidéo et photo générées par IA | Kodem',
+                'description' => 'KODEM lance bientôt la création de vidéos et de visuels publicitaires générés par IA à partir de vos propres photos. Soyez prévenu du lancement.',
+            ],
+            'video' => $video,
+            'jsonLd' => [$this->buildBreadcrumbList(['Publicités par IA' => route('pub-ia')])],
         ]);
     }
 
