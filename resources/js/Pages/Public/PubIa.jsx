@@ -89,7 +89,7 @@ function Exemples({ video, flyers }) {
                             onPlay={() => trackClick('pub_ia_demo_lecture')}
                         />
                         <p className="mt-3 max-w-4xl text-sm text-acier">
-                            Vidéo publicitaire de 30&nbsp;s&nbsp;: photos d'annonces réelles publiées sur Localoge, animées
+                            Vidéo publicitaire&nbsp;: photos d'annonces réelles publiées sur Localoge, animées
                             par IA. Contenu généré par IA. Voix&nbsp;: Kyutai TTS (CC BY 4.0).
                         </p>
                     </>
