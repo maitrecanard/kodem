@@ -5,6 +5,13 @@ Toutes les évolutions notables de ce projet sont consignées dans ce fichier.
 Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/)
 et le projet suit le [versionnage sémantique](https://semver.org/lang/fr/).
 
+## [1.22.0] (2026-11-13)
+
+### Changed
+- `/pub-ia` : bannière refaite avec une mosaïque d'extraits de réalisations (flyers découpés, image de
+  vidéo, plans animés de personnages générés par IA étiquetés « Personnage IA »). Fichiers hors dépôt
+  dans `public/media/pub-ia/banniere/`.
+
 ## [1.21.1] (2026-11-13)
 
 ### Changed

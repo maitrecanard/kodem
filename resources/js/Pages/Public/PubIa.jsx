@@ -1,7 +1,7 @@
 import { useForm } from '@inertiajs/react';
 import PublicLayout from '@/Layouts/PublicLayout';
 import { trackClick } from '@/lib/track';
-import Banner from '@/Components/Banner';
+import DiagonalPattern from '@/Components/DiagonalPattern';
 import SectionLabel from '@/Components/SectionLabel';
 import FormField, { FormInputStyle } from '@/Components/FormField';
 
@@ -12,7 +12,7 @@ const MESSAGE_PAR_DEFAUT = 'Je souhaite être prévenu du lancement des publicit
 const ATOUTS = [
     {
         label: 'VOS PHOTOS',
-        texte: "Chaque plan est animé à partir de vos propres photos : votre lieu, vos produits, pas une image de banque.",
+        texte: 'Vos propres photos animées par IA : votre lieu, vos produits. Des personnages générés peuvent y être mis en scène.',
     },
     {
         label: 'PRÊTE À PUBLIER',
@@ -24,28 +24,17 @@ const ATOUTS = [
     },
 ];
 
-export default function PubIa({ meta, video, flyers = [] }) {
+export default function PubIa({ meta, video, flyers = [], tuiles = [] }) {
     return (
         <PublicLayout meta={meta}>
-            <Banner
-                title="Bientôt : vos publicités vidéo et photo générées par IA"
-                cta={
-                    <a
-                        href="#prevenu"
-                        onClick={() => trackClick('pub_ia_hero_prevenu')}
-                        className="inline-flex items-center rounded-kodem bg-cobalt-600 px-5 py-3 text-white font-medium hover:bg-cobalt-700 transition"
-                    >
-                        Être prévenu du lancement
-                    </a>
-                }
-            />
+            <Hero tuiles={tuiles} />
 
             <section className="max-w-6xl mx-auto px-6 pt-16 pb-8">
                 <SectionLabel>BIENTÔT</SectionLabel>
                 <h2 className="mt-4 text-kodem-h1 font-bold max-w-2xl">
                     Une vidéo publicitaire à partir des photos de votre établissement.
                 </h2>
-                <p className="animate-kodem-fade mt-4 max-w-2xl text-lg text-acier">
+                <p className="mt-4 max-w-2xl text-lg text-acier">
                     Commerce, hébergement touristique, artisan ou PME : KODEM transforme vos photos en une courte
                     vidéo publicitaire animée par IA, puis en visuels pour vos réseaux. L'offre ouvre prochainement ;
                     laissez votre adresse pour être parmi les premiers prévenus.
@@ -67,6 +56,67 @@ export default function PubIa({ meta, video, flyers = [] }) {
 
             <Prevenu />
         </PublicLayout>
+    );
+}
+
+function Hero({ tuiles }) {
+    return (
+        <section className="relative overflow-hidden bg-encre text-white">
+            <DiagonalPattern className="absolute inset-0 opacity-40" aria-hidden="true" />
+            <div className="relative max-w-6xl mx-auto px-6 py-12 md:py-16 grid gap-10 md:grid-cols-[1fr,minmax(0,460px)] items-center">
+                <div>
+                    <span className="inline-block rounded-full bg-cobalt-600 px-3 py-1 font-mono text-xs font-bold tracking-widest">
+                        BIENTÔT
+                    </span>
+                    <h1 className="mt-4 text-3xl md:text-5xl font-bold leading-tight text-white">
+                        Vos publicités vidéo et photo générées par IA
+                    </h1>
+                    <p className="mt-4 max-w-xl text-lg text-white/80">
+                        Vidéos animées à partir de vos photos, personnages générés, flyers et affiches prêts à imprimer.
+                    </p>
+                    <a
+                        href="#prevenu"
+                        onClick={() => trackClick('pub_ia_hero_prevenu')}
+                        className="mt-8 inline-flex items-center rounded-kodem bg-cobalt-600 px-5 py-3 text-white font-medium hover:bg-cobalt-700 transition"
+                    >
+                        Être prévenu du lancement
+                    </a>
+                </div>
+
+                {tuiles.length > 0 && (
+                    <div className="grid grid-cols-3 gap-2 md:gap-3" aria-label="Exemples de réalisations">
+                        {tuiles.map((tuile, i) => (
+                            <figure
+                                key={tuile.src}
+                                className={`relative aspect-[3/4] overflow-hidden rounded-kodem bg-white/10 shadow-lg ${i % 2 ? 'md:translate-y-4' : ''}`}
+                            >
+                                {tuile.type === 'video' ? (
+                                    <video
+                                        src={tuile.src}
+                                        poster={tuile.affiche ?? undefined}
+                                        aria-label={tuile.alt}
+                                        className="h-full w-full object-cover"
+                                        autoPlay
+                                        muted
+                                        loop
+                                        playsInline
+                                        preload="metadata"
+                                    />
+                                ) : (
+                                    <img src={tuile.src} alt={tuile.alt} className="h-full w-full object-cover" decoding="async" />
+                                )}
+                                <figcaption className="absolute left-1.5 bottom-1.5 whitespace-nowrap rounded-full bg-encre/80 px-2 py-0.5 text-[10px] md:text-xs font-medium">
+                                    {tuile.etiquette}
+                                </figcaption>
+                            </figure>
+                        ))}
+                        <p className="col-span-3 mt-2 md:mt-6 text-xs text-white/70">
+                            Extraits de réalisations pour Localoge. Les personnages sont entièrement générés par IA.
+                        </p>
+                    </div>
+                )}
+            </div>
+        </section>
     );
 }
 

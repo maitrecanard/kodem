@@ -236,6 +236,39 @@ class PublicPagesTest extends TestCase
         }
     }
 
+    public function test_pub_ia_banner_lists_only_deployed_tiles_with_ai_label(): void
+    {
+        $dossier = public_path('media/pub-ia/banniere');
+        $fichier = $dossier.'/personnages-2.mp4';
+        $crees = [];
+        foreach ([public_path('media/pub-ia'), $dossier] as $d) {
+            if (! is_dir($d)) {
+                mkdir($d, 0775, true);
+                array_unshift($crees, $d);
+            }
+        }
+        if (! is_file($fichier)) {
+            file_put_contents($fichier, 'video');
+            array_unshift($crees, $fichier);
+        }
+
+        try {
+            $this->get('/pub-ia')
+                ->assertOk()
+                ->assertInertia(fn (AssertableInertia $page) => $page
+                    ->where('tuiles', fn ($tuiles) => collect($tuiles)->contains(
+                        fn ($t) => $t['src'] === '/media/pub-ia/banniere/personnages-2.mp4'
+                            && $t['type'] === 'video'
+                            && $t['etiquette'] === 'Personnage IA'
+                    ) && collect($tuiles)->every(fn ($t) => is_file(public_path(ltrim($t['src'], '/')))))
+                );
+        } finally {
+            foreach ($crees as $chemin) {
+                is_dir($chemin) ? rmdir($chemin) : unlink($chemin);
+            }
+        }
+    }
+
     public function test_pub_ia_waitlist_goes_through_the_contact_form(): void
     {
         $this->from('/pub-ia')->post('/contact', [
