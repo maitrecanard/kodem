@@ -5,6 +5,12 @@ Toutes les évolutions notables de ce projet sont consignées dans ce fichier.
 Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/)
 et le projet suit le [versionnage sémantique](https://semver.org/lang/fr/).
 
+## [1.21.1] (2026-11-13)
+
+### Changed
+- `/pub-ia` : la vidéo d'exemple devient la présentation Localoge du 2026-11-09 (23 s) ; durée retirée
+  de la légende.
+
 ## [1.21.0] (2026-11-13)
 
 ### Added
