@@ -68,6 +68,8 @@ class SeoRefonteTest extends TestCase
             'Le sitemap doit contenir l\'URL racine du site'
         );
 
+        $this->assertStringContainsString('<loc>'.url('/pub-ia').'</loc>', $content);
+
         $this->assertStringNotContainsString(
             '/admin',
             $content,

@@ -5,6 +5,18 @@ Toutes les évolutions notables de ce projet sont consignées dans ce fichier.
 Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/)
 et le projet suit le [versionnage sémantique](https://semver.org/lang/fr/).
 
+## [1.20.0] (2026-11-13)
+
+### Added
+- **Page `/pub-ia`** : annonce de l'offre de publicités vidéo et photo générées par IA, cible de la
+  publicité KODEM diffusée sur localoge.com (arbitrage de l'actionnaire du 2026-11-13). Sans prix ni
+  date ; formulaire « être prévenu du lancement » relié au contact existant ; page au sitemap.
+- Vidéo de démonstration servie seulement si `public/media/pub-ia/demo-16x9.mp4` est déployé
+  (fichier hors dépôt, droits à constater avant), avec les mentions IA et Kyutai TTS sous le lecteur.
+
+### Changed
+- Champ de formulaire public extrait dans `Components/FormField.jsx`, partagé par `/contact` et `/pub-ia`.
+
 ## [1.19.0] (2026-10-15)
 
 ### Changed

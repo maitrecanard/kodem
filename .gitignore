@@ -32,3 +32,6 @@ yarn-error.log
 /*.jpg
 /*.jpeg
 /*.png
+
+# Vidéo de démonstration de /pub-ia : déployée à la main, droits à constater (registre du 2026-11-13).
+/public/media/pub-ia/
