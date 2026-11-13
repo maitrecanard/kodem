@@ -23,6 +23,19 @@ class PublicController extends Controller
         ['fichier' => 'flyer-longere', 'titre' => "Flyer A5 d'une annonce", 'alt' => 'Flyer Localoge au format A5 pour une longère en pierre à Languidic, avec QR code de réservation'],
     ];
 
+    /**
+     * Mosaïque de la bannière de /pub-ia : extraits de réalisations (flyers découpés, vidéo,
+     * plans avec des personnes générées par IA). Fichiers hors dépôt, servis s'ils sont déployés.
+     */
+    private const PUB_IA_TUILES = [
+        ['fichier' => 'personnages-2.mp4', 'affiche' => 'personnages-2.jpg', 'etiquette' => 'Personnage IA', 'alt' => 'Plan vidéo : une femme générée par IA dans un salon'],
+        ['fichier' => 'flyer-france.webp', 'etiquette' => 'Flyer', 'alt' => 'Extrait du flyer Localoge « Toute la France »'],
+        ['fichier' => 'video-presentation.webp', 'etiquette' => 'Vidéo', 'alt' => 'Image de la vidéo de présentation Localoge, plus de 500 villes'],
+        ['fichier' => 'flyer-longere.webp', 'etiquette' => 'Flyer', 'alt' => "Extrait du flyer Localoge d'une longère bretonne"],
+        ['fichier' => 'personnages-3.mp4', 'affiche' => 'personnages-3.jpg', 'etiquette' => 'Personnage IA', 'alt' => 'Plan vidéo : un homme généré par IA regarde son téléphone'],
+        ['fichier' => 'affiche-qr.webp', 'etiquette' => 'Affiche', 'alt' => 'Extrait de l\'affiche Localoge « Le prix affiché, c\'est le prix payé »'],
+    ];
+
     private const NOINDEX = 'noindex, follow';
 
     public function home(): Response
@@ -177,6 +190,23 @@ class PublicController extends Controller
             }
         }
 
+        $tuiles = [];
+        foreach (self::PUB_IA_TUILES as $tuile) {
+            $chemin = 'media/pub-ia/banniere/'.$tuile['fichier'];
+            if (! is_file(public_path($chemin))) {
+                continue;
+            }
+            $estVideo = str_ends_with($chemin, '.mp4');
+            $affiche = isset($tuile['affiche']) ? 'media/pub-ia/banniere/'.$tuile['affiche'] : null;
+            $tuiles[] = [
+                'type' => $estVideo ? 'video' : 'image',
+                'src' => '/'.$chemin,
+                'affiche' => $affiche && is_file(public_path($affiche)) ? '/'.$affiche : null,
+                'etiquette' => $tuile['etiquette'],
+                'alt' => $tuile['alt'],
+            ];
+        }
+
         return Inertia::render('Public/PubIa', [
             'meta' => [
                 'title' => 'Bientôt : vos publicités vidéo et photo générées par IA | Kodem',
@@ -184,6 +214,7 @@ class PublicController extends Controller
             ],
             'video' => $video,
             'flyers' => $flyers,
+            'tuiles' => $tuiles,
             'jsonLd' => [$this->buildBreadcrumbList(['Publicités par IA' => route('pub-ia')])],
         ]);
     }
