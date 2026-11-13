@@ -24,7 +24,7 @@ const ATOUTS = [
     },
 ];
 
-export default function PubIa({ meta, video }) {
+export default function PubIa({ meta, video, flyers = [] }) {
     return (
         <PublicLayout meta={meta}>
             <Banner
@@ -63,32 +63,62 @@ export default function PubIa({ meta, video }) {
                 </div>
             </section>
 
-            {video && <Demonstration video={video} />}
+            {(video || flyers.length > 0) && <Exemples video={video} flyers={flyers} />}
 
             <Prevenu />
         </PublicLayout>
     );
 }
 
-function Demonstration({ video }) {
+function Exemples({ video, flyers }) {
     return (
         <section className="bg-white border-y border-brume">
             <div className="max-w-6xl mx-auto px-6 py-16">
-                <SectionLabel>EXEMPLE</SectionLabel>
-                <h2 className="mt-3 text-kodem-h1 font-bold max-w-2xl">Une vidéo réalisée pour Localoge</h2>
-                <video
-                    className="mt-8 w-full max-w-4xl rounded-kodem border border-brume bg-encre"
-                    src={video.src}
-                    poster={video.poster ?? undefined}
-                    controls
-                    playsInline
-                    preload="none"
-                    onPlay={() => trackClick('pub_ia_demo_lecture')}
-                />
-                <p className="mt-3 max-w-4xl text-sm text-acier">
-                    Photos d'annonces réelles publiées sur Localoge, animées par IA. Contenu généré par IA.
-                    Voix&nbsp;: Kyutai TTS (CC BY 4.0).
-                </p>
+                <SectionLabel>EXEMPLES</SectionLabel>
+                <h2 className="mt-3 text-kodem-h1 font-bold max-w-2xl">Réalisés pour Localoge</h2>
+
+                {video && (
+                    <>
+                        <video
+                            className="mt-8 w-full max-w-4xl rounded-kodem border border-brume bg-encre"
+                            src={video.src}
+                            poster={video.poster ?? undefined}
+                            controls
+                            playsInline
+                            preload="none"
+                            onPlay={() => trackClick('pub_ia_demo_lecture')}
+                        />
+                        <p className="mt-3 max-w-4xl text-sm text-acier">
+                            Vidéo publicitaire de 30&nbsp;s&nbsp;: photos d'annonces réelles publiées sur Localoge, animées
+                            par IA. Contenu généré par IA. Voix&nbsp;: Kyutai TTS (CC BY 4.0).
+                        </p>
+                    </>
+                )}
+
+                {flyers.length > 0 && (
+                    <>
+                        <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                            {flyers.map((flyer) => (
+                                <figure key={flyer.src}>
+                                    <a
+                                        href={flyer.grand}
+                                        target="_blank"
+                                        rel="noopener"
+                                        onClick={() => trackClick('pub_ia_flyer_ouverture', { flyer: flyer.titre })}
+                                        className="block overflow-hidden rounded-kodem border border-brume shadow-sm hover:shadow-md transition"
+                                    >
+                                        <img src={flyer.src} alt={flyer.alt} loading="lazy" className="w-full h-auto" />
+                                    </a>
+                                    <figcaption className="mt-2 text-sm font-medium text-encre">{flyer.titre}</figcaption>
+                                </figure>
+                            ))}
+                        </div>
+                        <p className="mt-4 max-w-4xl text-sm text-acier">
+                            Flyers et affiches mis en page par KODEM à partir des photos réelles des annonces, prêts à
+                            imprimer.
+                        </p>
+                    </>
+                )}
             </div>
         </section>
     );

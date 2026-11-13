@@ -5,6 +5,13 @@ Toutes les évolutions notables de ce projet sont consignées dans ce fichier.
 Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/)
 et le projet suit le [versionnage sémantique](https://semver.org/lang/fr/).
 
+## [1.21.0] (2026-11-13)
+
+### Added
+- `/pub-ia` : section « Exemples » avec la vidéo Localoge voyageurs n° 5 et trois flyers Localoge
+  (flyer A5 « Toute la France », affiche QR, flyer A5 d'une annonce), en vignettes ouvrant la grande
+  version. Fichiers hors dépôt dans `public/media/pub-ia/`, servis seulement s'ils sont déployés.
+
 ## [1.20.0] (2026-11-13)
 
 ### Added

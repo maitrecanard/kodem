@@ -142,7 +142,8 @@ class PublicPagesTest extends TestCase
                 ->where('meta.title', fn ($t) => str_contains($t, 'IA') && str_contains($t, 'Kodem'))
                 ->where('meta.description', fn ($d) => ! preg_match('/\\d+\\s?€/u', $d))
                 ->where('video', null)
-            ));
+                ->where('flyers', [])
+            ), withFlyers: false);
     }
 
     public function test_pub_ia_page_serves_the_demo_video_once_deployed(): void
@@ -158,8 +159,17 @@ class PublicPagesTest extends TestCase
      * Exécute $test avec ou sans fichier vidéo, sans toucher durablement au fichier local
      * éventuellement présent (il n'est pas versionné).
      */
-    private function withPubIaVideo(bool $present, callable $test): void
+    private function withPubIaVideo(bool $present, callable $test, bool $withFlyers = true): void
     {
+        $dossierFlyers = public_path('media/pub-ia');
+        $flyersMasques = [];
+        if (! $withFlyers && is_dir($dossierFlyers)) {
+            foreach (glob($dossierFlyers.'/*.webp') as $flyer) {
+                rename($flyer, $flyer.'.test-bak');
+                $flyersMasques[] = $flyer;
+            }
+        }
+
         $fichier = public_path('media/pub-ia/demo-16x9.mp4');
         $sauvegarde = $fichier.'.test-bak';
         $existait = is_file($fichier);
@@ -187,6 +197,41 @@ class PublicPagesTest extends TestCase
             }
             if ($dossierCree) {
                 rmdir(dirname($fichier));
+            }
+            foreach ($flyersMasques as $flyer) {
+                rename($flyer.'.test-bak', $flyer);
+            }
+        }
+    }
+
+    public function test_pub_ia_page_lists_only_deployed_flyers(): void
+    {
+        $dossier = public_path('media/pub-ia');
+        $crees = [];
+        if (! is_dir($dossier)) {
+            mkdir($dossier, 0775, true);
+            $crees[] = $dossier;
+        }
+        foreach (['flyer-france.webp', 'flyer-france-grand.webp'] as $nom) {
+            if (! is_file($dossier.'/'.$nom)) {
+                file_put_contents($dossier.'/'.$nom, 'webp');
+                array_unshift($crees, $dossier.'/'.$nom);
+            }
+        }
+
+        try {
+            $this->get('/pub-ia')
+                ->assertOk()
+                ->assertInertia(fn (AssertableInertia $page) => $page
+                    ->where('flyers.0.src', '/media/pub-ia/flyer-france.webp')
+                    ->where('flyers.0.grand', '/media/pub-ia/flyer-france-grand.webp')
+                    ->where('flyers', fn ($flyers) => collect($flyers)->every(
+                        fn ($f) => is_file(public_path(ltrim($f['src'], '/')))
+                    ))
+                );
+        } finally {
+            foreach ($crees as $chemin) {
+                is_dir($chemin) ? rmdir($chemin) : unlink($chemin);
             }
         }
     }

@@ -13,6 +13,16 @@ class PublicController extends Controller
 
     private const PUB_IA_POSTER = 'media/pub-ia/demo-16x9.jpg';
 
+    /**
+     * Flyers donnés en exemple sur /pub-ia : mises en page KODEM à partir de photos réelles,
+     * pas des images générées par IA. Fichiers hors dépôt, servis seulement s'ils sont déployés.
+     */
+    private const PUB_IA_FLYERS = [
+        ['fichier' => 'flyer-france', 'titre' => 'Flyer A5 « Toute la France »', 'alt' => 'Flyer Localoge au format A5 présentant des locations partout en France, avec deux QR codes'],
+        ['fichier' => 'affiche-qr', 'titre' => 'Affiche avec QR code', 'alt' => 'Affiche Localoge « Le prix affiché, c\'est le prix payé » avec un QR code'],
+        ['fichier' => 'flyer-longere', 'titre' => "Flyer A5 d'une annonce", 'alt' => 'Flyer Localoge au format A5 pour une longère en pierre à Languidic, avec QR code de réservation'],
+    ];
+
     private const NOINDEX = 'noindex, follow';
 
     public function home(): Response
@@ -159,12 +169,21 @@ class PublicController extends Controller
             'poster' => is_file(public_path(self::PUB_IA_POSTER)) ? '/'.self::PUB_IA_POSTER : null,
         ] : null;
 
+        $flyers = [];
+        foreach (self::PUB_IA_FLYERS as $flyer) {
+            $base = 'media/pub-ia/'.$flyer['fichier'];
+            if (is_file(public_path($base.'.webp')) && is_file(public_path($base.'-grand.webp'))) {
+                $flyers[] = ['src' => '/'.$base.'.webp', 'grand' => '/'.$base.'-grand.webp', 'titre' => $flyer['titre'], 'alt' => $flyer['alt']];
+            }
+        }
+
         return Inertia::render('Public/PubIa', [
             'meta' => [
                 'title' => 'Bientôt : vos publicités vidéo et photo générées par IA | Kodem',
                 'description' => 'KODEM lance bientôt la création de vidéos et de visuels publicitaires générés par IA à partir de vos propres photos. Soyez prévenu du lancement.',
             ],
             'video' => $video,
+            'flyers' => $flyers,
             'jsonLd' => [$this->buildBreadcrumbList(['Publicités par IA' => route('pub-ia')])],
         ]);
     }
