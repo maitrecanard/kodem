@@ -70,7 +70,7 @@
                         'latitude' => '46.5802',
                         'longitude' => '0.3404',
                     ],
-                    'telephone' => '+33 7 62 61 26 46',
+                    'telephone' => '+33 7 56 84 92 41',
                     'areaServed' => $areaServedFrance,
                 ],
                 [

@@ -3,7 +3,7 @@ import BrandWordmark from '@/Components/BrandWordmark';
 
 export default function ContactBlockMono({
     web = 'kodem.fr',
-    phone = '+33 7 62 61 26 46',
+    phone = '+33 7 56 84 92 41',
     address = 'Poitiers — Nouvelle-Aquitaine',
     area = '',
     className = '',

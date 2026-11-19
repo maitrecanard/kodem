@@ -19,7 +19,7 @@ export default function Mentions({ meta }) {
                     <li>Adresse : 13 Résidence de la Picauderie, 86300 Valdivienne, France</li>
                     <li>SIREN : 922 818 547</li>
                     <li>Email : {contactEmail}</li>
-                    <li>Téléphone : 07 62 61 26 46</li>
+                    <li>Téléphone : 07 56 84 92 41</li>
                     <li>Directeur de la publication : Mathieu Siaudeau</li>
                 </ul>
 

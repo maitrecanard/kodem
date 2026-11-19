@@ -453,7 +453,7 @@ function HomeContact({ ctaFinal }) {
                     {label}
                 </button>
             </div>
-            <p className="kh-tel">07 62 61 26 46 · Poitiers · missions à distance</p>
+            <p className="kh-tel">07 56 84 92 41 · Poitiers · missions à distance</p>
         </section>
     );
 }
