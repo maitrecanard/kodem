@@ -5,6 +5,12 @@ Toutes les évolutions notables de ce projet sont consignées dans ce fichier.
 Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/)
 et le projet suit le [versionnage sémantique](https://semver.org/lang/fr/).
 
+## [1.22.1] (2026-11-19)
+
+### Fixed
+- Numéro de téléphone remplacé par le 07 56 84 92 41 (accueil, bloc contact, mentions légales,
+  données structurées).
+
 ## [1.22.0] (2026-11-13)
 
 ### Changed
